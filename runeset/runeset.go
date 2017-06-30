@@ -1,7 +1,9 @@
 package runeset
 
-//RuneSet is a map[rune]bool with a contains method
-type RuneSet map[rune]inter
+//RuneSet is a map[rune]bool with the methods you would expect from a set type.
+//Eg, Contains, Union, Intersection, and Difference.
+//I will make code generation for further set types in the future.
+type RuneSet map[rune]bool
 
 //Contains shows whether r is in the RuneSet.
 func (rs RuneSet) Contains(r rune) bool {
@@ -74,4 +76,3 @@ func FromString(s string) (set RuneSet) {
 	}
 	return set
 }
-func all()
