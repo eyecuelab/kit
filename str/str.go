@@ -1,45 +1,64 @@
 package str
 
-import "github.com/eyecuelab/kit/runes"
+import (
+	"bytes"
+	"fmt"
+
+	"github.com/eyecuelab/kit/runeset"
+)
 
 //RemoveWhiteSpace removes whitespace {'\n' '\t' ' ' '\r`} from a string.
 //Note that this converts to runes and back to UTF-8, so RemoveWhiteSpace(s) == s
 //for a non-whitespace string does not necessarially hold, since the code points may differ.
 func RemoveWhiteSpace(s string) string {
-	var bytes []rune
-	for _, char := range s {
-		switch char {
-		case '\n', '\t', ' ', '\r':
-			// pass
-		default:
-			bytes = append(bytes, char)
-		}
-
-	}
-	return string(bytes)
+	return RemoveRunes(s, '\n', ' ', '\r', '\t')
 }
 
 //RemoveRunes removes any runes listed from the string.
 //Note that this converts to runes and back to UTF-8, so RemoveRunes(s) == s
 //does not necessarially hold, since the code points may differ.
 func RemoveRunes(s string, toRemove ...rune) string {
-	var bytes []rune
-	set := runes.Set(toRemove...)
-	for _, r := range s {
-		_, unwanted := set[r]
-		if !unwanted {
-			bytes = append(bytes, r)
+	buf := bytes.Buffer{}
+	set := runes.FromRunes(toRemove...)
+	var r rune
+	for _, r = range s {
+		if !set.Contains(r) {
+			buf.WriteRune(r)
 		}
 	}
-	return string(bytes)
-
+	return buf.String()
 }
 
-//ToRuneSet converts a string to a set of the runes inside. i.e, a map of bools
-func ToRuneSet(s string) map[rune]bool {
-	set := make(map[rune]bool)
+//SRemoveRunes removes any of the runes contained in toRemove from s.
+//Equivalent to RemoveRunes(s, []rune(toRemove))
+func SRemoveRunes(s string, toRemove string) string {
+	buf := bytes.Buffer{}
+	set := runeset.FromString(s)
 	for _, r := range s {
-		set[r] = true
+		if !set.Contains(r) {
+			buf.WriteRune(r)
+		}
 	}
-	return set
+	return buf.String()
+}
+
+//MapErr maps f(string)string, err across a slice. If any error results, it
+// it immediately returns an empty slice and the error.
+func MapErr(f func(string) (string, error), strings ...string) ([]string, error) {
+	for i, str := range strings {
+		result, err := f(str)
+		if err != nil {
+			return []string{}, fmt.Errorf("MapErr: %v", err)
+		}
+		strings[i] = result
+	}
+	return strings, nil
+}
+
+//Map maps f(string) across the remaining arguments, returning [f(str) for str in str]
+func Map(f func(string) string, strings ...string) []string {
+	for i, str := range strings {
+		strings[i] = f(str)
+	}
+	return strings
 }
