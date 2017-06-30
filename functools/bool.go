@@ -1,6 +1,6 @@
 package functools
 
-//All returns false if any predicate is false. Any() is True.
+//All returns false if any predicate is false. All() is True.
 func All(predicates ...bool) bool {
 	for _, predicate := range predicates {
 		if !predicate {
