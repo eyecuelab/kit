@@ -1,4 +1,4 @@
-package errors
+package errorlib
 
 import (
 	"fmt"
@@ -31,6 +31,22 @@ func FatalCheckF(err error, format string, args ...interface{}) {
 func FactoryChCheckF(errors chan<- error) func(err error, format string, args ...interface{}) {
 	return func(err error, format string, args ...interface{}) {
 		chCheckF(errors, err, format, args...)
+	}
+}
+
+//NewChecker produces an error channel, starts LogErrors() on that channel in it's own goroutine,
+//and produces a checker function that sends non-fatal errors to that channel.
+func NewChecker() (errors chan error, checker func(err error, format string, args ...interface{})) {
+	errors = make(chan error)
+	go LogErrors(errors)
+	return errors, FactoryChCheckF(errors)
+}
+
+//LogErrors logs errors as they come in to os.stdout.
+//Goroutine. Do not run directly!
+func LogErrors(errors <-chan error) {
+	for err := range errors {
+		fmt.Println(err)
 	}
 }
 

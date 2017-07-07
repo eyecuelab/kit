@@ -19,7 +19,7 @@ func RemoveWhiteSpace(s string) string {
 //does not necessarially hold, since the code points may differ.
 func RemoveRunes(s string, toRemove ...rune) string {
 	buf := bytes.Buffer{}
-	set := runes.FromRunes(toRemove...)
+	set := runeset	.FromRunes(toRemove...)
 	var r rune
 	for _, r = range s {
 		if !set.Contains(r) {

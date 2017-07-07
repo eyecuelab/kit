@@ -1,12 +1,8 @@
 """setgenerator.py generates a set type for a golang type
 why does go not have a set type"""
-import sys
-
-_default = object()
 
 
-BASE_STR = (
-"""
+BASE_STR = """
 package _PACKAGE
 type _TYPE_NAME map[_BASE_TYPE]bool
 
@@ -71,21 +67,20 @@ func From_BASE_TYPEs(_BASE_TYPEs ..._BASE_TYPE) _TYPE_NAME {
 	}
 	return set
 }
+"""
 
-""")
 
-
-def make_set_type(type_, base_type, reciever, shorthand, slice_, outfile=_default, package=_default):    
+def make_set_type(type_, base_type, reciever, shorthand, slice_, outfile=None, package=None):    
         code = BASE_STR.replace("_TYPE_NAME", type_)
         code = code.replace("_BASE_TYPE", base_type)
         code = code.replace("_RECIEVER", reciever)
         code = code.replace("_SLICE_NAME", slice_)
         code = code.replace("_SHORTHAND", shorthand)
-        if package is _default:
+        if package is None:
             code = code.replace("_PACKAGE", type_.lower())
         else:
             code = code.replace("_PACKAGE", package)
-        if outfile is not _default:
+        if outfile is not None:
             with open(outfile, 'w+') as out:
                 print(code, file=out)
         else:
