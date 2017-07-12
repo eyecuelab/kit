@@ -29,7 +29,7 @@ func RemoveRunes(s string, toRemove ...rune) string {
 	return buf.String()
 }
 
-//SRemoveRunes removes any of the runes contained in toRemove from s.
+//SRemoveRunes removes any of the runes contained in the string toRemove from s.
 //Equivalent to RemoveRunes(s, []rune(toRemove))
 func SRemoveRunes(s string, toRemove string) string {
 	buf := bytes.Buffer{}

@@ -14,18 +14,18 @@ type LatLng struct {
 	Lng float64
 }
 
-//DToR converts degrees to Radians. Does not bounds check.
+//DToR converts degrees to Radians. r = dπ/180 Does not bounds check.
 func DToR(d float64) float64 {
 	return d * math.Pi / 180
 }
 
-//RToD converts Radians to Degrees. Does not bounds check.
+//RToD converts Radians to Degrees. d=180r/π. Does not bounds check.
 func RToD(r float64) float64 {
 	return r * 180 / math.Pi
 }
 
 //AddMetersLatitude creates a new LatLng shifted approximately dy meters north.
-//This uses the pythagorean theorem.
+//This uses the pythagorean theorem; which is less accurate than other methods.
 func (latlng LatLng) addMetersLatitude(dy float64) LatLng {
 	return LatLng{latlng.Lat + RToD(dy/EarthRadius), latlng.Lng}
 }
@@ -46,10 +46,9 @@ func Haversine(q, r LatLng) float64 {
 	Δlat := DToR(r.Lat - q.Lat)
 	Δlng := DToR(r.Lng - q.Lng)
 	a := (math.Sin(Δlat/2) * math.Sin(Δlat/2)) +
-		math.Cos(DToR(q.Lat)*math.Cos(DToR(r.Lat))*
-			math.Sin(Δlng/2)*math.Sin(Δlng/2))
+		math.Cos(DToR(q.Lat)*math.Cos(DToR(r.Lat)))*
+			math.Sin(Δlng/2)*math.Sin(Δlng/2)
 
 	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
-
 	return EarthRadius * c
 }
