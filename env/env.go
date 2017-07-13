@@ -1,5 +1,6 @@
 package env
 
+//kit.env contains tools to help with the assignment of environment variables
 import (
 	"fmt"
 	"os"

@@ -25,9 +25,8 @@ func FatalCheckF(err error, format string, args ...interface{}) {
 	}
 }
 
-//FactoryChCheckF creates a partial function for chCheckF with the errors channel specified.
-//MyChErrorF := FactorychCheck(errors)
-//MyChErrorF(err, format, ...args) <-> ChErrorF(errors, err, format, ...args)
+//FactoryChCheckF creates a partial function for chCheckF with the errors channel specified. Equivalent to
+//MyChErrorF := FactorychCheck(errors); MyChErrorF(err, format, ...args) <-> ChErrorF(errors, err, format, ...args)
 func FactoryChCheckF(errors chan<- error) func(err error, format string, args ...interface{}) {
 	return func(err error, format string, args ...interface{}) {
 		chCheckF(errors, err, format, args...)
@@ -35,11 +34,19 @@ func FactoryChCheckF(errors chan<- error) func(err error, format string, args ..
 }
 
 //NewChecker produces an error channel, starts LogErrors() on that channel in it's own goroutine,
-//and produces a checker function that sends non-fatal errors to that channel.
+//and produces a checker function that sends non-fatal errors to that channel. Equivalent to
+//errors := LoggedChannel(); //checker := FactoryChCheckF(errors)
 func NewChecker() (errors chan error, checker func(err error, format string, args ...interface{})) {
 	errors = make(chan error)
 	go LogErrors(errors)
 	return errors, FactoryChCheckF(errors)
+}
+
+//LoggedChannel creates an error channel and starts LogErrors on that channel in it's own goroutine.
+func LoggedChannel() chan error {
+	errors := make(chan error)
+	go LogErrors(errors)
+	return errors
 }
 
 //LogErrors logs errors as they come in to os.stdout.
