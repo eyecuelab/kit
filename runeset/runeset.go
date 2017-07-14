@@ -70,6 +70,7 @@ func FromRunes(runes ...rune) RuneSet {
 
 //FromString converts a string to a RuneSet of the runes inside.
 func FromString(s string) (set RuneSet) {
+	set = make(RuneSet)
 	var r rune
 	for _, r = range s {
 		set[r] = true

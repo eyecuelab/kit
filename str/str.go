@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 
+	"strings"
+
 	"github.com/eyecuelab/kit/runeset"
 )
 
@@ -61,4 +63,9 @@ func Map(f func(string) string, strings ...string) []string {
 		strings[i] = f(str)
 	}
 	return strings
+}
+
+//Normalize lowercases a string and removes all whitespace and quotation from it. ('")
+func Normalize(s string) string {
+	return SRemoveRunes(RemoveWhiteSpace(strings.ToLower(s)), `"'`)
 }

@@ -3,8 +3,12 @@ package env
 //kit.env contains tools to help with the assignment of environment variables
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
+	"strings"
+
+	"github.com/spf13/viper"
 )
 
 //Key is the key string of an environment variable.
@@ -57,4 +61,17 @@ func (key Key) SetBool(bp *bool) error {
 	}
 	*bp = asBool
 	return nil
+}
+
+//Check checks the local environment to see that all of the environment variables specified in config are set.
+func Check() {
+	var missing []string
+	for _, key := range viper.GetStringSlice("env_var_names") {
+		if _, ok := os.LookupEnv(key); !ok {
+			missing = append(missing, key)
+		}
+	}
+	if len(missing) > 0 {
+		log.Fatalf("CheckEnv(): missing the following environmental variables: \n\t%s", strings.Join(missing, "\n\t"))
+	}
 }
