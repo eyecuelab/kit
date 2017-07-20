@@ -8,9 +8,7 @@ RUN go get -u github.com/golang/dep && go install github.com/golang/dep/cmd/dep
 RUN go get -u github.com/pilu/fresh
 
 WORKDIR $APP_DIR
-COPY . $APP_DIR
-
-RUN ls -al
+RUN go get -u github.com/eyecuelab/$app
 
 RUN dep ensure -update -v
 
