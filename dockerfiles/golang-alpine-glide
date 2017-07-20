@@ -1,0 +1,7 @@
+FROM golang:alpine
+
+RUN apk add --update --no-cache tzdata bash wget curl git ca-certificates
+
+RUN mkdir -p $$GOPATH/bin && \
+    curl https://glide.sh/get | sh && \
+    go get github.com/pilu/fresh
