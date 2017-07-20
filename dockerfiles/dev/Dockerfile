@@ -10,6 +10,8 @@ RUN go get -u github.com/pilu/fresh
 WORKDIR $APP_DIR
 COPY . $APP_DIR
 
+RUN ls -al
+
 RUN dep ensure -update -v
 
 CMD fresh -c runner.conf main.go
