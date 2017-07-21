@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"os"
 
 	"github.com/spf13/viper"
 )
@@ -39,4 +40,13 @@ func FatalCheck(key string) {
 	if viper.Get(key) == nil {
 		log.Fatalf("missing required configuration val: %s", key)
 	}
+}
+
+//RequiredEnv checks that the specified environment variable exists. If not, it calls log.Fatalf.
+func RequiredEnv(key string) string {
+	if val, ok := os.LookupEnv(key); ok {
+		return val
+	}
+	log.Fatalf("missing required environment variable %s", key)
+	return ""
 }
