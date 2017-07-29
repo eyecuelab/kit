@@ -18,6 +18,10 @@ func Info(msg string) {
 	log.Info(msg)
 }
 
+func Infof(format string, args ...interface{}) {
+	log.Infof(format, args)
+}
+
 func Check(err error) {
 	if err != nil {
 		log.Fatal(err)
