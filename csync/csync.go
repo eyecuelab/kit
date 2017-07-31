@@ -1,4 +1,4 @@
-package syncC
+package csync
 
 import "time"
 
