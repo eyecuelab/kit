@@ -2,6 +2,7 @@ package csync
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 )
 
@@ -29,11 +30,11 @@ func init() {
 //WaitForConcurrentRequests waits for a slot to open up in the default concurentRequests channel within timeout duration.
 //It returns true if a slot opens up in time and false otherwise.
 func WaitForConcurrentRequests(requests Queue, timeout time.Duration) bool {
-	for t := time.Duration(0); requests.Full(); t += 100 * time.Millisecond {
-		time.Sleep(100 * time.Millisecond)
+	for t := time.Duration(0); requests.Full(); t += time.Millisecond * time.Duration(rand.Intn(1000)) {
 		if t > timeout {
 			return false
 		}
+		time.Sleep(t)
 	}
 	return true
 }
