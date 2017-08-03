@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/eyecuelab/kit/log"
 	"github.com/eyecuelab/kit/web"
 
 	"github.com/spf13/cobra"
@@ -15,15 +14,12 @@ var ApiCmd = &cobra.Command{
 	Run:   run,
 }
 
-var (
-	port int
-)
+var Port int
 
 func init() {
-	ApiCmd.PersistentFlags().IntVar(&port, "port", 3000, "port to attach server")
+	ApiCmd.PersistentFlags().IntVar(&Port, "port", 3000, "port to attach server")
 }
 
 func run(cmd *cobra.Command, args []string) {
-	log.Infof("Serving API on port %d...", port)
-	web.Start(port)
+	web.Start(Port)
 }

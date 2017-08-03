@@ -28,6 +28,8 @@ func Check(err error) {
 	}
 }
 
+var Logger = log.StandardLogger()
+
 func init() {
 	if goenv.Prod {
 		log.SetFormatter(&log.JSONFormatter{})

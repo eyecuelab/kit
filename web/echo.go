@@ -4,8 +4,10 @@ import (
 	"fmt"
 
 	valid "github.com/asaskevich/govalidator"
+	"github.com/eyecuelab/kit/log"
 	"github.com/facebookgo/grace/gracehttp"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 type apiValidator struct{}
@@ -15,27 +17,38 @@ func (v *apiValidator) Validate(i interface{}) error {
 	return err
 }
 
-var Server *echo.Echo
+var Echo *echo.Echo
 
 func NewEcho(port int) *echo.Echo {
 	e := echo.New()
 	e.Validator = &apiValidator{}
 	e.Server.Addr = fmt.Sprintf(":%v", port)
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.HTTPErrorHandler = ErrorHandler
+	// e.Use(errorHandler)
 
 	return e
 }
 
 func Start(port int) {
-	Server = NewEcho(port)
+	Echo = NewEcho(port)
 	initRoutes()
 
-	Server.Logger.Fatal(gracehttp.Serve(Server.Server))
+	Echo.Logger.Fatal(gracehttp.Serve(Echo.Server))
 }
 
 func initRoutes() {
 	for _, route := range Routing.Routes {
 		for _, handler := range route.Handlers {
-			Server.Add(handler.Method, route.Path, handler.Handler, handler.MiddleWare...)
+			Echo.Add(handler.Method, route.Path, handler.Handler, handler.MiddleWare...)
 		}
+	}
+}
+
+func errorHandler(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		log.Infof("HERE!%v\n", c.Error)
+		return next(c)
 	}
 }
