@@ -1,4 +1,4 @@
-package strset
+package str
 
 import (
 	"bytes"
