@@ -53,12 +53,12 @@ func FromTaggedIntermediate(bdoc Intermediate, v interface{}) (err error) {
 
 //Unmarshal a BSON-serialized object to the json-tagged object pointed to by v.
 func Unmarshal(data []byte, v interface{}) (err error) {
-
+	var bdoc interface{}
 	var JSON []byte
-	if err = bson.Unmarshal(data, &intermediate); err != nil {
+	if err = bson.Unmarshal(data, &bdoc); err != nil {
 		return fmt.Errorf("bson.Unmarshal: %v", err)
 	}
-	if JSON, err = bson.MarshalJSON(intermediate); err != nil {
+	if JSON, err = bson.MarshalJSON(bdoc); err != nil {
 		return fmt.Errorf("bson.MarshalJSON: %v", err)
 	}
 	if err = json.Unmarshal(JSON, v); err != nil {
