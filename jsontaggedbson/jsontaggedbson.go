@@ -3,12 +3,15 @@ package jsontaggedbson
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 
 	"gopkg.in/mgo.v2/bson"
 )
 
-//TaggedInterface creates BSON-tagged struct ready for serializing from a JSON struct.
-func TaggedInterface(obj interface{}) (bdoc interface{}, err error) {
+type Intermediate interface{}
+
+//TaggedIntermediate creates BSON-tagged struct ready for serializing from a JSON struct.
+func TaggedIntermediate(obj interface{}) (bdoc Intermediate, err error) {
 	JSON, err := json.Marshal(obj)
 	if err != nil {
 		return bdoc, fmt.Errorf("JSONTaggedBSON: json.Marshal: %v", err)
@@ -22,16 +25,35 @@ func TaggedInterface(obj interface{}) (bdoc interface{}, err error) {
 
 //Marshal a JSON-tagged object to BSON.
 func Marshal(v interface{}) (BSON []byte, err error) {
-	var intermediate interface{}
-	if intermediate, err = TaggedInterface(v); err != nil {
+	var bdoc Intermediate
+	if bdoc, err = TaggedIntermediate(v); err != nil {
 		return BSON, fmt.Errorf("TaggedInterface: %v", err)
 	}
-	return bson.Marshal(intermediate)
+	return bson.Marshal(bdoc)
+}
+
+func isPtr(i interface{}) bool {
+	return reflect.ValueOf(i).Kind() == reflect.Ptr
+}
+
+//FromTaggedIntermediate assigns the elements of bdoc to the JSON-tagged struct pointed to by v.
+func FromTaggedIntermediate(bdoc Intermediate, v interface{}) (err error) {
+	if !isPtr(v) {
+		return fmt.Errorf("v must be a pointer to a struct")
+	}
+	var JSON []byte
+	if JSON, err = bson.MarshalJSON(bdoc); err != nil {
+		return fmt.Errorf("bson.MarshalJSON: %v", err)
+	}
+	if err = json.Unmarshal(JSON, v); err != nil {
+		return fmt.Errorf("json.Unmarshal: %v", err)
+	}
+	return nil
 }
 
 //Unmarshal a BSON-serialized object to the json-tagged object pointed to by v.
 func Unmarshal(data []byte, v interface{}) (err error) {
-	var intermediate interface{}
+
 	var JSON []byte
 	if err = bson.Unmarshal(data, &intermediate); err != nil {
 		return fmt.Errorf("bson.Unmarshal: %v", err)
