@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	valid "github.com/asaskevich/govalidator"
-	"github.com/eyecuelab/kit/log"
 	"github.com/facebookgo/grace/gracehttp"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -26,7 +25,7 @@ func NewEcho(port int) *echo.Echo {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.HTTPErrorHandler = ErrorHandler
-	// e.Use(errorHandler)
+	e.Binder = &ApiBinder{}
 
 	return e
 }
@@ -43,12 +42,5 @@ func initRoutes() {
 		for _, handler := range route.Handlers {
 			Echo.Add(handler.Method, route.Path, handler.Handler, handler.MiddleWare...)
 		}
-	}
-}
-
-func errorHandler(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		log.Infof("HERE!%v\n", c.Error)
-		return next(c)
 	}
 }
