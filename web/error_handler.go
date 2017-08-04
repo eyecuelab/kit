@@ -4,56 +4,85 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/eyecuelab/kit/goenv"
+	"github.com/eyecuelab/kit/log"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
 )
 
 func ErrorHandler(err error, c echo.Context) {
-	var (
-		code = http.StatusInternalServerError
-		msg  interface{}
-	)
+	if c.Response().Committed {
+		return
+	}
+
+	code, apiError := toApiError(err)
+
+	if c.Request().Method == "HEAD" { // Issue #608
+		if err := c.NoContent(code); err != nil {
+			goto ERROR
+		}
+		return
+	}
+
+	if err := renderApiErrors(c, apiError); err != nil {
+		logErr(err)
+		goto ERROR
+	}
+
+	if code < 500 {
+		return
+	}
+ERROR:
+	logErr(err)
+}
+
+func logErr(err error) {
+	log.ErrorWrap(err, "Uncaught Error")
+}
+
+func toApiError(err error) (int, *jsonapi.ErrorObject) {
+	code := http.StatusInternalServerError
+
+	if he, ok := err.(*jsonapi.ErrorObject); ok {
+		code, _ = strconv.Atoi(he.Status)
+		return code, he
+	}
+
+	var detail interface{}
 
 	if he, ok := err.(*echo.HTTPError); ok {
 		code = he.Code
-		msg = he.Message
+		detail = he.Message
 	} else if !goenv.Prod {
-		msg = err.Error()
-	} else {
-		// will result in 500 "Internal Server Error" on panic
-		msg = http.StatusText(code)
+		detail = err.Error()
 	}
 
-	if !c.Response().Committed {
-		if c.Request().Method == "HEAD" { // Issue #608
-			if err := c.NoContent(code); err != nil {
-				goto ERROR
-			}
-		} else if err, b := errorToBytes(&msg, code); err != nil {
-			goto ERROR
-		} else if err := c.Blob(code, echo.MIMEApplicationJSON, b.Bytes()); err != nil {
-			goto ERROR
-			// c.Blob(code, echo.MIMEApplicationJSON, b.Bytes())
-		}
-		// if err, b := errorToBytes(&msg, code); err != nil {
-		// 	goto ERROR
-		// } else {
-		// 	c.Blob(code, echo.MIMEApplicationJSON, b.Bytes())
-		// }
-		// }
-	}
-ERROR:
-	c.Logger().Error(err)
+	return code, valuesToApiError(code, http.StatusText(code), &detail)
 }
 
-func errorToBytes(title *interface{}, code int) (error, *bytes.Buffer) {
+func renderApiErrors(c echo.Context, errors ...*jsonapi.ErrorObject) error {
 	var b bytes.Buffer
-	err := jsonapi.MarshalErrors(&b, []*jsonapi.ErrorObject{{
-		Title:  fmt.Sprint(*title),
-		Detail: "",
-		Status: fmt.Sprintf("%d", code),
-	}})
-	return err, &b
+	if err := jsonapi.MarshalErrors(&b, errors); err != nil {
+		return err
+	}
+
+	if i, err := strconv.Atoi(errors[0].Status); err != nil {
+		return err
+	} else {
+		return c.Blob(i, echo.MIMEApplicationJSON, b.Bytes())
+	}
+}
+
+func valuesToApiError(status int, title string, detail *interface{}) *jsonapi.ErrorObject {
+	var d string
+	if *detail != nil {
+		d = fmt.Sprint(*detail)
+	}
+	return &jsonapi.ErrorObject{
+		Status: fmt.Sprintf("%d", status),
+		Title:  title,
+		Detail: d,
+	}
 }

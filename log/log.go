@@ -22,6 +22,10 @@ func Infof(format string, args ...interface{}) {
 	log.Infof(format, args)
 }
 
+func ErrorWrap(err error, msg string) {
+	log.Errorf("%+v", errors.Wrap(err, msg))
+}
+
 func Check(err error) {
 	if err != nil {
 		log.Fatal(err)
