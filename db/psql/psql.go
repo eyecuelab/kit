@@ -2,25 +2,28 @@ package psql
 
 import (
 	"errors"
-	"os"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
-	Db    *gorm.DB
-	Error error
+	Db         *gorm.DB
+	Error      error
+	references []*gorm.DB
 )
 
-const dbEnvVar = "LUB_API_DATABASE_URL"
+func init() {
+	cobra.OnInitialize(connect)
+}
 
-func Connect(envVar string) {
-	u := os.Getenv(dbEnvVar)
-	if u == "" {
-		Error = errors.New("Missing " + dbEnvVar)
-		return
+func connect() {
+	dbUrl := viper.GetString("database_url")
+	if dbUrl == "" {
+		Error = errors.New("Missing database url")
+	} else {
+		Db, Error = gorm.Open("postgres", dbUrl)
 	}
-
-	Db, Error = gorm.Open("postgres", u)
 }

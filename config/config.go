@@ -10,7 +10,6 @@ func Load(envPrefix string, configPath string) error {
 	if configPath != "" {
 		viper.SetConfigFile(configPath)
 	} else {
-		// viper.SetConfigName("config")
 		viper.AddConfigPath(".")
 	}
 
