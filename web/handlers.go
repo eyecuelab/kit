@@ -1,4 +1,4 @@
-package handlers
+package web
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Healthz(c echo.Context) error {
+func Healthz(c *ApiContext) error {
 	if c.QueryParam("oops") == "1" {
 		panic("oops")
 	}
@@ -29,6 +29,6 @@ func Healthz(c echo.Context) error {
 	return c.String(http.StatusOK, "live")
 }
 
-func Config(c echo.Context) error {
+func Config(c *ApiContext) error {
 	return c.JSON(http.StatusOK, viper.AllSettings())
 }

@@ -1,6 +1,9 @@
 package middleware
 
-import "github.com/labstack/echo"
+import (
+	"github.com/labstack/echo"
+	mw "github.com/labstack/echo/middleware"
+)
 
 type (
 	// ApiErrorConfig defines the config for ApiError middleware.
@@ -33,7 +36,7 @@ func TemplateWithConfig(config TemplateConfig) echo.MiddlewareFunc {
 				return next(c)
 			}
 
-			next(c)
+			return next(c)
 		}
 	}
 }

@@ -21,11 +21,11 @@ func Load(envPrefix string, configPath string) error {
 	viper.AutomaticEnv()
 
 	// # TODO: raise error if not present
-	// for _, envVar := range viper.GetStringSlice("env") {
-	// 	if err := viper.BindEnv(envVar); err != nil {
-	// 		return err
-	// 	}
-	// }
+	for _, envVar := range viper.GetStringSlice("env") {
+		if err := viper.BindEnv(envVar); err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

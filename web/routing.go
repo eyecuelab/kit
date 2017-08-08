@@ -5,8 +5,9 @@ import (
 )
 
 type MethodHandler struct {
-	Method     string
-	Handler    echo.HandlerFunc
+	Method  string
+	Handler echo.HandlerFunc
+	// Handler    HandlerFunc
 	MiddleWare []echo.MiddlewareFunc
 }
 
@@ -20,8 +21,8 @@ type RouteConfig struct {
 	MiddleWare []echo.MiddlewareFunc
 }
 
-func (route *Route) Handle(m string, hf echo.HandlerFunc, mw ...echo.MiddlewareFunc) *Route {
-	handler := &MethodHandler{m, hf, mw}
+func (route *Route) Handle(m string, hf HandlerFunc, mw ...echo.MiddlewareFunc) *Route {
+	handler := &MethodHandler{m, wrapApiRoute(hf), mw}
 	route.Handlers = append(route.Handlers, handler)
 	return route
 }
@@ -40,4 +41,13 @@ func init() {
 
 func AddRoute(path string) *Route {
 	return Routing.AddRoute(path)
+}
+
+type HandlerFunc func(*ApiContext) error
+
+func wrapApiRoute(f HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ac := c.(*ApiContext)
+		return f(ac)
+	}
 }

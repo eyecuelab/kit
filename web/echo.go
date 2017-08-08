@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	valid "github.com/asaskevich/govalidator"
-	"github.com/eyecuelab/kit/web/handlers"
 	"github.com/facebookgo/grace/gracehttp"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -23,10 +22,10 @@ func NewEcho(port int) *echo.Echo {
 	e := echo.New()
 	e.Validator = &apiValidator{}
 	e.Server.Addr = fmt.Sprintf(":%v", port)
+	e.Use(ApiContextMiddleWare())
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.HTTPErrorHandler = handlers.ErrorHandler
-	e.Binder = &ApiBinder{}
+	e.HTTPErrorHandler = ErrorHandler
 
 	return e
 }
