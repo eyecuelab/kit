@@ -9,19 +9,18 @@ import (
 //ConcurrencyLimiter is an interface for limiting the number of simulataneous concurrent requests.
 type ConcurrencyLimiter interface {
 	add()
+	openSlot() bool
 	Done()
 	WaitForSlot() bool
 	WaitAll() //equivalent to sync.WaitGroup.Wait()
-	openSlot() bool
 	Start() bool
-	Total()
 }
 
 //Limiter is a concrete struct which implements the values & methods of ConcurrencyLimiter that should be shared across all implementations.
 type Limiter struct {
 	ConcurrencyLimiter
-	CurrentRequests, TotalRequests *int64
-	Timeout, PollingPeriod         time.Duration
+	Current, Total, Completed *int64
+	Timeout, PollingPeriod    time.Duration
 }
 
 //Start waits Timeout seconds for a for a slot to open. If a slot opens, it adds 1 to the current requests and returns true.
@@ -37,8 +36,14 @@ func (l *Limiter) Start() bool {
 
 //Add a request.
 func (l *Limiter) add() {
-	atomic.AddInt64(l.CurrentRequests, 1)
-	atomic.AddInt64(l.TotalRequests, 1)
+	atomic.AddInt64(l.Current, 1)
+	atomic.AddInt64(l.Total, 1)
+}
+
+//Done signifies that a request is completed; this usually opens up a slot for another.
+func (l *Limiter) Done() {
+	atomic.AddInt64(l.Current, -1)
+	atomic.AddInt64(l.Completed, 1)
 }
 
 //WaitForSlot returns true if a slot opens for requests before Timeout.
@@ -56,15 +61,16 @@ func (l *Limiter) WaitForSlot() bool {
 //WaitAll waits for all current requests to complete. This can wait forever if some requests never finish.
 //Use WaitAllTimeOut if that's not what you want.
 func (l *Limiter) WaitAll() {
-	for atomic.LoadInt64(l.CurrentRequests) > 0 {
+	for atomic.LoadInt64(l.Current) > 0 {
 		time.Sleep(l.PollingPeriod)
 	}
 }
 
-//WaitAllTimeout waits for timeout duration for all requests to complete. If you want to wait forever, use WaitAll instead.
+//WaitAllTimeout waits for timeout duration for all requests to complete. Returns true if no timeout; false if timeout.
+// If you want to wait forever, use WaitAll instead.
 func (l *Limiter) WaitAllTimeout(timeout time.Duration) bool {
 	for wait := time.Duration(0); wait < l.Timeout; wait += l.PollingPeriod {
-		if atomic.LoadInt64(l.CurrentRequests) == 0 {
+		if atomic.LoadInt64(l.Current) == 0 {
 			return true
 		}
 		time.Sleep(l.PollingPeriod)
@@ -79,10 +85,10 @@ type TotalLimiter struct {
 }
 
 func (psl *TotalLimiter) openSlot() bool {
-	return atomic.LoadInt64(psl.CurrentRequests) < psl.MaxRequests
+	return atomic.LoadInt64(psl.Current) < psl.MaxRequests
 }
 
-//NewTotalLimiter builds a TotalLimiter
+//NewTotalLimiter builds a TotalLimiter, an interface for limiting the number of simulataneous concurrent requests.
 func NewTotalLimiter(maxRequests int64, timeOut time.Duration) *TotalLimiter {
 	limiter := Limiter{Timeout: timeOut}
 	return &TotalLimiter{&limiter, maxRequests}
@@ -96,7 +102,7 @@ type PerSecondLimiter struct {
 }
 
 func (psl *PerSecondLimiter) openSlot() bool {
-	if atomic.LoadInt64(psl.CurrentRequests) == 0 {
+	if atomic.LoadInt64(psl.Current) == 0 {
 		// no live requests, so we need to reset the time from which we're counting requests per-second.
 		psl.startTimeOfLastRequestCycle = time.Now()
 		return true
@@ -106,7 +112,7 @@ func (psl *PerSecondLimiter) openSlot() bool {
 
 func (psl *PerSecondLimiter) requestsPerSecond() float64 {
 	elapsed := time.Now().Sub(psl.startTimeOfLastRequestCycle).Seconds()
-	return elapsed / float64(atomic.LoadInt64(psl.CurrentRequests))
+	return elapsed / float64(atomic.LoadInt64(psl.Current))
 }
 
 //NewPerSecondLimiter builds a PerSecondLimiter.
