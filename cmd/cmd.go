@@ -18,13 +18,6 @@ func init() {
 	cobra.OnInitialize(initConfig)
 }
 
-// func NewRoot(use string, short string, long string) *cobra.Command {
-// 	Root = &cobra.Command{
-// 		Use:   use,
-// 		Short: short,
-// 		Long:  long,
-// 	}
-
 func NewRoot(cmd *cobra.Command) *cobra.Command {
 	Root = cmd
 

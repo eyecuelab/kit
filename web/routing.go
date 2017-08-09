@@ -51,3 +51,11 @@ func wrapApiRoute(f HandlerFunc) echo.HandlerFunc {
 		return f(ac)
 	}
 }
+
+func InitRoutes(e *echo.Echo) {
+	for _, route := range Routing.Routes {
+		for _, handler := range route.Handlers {
+			e.Add(handler.Method, route.Path, handler.Handler, handler.MiddleWare...)
+		}
+	}
+}

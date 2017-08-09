@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/eyecuelab/kit/maputil"
-	"github.com/eyecuelab/kit/web/handlers"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
 )
@@ -73,8 +72,8 @@ func jsonApiBind(c *ApiContext, i interface{}) error {
 	tee := io.TeeReader(c.Request().Body, &buf)
 
 	if err := jsonapi.UnmarshalPayload(tee, i); err != nil {
-		if match := notJsonApi.MatchString(err.Error()); match {
-			return handlers.ApiError("Request Body is not valid JsonAPI")
+		if notJsonApi.MatchString(err.Error()) {
+			return c.ApiError("Request Body is not valid JsonAPI")
 		}
 		return err
 	}

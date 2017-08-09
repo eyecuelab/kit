@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"github.com/eyecuelab/kit/log"
-	"github.com/eyecuelab/kit/web"
+	"github.com/eyecuelab/kit/web/server"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+var apiArgs = []string{"port", "secret"}
 
 //ApiCmd represents the api command
 var ApiCmd = &cobra.Command{
@@ -20,8 +22,11 @@ var Port int
 
 func init() {
 	ApiCmd.PersistentFlags().IntVar(&Port, "port", 3000, "port to attach server")
-	viper.BindPFlag("port", ApiCmd.PersistentFlags().Lookup("port"))
-	viper.BindEnv("port")
+	ApiCmd.PersistentFlags().String("secret", "", "secret key used for token hashing")
+	for _, a := range apiArgs {
+		viper.BindPFlag(a, ApiCmd.PersistentFlags().Lookup(a))
+		viper.BindEnv(a)
+	}
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -29,5 +34,5 @@ func run(cmd *cobra.Command, args []string) {
 		Port = viper.GetInt("port")
 	}
 	log.Infof("Serving API on port %d...", Port)
-	web.Start(Port)
+	server.Start(Port)
 }

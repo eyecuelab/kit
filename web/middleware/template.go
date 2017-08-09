@@ -2,21 +2,21 @@ package middleware
 
 import (
 	"github.com/labstack/echo"
-	mw "github.com/labstack/echo/middleware"
+	emw "github.com/labstack/echo/middleware"
 )
 
 type (
 	// ApiErrorConfig defines the config for ApiError middleware.
 	TemplateConfig struct {
 		// Skipper defines a function to skip middleware.
-		Skipper mw.Skipper
+		Skipper emw.Skipper
 	}
 )
 
 var (
 	// DefaultApiErrorConfig is the default ApiError middleware config.
 	DefaultTemplateConfig = TemplateConfig{
-		Skipper: mw.DefaultSkipper,
+		Skipper: emw.DefaultSkipper,
 	}
 )
 
