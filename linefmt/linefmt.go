@@ -1,3 +1,4 @@
+//Package linefmt contains tools for printing repeatedly to the same line.
 package linefmt
 
 import "strings"
@@ -31,4 +32,9 @@ func Printf(format string, args ...interface{}) (int, error) {
 func Print(args ...interface{}) (int, error) {
 	ClearAll()
 	return fmt.Print(args...)
+}
+
+//TickerPrintf prints to the internal ticker.
+func TickerPrintf(format string, args ...interface{}) {
+	internalTicker.Printf(format, args...)
 }
