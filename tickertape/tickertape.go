@@ -2,13 +2,14 @@ package tickertape
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
 const (
 	bufSize              = 30
 	defaultPollingPeriod = 300 * time.Millisecond
-	defaultSignalPeriod  = 500 * time.Millisecond
+	defaultSignalPeriod  = 1000 * time.Millisecond
 )
 
 type _signal struct{}
@@ -24,37 +25,37 @@ type TickerTape struct {
 	signalPeriod, pollingPeriod time.Duration
 }
 
-func repeatSignal(period time.Duration, ch chan<- _signal) {
-
-}
-
 func (ticker *TickerTape) startListening() {
 	if ticker.signalPeriod == 0 {
-		ticker.signalPeriod |= defaultSignalPeriod
+		ticker.signalPeriod = defaultSignalPeriod
 	}
 	if ticker.pollingPeriod == 0 {
 		ticker.pollingPeriod = defaultPollingPeriod
 	}
 	ticker.listening = true
+	ticker.events = make(chan string, bufSize)
+	ticker.signals = make(chan _signal, bufSize)
 	go ticker.listen()
 	go ticker.repeatSignal()
 }
 
 func (ticker *TickerTape) repeatSignal() {
-	ticker.signals = make(chan _signal)
+
 	for {
 		ticker.signals <- signal
 		time.Sleep(ticker.signalPeriod)
 	}
 }
 func (ticker *TickerTape) listen() {
-	ticker.events = make(chan string, bufSize)
 	for i := 0; ; i++ {
 		select {
 		case event := <-ticker.events:
+			fmt.Print("\r", strings.Repeat(" ", 120))
+			fmt.Print(strings.Repeat("\b", 120))
 			fmt.Print("\r", event)
-			time.Sleep(ticker.pollingPeriod) // we want to be able to see each message as it comes up.
-		case <-ticker.signals:
+			// we want to be able to see each message as it comes up.
+		default:
+			<-ticker.signals
 			fmt.Print(".")
 		}
 	}
