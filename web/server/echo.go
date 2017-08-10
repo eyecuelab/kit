@@ -9,6 +9,7 @@ import (
 	"github.com/facebookgo/grace/gracehttp"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	emw "github.com/labstack/echo/middleware"
 	"github.com/spf13/viper"
 )
 
@@ -21,27 +22,23 @@ func (v *apiValidator) Validate(i interface{}) error {
 
 var (
 	Echo *echo.Echo
+	mws  = []echo.MiddlewareFunc{}
 )
-
-func jwtSkipper(skipRegex string) func(echo.Context) bool {
-	skip := regexp.MustCompile(skipRegex)
-	return func(c echo.Context) bool {
-		return skip.MatchString(c.Request().URL.Path)
-	}
-}
 
 func NewEcho(port int) *echo.Echo {
 	e := echo.New()
 	e.Validator = &apiValidator{}
 	e.Server.Addr = fmt.Sprintf(":%v", port)
+	e.HTTPErrorHandler = web.ErrorHandler
+
 	e.Use(web.ApiContextMiddleWare())
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		Skipper:    jwtSkipper(viper.GetString("skipjwt")),
+		Skipper:    AuthedSkipper(),
 		SigningKey: []byte(viper.GetString("secret")),
 	}))
-	e.HTTPErrorHandler = web.ErrorHandler
+	e.Use(mws...)
 
 	return e
 }
@@ -51,4 +48,20 @@ func Start(port int) {
 	web.InitRoutes(Echo)
 
 	Echo.Logger.Fatal(gracehttp.Serve(Echo.Server))
+}
+
+func AddMiddleWare(mw echo.MiddlewareFunc) {
+	mws = append(mws, mw)
+}
+
+func AuthedSkipper() func(echo.Context) bool {
+	skip := viper.GetString("skipjwt")
+	if len(skip) == 0 {
+		return emw.DefaultSkipper
+	}
+
+	re := regexp.MustCompile(skip)
+	return func(c echo.Context) bool {
+		return re.MatchString(c.Request().URL.Path)
+	}
 }

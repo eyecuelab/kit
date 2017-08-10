@@ -19,7 +19,7 @@ func Info(msg string) {
 }
 
 func Infof(format string, args ...interface{}) {
-	log.Infof(format, args)
+	log.Infof(format, args...)
 }
 
 func ErrorWrap(err error, msg string) {

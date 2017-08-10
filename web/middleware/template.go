@@ -21,7 +21,7 @@ var (
 )
 
 // ApiError returns a middleware that logs converts errors to json api errors.
-func ApiError() echo.MiddlewareFunc {
+func TemplateMiddleware() echo.MiddlewareFunc {
 	return TemplateWithConfig(DefaultTemplateConfig)
 }
 

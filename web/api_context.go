@@ -92,6 +92,7 @@ func (c *ApiContext) ApiError(msg string, codes ...int) *echo.HTTPError {
 		status = codes[0]
 	}
 
+	// TODO: return jsonapi error instead
 	return echo.NewHTTPError(status, msg)
 }
 
