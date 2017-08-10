@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"gopkg.in/mgo.v2/bson"
 )
@@ -41,6 +42,7 @@ func FromTaggedIntermediate(bdoc Intermediate, v interface{}) (err error) {
 	if !isPtr(v) {
 		return fmt.Errorf("v must be a pointer to a struct")
 	}
+
 	var JSON []byte
 	if JSON, err = bson.MarshalJSON(bdoc); err != nil {
 		return fmt.Errorf("bson.MarshalJSON: %v", err)
@@ -49,6 +51,17 @@ func FromTaggedIntermediate(bdoc Intermediate, v interface{}) (err error) {
 		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 	return nil
+}
+
+func hasSomeJSONTags(i interface{}) bool {
+	val := reflect.ValueOf(i).Elem()
+	for j := 0; j < val.NumField(); j++ {
+		tag := string(val.Type().Field(j).Tag)
+		if strings.Contains(strings.ToLower(tag), "json") {
+			return true
+		}
+	}
+	return false
 }
 
 //Unmarshal a BSON-serialized object to the json-tagged object pointed to by v.
