@@ -1,3 +1,4 @@
+//Package latlng contains tools for dealing with latitudes and longitudes.
 package latlng
 
 import (
