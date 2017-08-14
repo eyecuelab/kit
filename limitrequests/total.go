@@ -6,16 +6,6 @@ import (
 	"time"
 )
 
-//ConcurrencyLimiter is an interface for limiting the number of simulataneous concurrent requests.
-type ConcurrencyLimiter interface {
-	add()
-	openSlot() bool
-	Done()
-	WaitForSlot() bool
-	WaitAll() //equivalent to sync.WaitGroup.Wait()
-	Start() bool
-}
-
 //TotalLimiter limits the Total number of current requests. Build with NewTotalLimiter. Implements ConcurrencyLimiter.
 //Compare with PerSecondLimiter for limiting the rate at which requests are launched.
 type TotalLimiter struct {
@@ -27,12 +17,13 @@ type TotalLimiter struct {
 //Start waits timeout seconds for a for a slot to open. If a slot opens, it adds 1 to the current requests and returns true.
 //otherwise, it returns false.
 func (tl *TotalLimiter) Start() bool {
-	if timeout := !tl.WaitForSlot(); timeout {
-		return false
+	if tl.SlotOpenBeforeTimeOut() {
+		tl.add()
+		return true
 	}
 
-	tl.add()
 	return true
+
 }
 
 //Add a request.
@@ -47,8 +38,8 @@ func (tl *TotalLimiter) Done() {
 	atomic.AddInt64(&tl.completed, 1)
 }
 
-//WaitForSlot returns true if a slot opens for requests before timeout.
-func (tl *TotalLimiter) WaitForSlot() bool {
+//SlotOpenBeforeTimeOut returns true if a slot opens before timeout.
+func (tl *TotalLimiter) SlotOpenBeforeTimeOut() bool {
 	for wait, i := time.Duration(0), uint(0); wait < tl.timeout; i++ {
 		if tl.openSlot() {
 			return true
@@ -59,17 +50,17 @@ func (tl *TotalLimiter) WaitForSlot() bool {
 	return false
 }
 
-//WaitAll waits for all current requests to complete. This can wait forever if some requests never finish.
-//Use WaitAlltimeout if that's not what you want.
-func (tl *TotalLimiter) WaitAll() {
+//Wait waits for all current requests to complete. This can wait forever if some requests never finish.
+//Analagous to sync.WaitGroup.Wait()
+func (tl *TotalLimiter) Wait() {
 	for atomic.LoadInt64(&tl.current) > 0 {
 		time.Sleep(tl.pollingPeriod)
 	}
 }
 
-//WaitAlltimeout waits for timeout duration for all requests to complete. Returns true if no timeout; false if timeout.
-// If you want to wait forever, use WaitAll instead.
-func (tl *TotalLimiter) WaitAlltimeout(timeout time.Duration) bool {
+//WaitTimeout waits up to timeout duration for all current requests to complete. It returns true if
+//all requests completed in that time.
+func (tl *TotalLimiter) WaitTimeout(timeout time.Duration) bool {
 	for wait := time.Duration(0); wait < tl.timeout; wait += tl.pollingPeriod {
 		if atomic.LoadInt64(&tl.current) == 0 {
 			return true
