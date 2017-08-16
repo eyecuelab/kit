@@ -1,6 +1,7 @@
 package errorlib
 
 import (
+	"errors"
 	"fmt"
 	"log"
 )
@@ -63,3 +64,15 @@ var Errors = make(chan error)
 //ChErrorF checks an error for nil and if non-nil, sends
 //fmt.Errorf(format+": %v", args, err) to errors.Errors
 var ChErrorF = FactoryChCheckF(Errors)
+
+//Flatten a slice of errors into a single error
+func Flatten(errs []error) error {
+	if len(errs) == 0 {
+		return nil
+	}
+	errmsg := "one or more errors: "
+	for _, err := range errs {
+		errmsg += fmt.Sprintf("%v; ", err)
+	}
+	return errors.New(errmsg)
+}
