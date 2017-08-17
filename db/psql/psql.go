@@ -29,7 +29,7 @@ func connect() {
 	DbUrl = viper.GetString("database_url")
 
 	if DbUrl == "" {
-		Error = errors.New("Missing database url")
+		Error = errors.New("Missing database_url")
 	} else {
 		if Scheme != "postgres" {
 			log.Infof("Registering dialect: %s", Scheme)

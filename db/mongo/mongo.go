@@ -1,13 +1,17 @@
 package mongo
 
 import (
-	"github.com/eyecuelab/kit/log"
+	"errors"
+
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gopkg.in/mgo.v2"
 )
 
 var (
-	MDb *mgo.Session
+	MDb      *mgo.Session
+	Error    error
+	MongoUrl string
 )
 
 func init() {
@@ -15,11 +19,11 @@ func init() {
 }
 
 func connect() {
-	var err error
-	MDb, err = mgo.Dial("localhost")
-	if err != nil {
-		log.Fatal(err)
+	MongoUrl = viper.GetString("mongo_url")
+	if len(MongoUrl) == 0 {
+		Error = errors.New("Missing mongo_url")
+	} else {
+		MDb, Error = mgo.Dial(MongoUrl)
+		MDb.SetMode(mgo.Monotonic, true)
 	}
-
-	MDb.SetMode(mgo.Monotonic, true)
 }
