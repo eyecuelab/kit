@@ -23,7 +23,8 @@ func connect() {
 	if len(MongoUrl) == 0 {
 		Error = errors.New("Missing mongo_url")
 	} else {
-		MDb, Error = mgo.Dial(MongoUrl)
-		MDb.SetMode(mgo.Monotonic, true)
+		if MDb, Error = mgo.Dial(MongoUrl); Error == nil {
+			MDb.SetMode(mgo.Monotonic, true)
+		}
 	}
 }
