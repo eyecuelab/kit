@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-//TotalLimiter limits the Total number of current requests. Build with NewTotalLimiter. Implements ConcurrencyLimiter.
+//TotalLimiter limits the Total number of simultaneous requests. Build with NewTotalLimiter. Implements ConcurrencyLimiter.
 //Compare with PerSecondLimiter for limiting the rate at which requests are launched.
 type TotalLimiter struct {
 	current, Total, completed int64
@@ -75,10 +75,10 @@ func (tl *TotalLimiter) openSlot() bool {
 }
 
 //NewTotalLimiter builds a TotalLimiter, an interface for limiting the number of simulataneous concurrent requests.
-func NewTotalLimiter(maxRequests int64, timeout time.Duration) *TotalLimiter {
+func NewTotalLimiter(maxSimultaneousRequests int64, timeout time.Duration) *TotalLimiter {
 	return &TotalLimiter{
 		timeout:       timeout,
-		maxRequests:   maxRequests,
+		maxRequests:   maxSimultaneousRequests,
 		pollingPeriod: 25 * time.Millisecond,
 	}
 }
