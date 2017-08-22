@@ -14,3 +14,8 @@ type ConcurrencyLimiter interface {
 	//		}
 	// return false
 }
+
+type MaxLimiter interface {
+	ConcurrencyLimiter
+	HitMaxRequests() bool
+}
