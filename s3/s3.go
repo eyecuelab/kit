@@ -36,7 +36,7 @@ func Upload(b []byte, key string) (*s3manager.UploadOutput, error) {
 	fileType := http.DetectContentType(b)
 
 	params := &s3manager.UploadInput{
-		Bucket:      aws.String("lub-assets-test"),
+		Bucket:      aws.String(viper.GetString("aws_bucket")),
 		Key:         aws.String(key),
 		Body:        fileBytes,
 		ContentType: aws.String(fileType),
