@@ -5,9 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"path"
 	"text/template"
+
+	"github.com/eyecuelab/kit/assets"
 )
 
 type Address struct {
@@ -55,13 +56,9 @@ func newTemplate(s string) (*template.Template, error) {
 }
 
 func setDefaultTemplateDir() {
-	pwd, err := os.Getwd()
-	if err != nil {
-		return
-	}
-	dir := path.Join(pwd, "data", "mail")
+	dir := path.Join("data", "mail")
 
-	if stat, err := os.Stat(dir); err == nil && stat.IsDir() {
+	if _, err := assets.Dir(dir); err == nil {
 		TemplateDir = dir
 	}
 }
@@ -97,6 +94,7 @@ func readEmailTemplates(key string) ([][]byte, error) {
 	for i, part := range []string{"subject", "html", "plain"} {
 		fileName := fmt.Sprintf("%s_%s.tmpl", key, part)
 		p := path.Join(TemplateDir, fileName)
+
 		if templates[i], err = ioutil.ReadFile(p); err != nil {
 			return templates, err
 		}
