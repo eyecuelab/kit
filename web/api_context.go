@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/eyecuelab/kit/log"
 	"github.com/eyecuelab/kit/maputil"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
@@ -15,7 +16,7 @@ import (
 
 const MIMEJsonAPI = "application/vnd.api+json"
 
-var notJsonApi = regexp.MustCompile("not a jsonapi")
+var notJsonApi = regexp.MustCompile("(not a jsonapi|EOF)")
 
 type ApiContext struct {
 	echo.Context
@@ -75,6 +76,7 @@ func jsonApiBind(c *ApiContext, i interface{}) error {
 		if notJsonApi.MatchString(err.Error()) {
 			return c.ApiError("Request Body is not valid JsonAPI")
 		}
+		log.Infof("err: [%v]", err.Error())
 		return err
 	}
 

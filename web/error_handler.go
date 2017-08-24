@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
-	"reflect"
 	"strconv"
 
 	"github.com/asaskevich/govalidator"
@@ -68,7 +67,6 @@ func toApiError(err error) (int, *jsonapi.ErrorObject) {
 		status = http.StatusBadRequest
 		detail = he.Error()
 	} else if !goenv.Prod {
-		log.Infof("err type: %s", reflect.TypeOf(err))
 		detail = err.Error()
 	}
 
