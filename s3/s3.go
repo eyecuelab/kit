@@ -48,6 +48,8 @@ func Upload(b []byte, key string) (*s3manager.UploadOutput, error) {
 func newS3Client() *s3.S3 {
 	awsAccessKey := viper.GetString("aws_access_key")
 	awsSecret := viper.GetString("aws_secret")
+	region := viper.GetString("aws_bucket_location")
+
 	creds := credentials.NewStaticCredentials(awsAccessKey, awsSecret, "")
 	_, err := creds.Get()
 	log.Check(err)
@@ -55,7 +57,7 @@ func newS3Client() *s3.S3 {
 	session, err := session.NewSession()
 	log.Check(err)
 
-	cfg := aws.NewConfig().WithRegion("us-west-1").WithCredentials(creds)
+	cfg := aws.NewConfig().WithRegion(region).WithCredentials(creds)
 	return s3.New(session, cfg)
 }
 
