@@ -56,7 +56,7 @@ func newTemplate(s string) (*template.Template, error) {
 }
 
 func setDefaultTemplateDir() {
-	dir := path.Join("data", "mail")
+	dir := path.Join("data", "bin", "mail")
 
 	if _, err := assets.Dir(dir); err == nil {
 		TemplateDir = dir
