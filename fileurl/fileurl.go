@@ -18,7 +18,8 @@ func IsFileURL(path string) bool {
 	//any characters
 	//a domain (foo.whatever.net)
 	//then a slash
-	//some filename
+	//any additional characters
+	//some file-path
 	//and then a period and file extension
 	//eg: http://foo.bar.baz/someFolder/hello.tsv
 }
