@@ -18,10 +18,10 @@ func IsFileURL(path string) bool {
 	//any characters
 	//a domain (foo.whatever.net)
 	//then a slash
-	//any additional characters
-	//some file-path
-	//and then a period and file extension
+	//any additional characters,
+	//a slash, then a file-name, a period, and an alphanumeric file extension
 	//eg: http://foo.bar.baz/someFolder/hello.tsv
+
 }
 
 //Copy the data located at the URL to the destination.

@@ -4,17 +4,8 @@ import (
 	"bytes"
 	"fmt"
 
-	"strings"
-
 	"github.com/eyecuelab/kit/runeset"
 )
-
-//RemoveWhiteSpace removes whitespace {'\n' '\t' ' ' '\r`} from a string.
-//Note that this converts to runes and back to UTF-8, so RemoveWhiteSpace(s) == s
-//for a non-whitespace string does not necessarially hold, since the code points may differ.
-func RemoveWhiteSpace(s string) string {
-	return RemoveRunes(s, '\n', ' ', '\r', '\t')
-}
 
 //RemoveRunes removes any runes listed from the string.
 //Note that this converts to runes and back to UTF-8, so RemoveRunes(s) == s
@@ -63,9 +54,4 @@ func Map(f func(string) string, strings ...string) []string {
 		strings[i] = f(str)
 	}
 	return strings
-}
-
-//Normalize lowercases a string and removes all whitespace and quotation from it. ('")
-func Normalize(s string) string {
-	return SRemoveRunes(RemoveWhiteSpace(strings.ToLower(s)), `"'`)
 }

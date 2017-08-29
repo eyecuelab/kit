@@ -22,7 +22,7 @@ func NewPerSecondMaxLimiter(maxPerSecond float64, timeout time.Duration, maxTota
 	}
 }
 
-//HitMaxRequests() returns true if the total requests are
+//HitMaxRequests returns true if the total requests are
 func (psml *PerSecondMaxLimiter) HitMaxRequests() bool {
 	return atomic.LoadInt64(&psml.Total) >= atomic.LoadInt64(&psml.maxTotalRequests)
 }
