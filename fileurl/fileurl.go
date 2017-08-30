@@ -36,6 +36,7 @@ func Copy(url string, dst io.Writer) (n int64, err error) {
 }
 
 //DownloadTemp downloads the url to a temporary file starting with prefix in the current working directory.
+//It returns a handle to the file.
 func DownloadTemp(url string, prefix string) (file *os.File, err error) {
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -54,25 +55,14 @@ func DownloadTemp(url string, prefix string) (file *os.File, err error) {
 }
 
 //Download downloads the url to the file specified by path. This will truncate an existing file!
-func Download(url string, filepath string) (file *os.File, err error) {
-	file, err = os.Create(filepath)
-	if err != nil {
-		return nil, err
-	}
-	_, err = Copy(url, file)
-	if err != nil {
-		file.Close()
-	}
-	return file, err
-}
-
-//DownloadClose downloads the url to the file specified by path, then closes it. This will truncate an existing file!
-func DownloadClose(url string, filepath string) error {
+func Download(url string, filepath string) (err error) {
 	file, err := os.Create(filepath)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
 	_, err = Copy(url, file)
-	return err
+	if err != nil {
+		return err
+	}
+	return file.Close()
 }
