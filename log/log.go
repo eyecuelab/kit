@@ -18,7 +18,7 @@ func Fatal(err error) {
 
 //Fatalf is an alias for log.Fatalf in the standard library
 func Fatalf(format string, args ...interface{}) {
-	log.Fatalf(err, args...)
+	log.Fatalf(format, args...)
 }
 
 //Info is an alias for log.Info in the standard library
