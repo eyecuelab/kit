@@ -97,7 +97,7 @@ func jsonApiBind(c *apiContext, i interface{}) error {
 	}
 
 	c.payload = new(jsonapi.OnePayload)
-	if err := json.Unmarshal(buf.Bytes(), c.Payload); err != nil {
+	if err := json.Unmarshal(buf.Bytes(), c.payload); err != nil {
 		return err
 	}
 
