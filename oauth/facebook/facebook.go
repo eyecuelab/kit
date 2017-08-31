@@ -2,6 +2,7 @@ package facebook
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/parnurzeal/gorequest"
 )
 
@@ -11,6 +12,7 @@ const (
 )
 
 type GraphInfo struct {
+	Error     graphError
 	Id        string
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
@@ -19,6 +21,13 @@ type GraphInfo struct {
 	Email     string
 	Timezone  int
 	Gender    string
+}
+
+type graphError struct {
+	Message   string
+	Type      string
+	Code      int
+	FbTraceId string `json:"fbtrace_id"`
 }
 
 type picture struct {
@@ -39,5 +48,8 @@ func FbUserInfo(accessToken string) (GraphInfo, error) {
 	}
 
 	err := json.Unmarshal([]byte(body), &gInfo)
+	if gInfo.Error.Message != "" {
+		return gInfo, errors.New(gInfo.Error.Message)
+	}
 	return gInfo, err
 }
