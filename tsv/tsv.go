@@ -2,15 +2,11 @@ package tsv
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"path"
-	"strconv"
 	"strings"
-
-	"gopkg.in/mgo.v2/bson"
 
 	"github.com/eyecuelab/kit/fileurl"
 	"github.com/eyecuelab/kit/tickertape"
