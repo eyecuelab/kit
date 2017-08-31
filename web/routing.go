@@ -43,11 +43,11 @@ func AddRoute(path string) *Route {
 	return Routing.AddRoute(path)
 }
 
-type HandlerFunc func(*ApiContext) error
+type HandlerFunc func(ApiContext) error
 
 func wrapApiRoute(f HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ac := c.(*ApiContext)
+		ac := c.(ApiContext)
 		return f(ac)
 	}
 }

@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/eyecuelab/kit/log"
 	"github.com/eyecuelab/kit/maputil"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
@@ -18,21 +17,39 @@ const MIMEJsonAPI = "application/vnd.api+json"
 
 var notJsonApi = regexp.MustCompile("(not a jsonapi|EOF)")
 
-type ApiContext struct {
-	echo.Context
+type (
+	ApiContext interface {
+		echo.Context
 
-	Payload *jsonapi.OnePayload
+		Payload() *jsonapi.OnePayload
+		Attrs() map[string]interface{}
+		AttrKeys() []string
+		BindAndValidate(interface{}) error
+		JsonApi(interface{}, int) error
+		JsonApiOK(interface{}) error
+		ApiError(string, ...int) *echo.HTTPError
+	}
+
+	apiContext struct {
+		echo.Context
+
+		payload *jsonapi.OnePayload
+	}
+)
+
+func (c *apiContext) Payload() *jsonapi.OnePayload {
+	return c.payload
 }
 
-func (c *ApiContext) Attrs() map[string]interface{} {
-	return c.Payload.Data.Attributes
+func (c *apiContext) Attrs() map[string]interface{} {
+	return c.payload.Data.Attributes
 }
 
-func (c *ApiContext) AttrKeys() []string {
+func (c *apiContext) AttrKeys() []string {
 	return maputil.Keys(c.Attrs())
 }
 
-func (c *ApiContext) Bind(i interface{}) error {
+func (c *apiContext) Bind(i interface{}) error {
 	ctype := c.Request().Header.Get(echo.HeaderContentType)
 
 	if strings.HasPrefix(ctype, MIMEJsonAPI) {
@@ -47,7 +64,7 @@ func (c *ApiContext) Bind(i interface{}) error {
 	return nil
 }
 
-func (c *ApiContext) BindAndValidate(i interface{}) error {
+func (c *apiContext) BindAndValidate(i interface{}) error {
 	if err := c.Bind(i); err != nil {
 		return err
 	}
@@ -57,18 +74,18 @@ func (c *ApiContext) BindAndValidate(i interface{}) error {
 	return nil
 }
 
-func (c *ApiContext) JsonApi(i interface{}, status int) error {
+func (c *apiContext) JsonApi(i interface{}, status int) error {
 	c.Response().Header().Set(echo.HeaderContentType, jsonapi.MediaType)
 	c.Response().WriteHeader(status)
 
 	return jsonapi.MarshalPayload(c.Response().Writer, i)
 }
 
-func (c *ApiContext) JsonApiOK(i interface{}) error {
+func (c *apiContext) JsonApiOK(i interface{}) error {
 	return c.JsonApi(i, http.StatusOK)
 }
 
-func jsonApiBind(c *ApiContext, i interface{}) error {
+func jsonApiBind(c *apiContext, i interface{}) error {
 	var buf bytes.Buffer
 	tee := io.TeeReader(c.Request().Body, &buf)
 
@@ -76,11 +93,10 @@ func jsonApiBind(c *ApiContext, i interface{}) error {
 		if notJsonApi.MatchString(err.Error()) {
 			return c.ApiError("Request Body is not valid JsonAPI")
 		}
-		log.Infof("err: [%v]", err.Error())
 		return err
 	}
 
-	c.Payload = new(jsonapi.OnePayload)
+	c.payload = new(jsonapi.OnePayload)
 	if err := json.Unmarshal(buf.Bytes(), c.Payload); err != nil {
 		return err
 	}
@@ -88,7 +104,7 @@ func jsonApiBind(c *ApiContext, i interface{}) error {
 	return nil
 }
 
-func (c *ApiContext) ApiError(msg string, codes ...int) *echo.HTTPError {
+func (c *apiContext) ApiError(msg string, codes ...int) *echo.HTTPError {
 	status := http.StatusBadRequest
 	if len(codes) > 0 {
 		status = codes[0]
@@ -101,7 +117,7 @@ func (c *ApiContext) ApiError(msg string, codes ...int) *echo.HTTPError {
 func ApiContextMiddleWare() func(echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			ac := &ApiContext{c, nil}
+			ac := &apiContext{c, nil}
 			return next(ac)
 		}
 	}

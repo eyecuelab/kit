@@ -14,6 +14,10 @@ import (
 	"github.com/lib/pq"
 )
 
+var pq500s = map[string]bool{
+	"undefined_function": true,
+}
+
 func ErrorHandler(err error, c echo.Context) {
 	if c.Response().Committed {
 		return
@@ -60,9 +64,11 @@ func toApiError(err error) (int, *jsonapi.ErrorObject) {
 		status = he.Code
 		detail = he.Message
 	} else if he, ok := err.(*pq.Error); ok {
-		status = http.StatusBadRequest
 		detail = he.Message
 		code = he.Code.Name()
+		if !pq500s[code] {
+			status = http.StatusBadRequest
+		}
 	} else if he, ok := err.(govalidator.Errors); ok {
 		status = http.StatusBadRequest
 		detail = he.Error()

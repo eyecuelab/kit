@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Healthz(c *ApiContext) error {
+func Healthz(c ApiContext) error {
 	if c.QueryParam("oops") == "1" {
 		panic("oops")
 	}
@@ -29,6 +29,6 @@ func Healthz(c *ApiContext) error {
 	return c.String(http.StatusOK, "live")
 }
 
-func Config(c *ApiContext) error {
+func Config(c ApiContext) error {
 	return c.JSON(http.StatusOK, viper.AllSettings())
 }
