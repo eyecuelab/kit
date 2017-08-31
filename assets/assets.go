@@ -5,23 +5,26 @@ import "errors"
 type AssetGet func(string) ([]byte, error)
 type AssetDir func(string) ([]string, error)
 
-// Getter should be set to the Assets func created by bindata
-var Getter AssetGet
-var Dirrer AssetDir
+type AssetManager struct {
+	Get AssetGet
+	Dir AssetDir
+}
+
+var Manager *AssetManager
 
 // Get retrieve static asset from client project data directory. This allows code in kit to use client project data dir
 func Get(name string) ([]byte, error) {
-	if Getter == nil {
-		return nil, errors.New("assets.Getter is not set")
+	if Manager == nil {
+		return nil, errors.New("Manager is not set")
 	}
 
-	return Getter(name)
+	return Manager.Get(name)
 }
 
 func Dir(name string) ([]string, error) {
-	if Dirrer == nil {
-		return nil, errors.New("assets.Dirrer is not set")
+	if Manager == nil {
+		return nil, errors.New("Manager is not set")
 	}
 
-	return Dirrer(name)
+	return Manager.Dir(name)
 }

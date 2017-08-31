@@ -1,8 +1,8 @@
 package cmd
 
 import (
+	"github.com/eyecuelab/kit/assets"
 	"github.com/eyecuelab/kit/config"
-	"github.com/eyecuelab/kit/log"
 	"github.com/spf13/cobra"
 )
 
@@ -14,33 +14,23 @@ var (
 	NoDb     bool
 )
 
-func init() {
-	cobra.OnInitialize(initConfig)
-}
-
-func NewRoot(cmd *cobra.Command) *cobra.Command {
-	Root = cmd
-
-	Root.PersistentFlags().BoolVar(&verbose, "verbose", false, "more verbose error reporting")
-	Root.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.lub-api.yaml)")
-	Root.PersistentFlags().BoolVar(&NoDb, "nodb", false, "allow DB-less execution")
-
-	addCommands()
-	return Root
-}
-
 func Add(command *cobra.Command) {
 	commands = append(commands, command)
 }
 
-func addCommands() {
-	for _, command := range commands {
-		Root.AddCommand(command)
-	}
+func Init(appName string, rootCmd *cobra.Command, assetGet assets.AssetGet, assetDir assets.AssetDir) error {
+	assets.Manager = &assets.AssetManager{assetGet, assetDir}
+	addRoot(rootCmd)
+
+	return config.Load(appName, cfgFile)
 }
 
-func initConfig() {
-	if err := config.Load("LUB_API", cfgFile); err != nil {
-		log.FatalWrap(err, "Failed to load configuration")
-	}
+func addRoot(cmd *cobra.Command) {
+	Root = cmd
+
+	Root.PersistentFlags().BoolVar(&verbose, "verbose", false, "more verbose error reporting")
+	Root.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $PWD/config.yaml)")
+	Root.PersistentFlags().BoolVar(&NoDb, "nodb", false, "allow DB-less execution")
+
+	Root.AddCommand(commands...)
 }
