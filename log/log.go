@@ -11,10 +11,17 @@ func FatalWrap(err error, msg string) {
 	log.Fatalf("%+v", errors.Wrap(err, msg))
 }
 
+//Fatal is an alias for log.Fatal
 func Fatal(err error) {
 	log.Fatal(err)
 }
 
+//Fatalf is an alias for log.Fatalf in the standard library
+func Fatalf(format string, args ...interface{}) {
+	log.Fatalf(err, args...)
+}
+
+//Info is an alias for log.Info in the standard library
 func Info(msg string) {
 	log.Info(msg)
 }
@@ -28,9 +35,10 @@ func ErrorWrap(err error, msg string) {
 	log.Errorf("%+v", errors.Wrap(err, msg))
 }
 
+//Check calls Fatal on an error if it is non-nil.
 func Check(err error) {
 	if err != nil {
-		log.Fatal(err)
+		Fatal(err)
 	}
 }
 
