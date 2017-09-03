@@ -102,17 +102,20 @@ func readEmailTemplates(key string) ([][]byte, error) {
 	return templates, nil
 }
 
-func RegisterTemplate(key string) error {
+func RegisterTemplate(keys ...string) error {
 	if len(TemplateDir) == 0 {
 		return errors.New("TemplateDir not set")
 	}
-
-	parts, err := readEmailTemplates(key)
-	if err != nil {
-		return err
+	for _, key := range keys {
+		parts, err := readEmailTemplates(key)
+		if err != nil {
+			return err
+		}
+		if err := AddTemplate(key, string(parts[0]), string(parts[1]), string(parts[2])); err != nil {
+			return err
+		}
 	}
-
-	return AddTemplate(key, string(parts[0]), string(parts[1]), string(parts[2]))
+	return nil
 }
 
 func Send(to *Address, templateKey string, vars *MergeVars) error {
