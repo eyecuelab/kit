@@ -9,9 +9,10 @@ import (
 )
 
 var (
-	MDb      *mgo.Session
+	MDb      *mgo.Database
 	Error    error
 	MongoUrl string
+	Msession *mgo.Session
 )
 
 func init() {
@@ -23,8 +24,10 @@ func connect() {
 	if len(MongoUrl) == 0 {
 		Error = errors.New("Missing mongo_url")
 	} else {
-		if MDb, Error = mgo.Dial(MongoUrl); Error == nil {
-			MDb.SetMode(mgo.Monotonic, true)
+		if Msession, Error = mgo.Dial(MongoUrl); Error == nil {
+			info, _ := mgo.ParseURL(MongoUrl)
+			Msession.SetMode(mgo.Monotonic, true)
+			MDb = Msession.DB(info.Database)
 		}
 	}
 }
