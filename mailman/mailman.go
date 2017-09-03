@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"path"
 	"text/template"
 
@@ -95,7 +94,7 @@ func readEmailTemplates(key string) ([][]byte, error) {
 		fileName := fmt.Sprintf("%s_%s.tmpl", key, part)
 		p := path.Join(TemplateDir, fileName)
 
-		if templates[i], err = ioutil.ReadFile(p); err != nil {
+		if templates[i], err = assets.Get(p); err != nil {
 			return templates, err
 		}
 	}
