@@ -51,8 +51,19 @@ func MigrateAll() (int, error) {
 	return migrate.Exec(psql.DB.DB(), "postgres", getMigrations(), migrate.Up)
 }
 
+func PendingMigrationCount() (int, error) {
+	plans, _, err := migrate.PlanMigration(psql.DB.DB(), "postgres", getMigrations(), migrate.Up, 0)
+	if err != nil {
+		return -1, err
+	}
+	return len(plans), nil
+}
+
 func direction() migrate.MigrationDirection {
 	if down {
+		if max == 0 {
+			max = 1
+		}
 		return migrate.Down
 	} else {
 		return migrate.Up
