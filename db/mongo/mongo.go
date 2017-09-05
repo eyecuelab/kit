@@ -31,3 +31,15 @@ func connect() {
 		}
 	}
 }
+
+//InCollection returns whether document(s) matching the query the specified collection exist
+func InCollection(collection *mgo.Collection, selector interface{}) bool {
+	n, _ := collection.Find(selector).Count()
+	return n > 0
+}
+
+//UniqueInCollection returns whether one and only one document matching the query in the specified collection exists.
+func UniqueInCollection(collection *mgo.Collection, selector interface{}) bool {
+	n, _ := collection.Find(selector).Count()
+	return n == 1
+}
