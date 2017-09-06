@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/eyecuelab/kit/maputil"
@@ -25,6 +26,7 @@ type (
 		Attrs() map[string]interface{}
 		AttrKeys() []string
 		BindAndValidate(interface{}) error
+		BindIdParam(*int, ...string) error
 		JsonApi(interface{}, int) error
 		JsonApiOK(interface{}) error
 		ApiError(string, ...int) *echo.HTTPError
@@ -83,6 +85,17 @@ func (c *apiContext) JsonApi(i interface{}, status int) error {
 
 func (c *apiContext) JsonApiOK(i interface{}) error {
 	return c.JsonApi(i, http.StatusOK)
+}
+
+func (c *apiContext) BindIdParam(idValue *int, named ...string) error {
+	paramName := "id"
+	if len(named) > 0 {
+		paramName = named[0]
+	}
+
+	var err error
+	*idValue, err = strconv.Atoi(paramName)
+	return err
 }
 
 func jsonApiBind(c *apiContext, i interface{}) error {
