@@ -43,6 +43,22 @@ var hellAddress = Address{
 	Country:    "us",
 }
 
+var heavenAddress = Address{
+	Street:    "1 N Heaven St",
+	Extension: "#18",
+	Locality:  "San Diego",
+	Region:    "CA",
+	Country:   "us",
+}
+
+var hellWithHeavenFieldsOnly = Address{
+	Street:    "1 S Hell St",
+	Extension: "#666",
+	Locality:  "Newark",
+	Region:    "NJ",
+	Country:   "us",
+}
+
 func TestFromFactualRecord(t *testing.T) {
 	type args struct {
 		factualRecord bson.M
@@ -75,6 +91,32 @@ func TestAddress_String(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.arg.String(); got != tt.want {
 				t.Errorf("Address.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAddress_SharedComponentsOf(t *testing.T) {
+	type args struct {
+		b Address
+	}
+	tests := []struct {
+		name     string
+		reciever Address
+		arg      Address
+		want     Address
+	}{
+		{"copy", heavenAddress, hellAddress, hellWithHeavenFieldsOnly},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			argCopy := tt.arg
+			a := tt.reciever
+			if got := a.SharedComponentsOf(tt.arg); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Address.SharedComponentsOf() = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(tt.arg, argCopy) {
+				t.Errorf("should not modify %v", tt.arg)
 			}
 		})
 	}

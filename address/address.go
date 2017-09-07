@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/eyecuelab/kit/stringslice"
+	"googlemaps.github.io/maps"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -25,6 +26,32 @@ func FromFactualRecord(factualRecord bson.M) Address {
 	}
 }
 
+func FromGoogleAddressComponents(components []maps.AddressComponent) (address Address) {
+	type routeparts struct {
+		name, number string
+	}
+	var street routeparts
+	for _, component := range components {
+		val := component.ShortName
+		for _, label := range component.Types {
+			switch label {
+			case "street_number":
+				street.name = val
+			case "route":
+				street.number = val
+			case "administrative_area_level_1":
+				address.Region = val
+			case "country":
+				address.Country = val
+			case "postal_code":
+				address.PostalCode = val
+			}
+		}
+	}
+	address.Street = street.number + " " + street.name
+	return address
+}
+
 //Address represents a physical location
 type Address struct {
 	Street, Extension, POBox string
@@ -32,6 +59,32 @@ type Address struct {
 	Region                   string //state
 	PostalCode               string //zip
 	Country                  string
+}
+
+//SharedComponentsOf returns a copy of b, except that where a.component == "", b.component == ""
+func (a *Address) SharedComponentsOf(b Address) Address {
+	if a.Street == "" {
+		b.Street = ""
+	}
+	if a.Extension == "" {
+		b.Extension = ""
+	}
+	if a.POBox == "" {
+		b.POBox = ""
+	}
+	if a.Locality == "" {
+		b.Locality = ""
+	}
+	if a.Region == "" {
+		b.Region = ""
+	}
+	if a.PostalCode == "" {
+		b.PostalCode = ""
+	}
+	if a.Country == "" {
+		b.Country = ""
+	}
+	return b
 }
 
 func (a *Address) String() string {
