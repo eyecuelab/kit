@@ -4,53 +4,7 @@ import (
 	"strings"
 
 	"github.com/eyecuelab/kit/stringslice"
-	"googlemaps.github.io/maps"
-	"gopkg.in/mgo.v2/bson"
 )
-
-//FromFactualRecord builds an address from a serialized record from factual
-func FromFactualRecord(factualRecord bson.M) Address {
-	getStr := func(key string) string {
-		val, _ := factualRecord[key]
-		str, _ := val.(string)
-		return str
-	}
-	return Address{
-		Street:     getStr("address"),
-		Extension:  getStr("address_extended"),
-		POBox:      getStr("po_box"),
-		Locality:   getStr("locality"),
-		PostalCode: getStr("postcode"),
-		Region:     getStr("region"),
-		Country:    getStr("country"),
-	}
-}
-
-func FromGoogleAddressComponents(components []maps.AddressComponent) (address Address) {
-	type routeparts struct {
-		name, number string
-	}
-	var street routeparts
-	for _, component := range components {
-		val := component.ShortName
-		for _, label := range component.Types {
-			switch label {
-			case "street_number":
-				street.name = val
-			case "route":
-				street.number = val
-			case "administrative_area_level_1":
-				address.Region = val
-			case "country":
-				address.Country = val
-			case "postal_code":
-				address.PostalCode = val
-			}
-		}
-	}
-	address.Street = street.number + " " + street.name
-	return address
-}
 
 //Address represents a physical location
 type Address struct {
@@ -61,8 +15,8 @@ type Address struct {
 	Country                  string
 }
 
-//SharedComponentsOf returns a copy of b, except that where a.component == "", b.component == ""
-func (a *Address) SharedComponentsOf(b Address) Address {
+//filterOutComponentsMissingFromReciever returns a copy of b, except that where a.component == "", b.component == ""
+func (a *Address) filterOutComponentsMissingFromReciever(b Address) Address {
 	if a.Street == "" {
 		b.Street = ""
 	}
@@ -87,6 +41,32 @@ func (a *Address) SharedComponentsOf(b Address) Address {
 	return b
 }
 
+//SharedComponents returns copies of a and b, except if a.component == "" || b.component == "",
+//c.component == "" && d.component == ""
+func SharedComponents(a, b Address) (Address, Address) {
+	b = a.filterOutComponentsMissingFromReciever(b)
+	a = b.filterOutComponentsMissingFromReciever(a)
+	return a, b
+}
+
+//StringSliceFromNonempty returns a stringslice of the non-empty components of a
+func (a *Address) StringSliceFromNonempty() []string {
+	return stringslice.AppendIfNonEmpty(make([]string, 0, 7),
+		a.Street, a.Extension, a.POBox, a.Locality, a.Region, a.PostalCode, a.Country)
+}
+
+func (a *Address) StringSlice() []string {
+	return []string{}
+}
+
+//Returns true if all components of the address are ""
+func (a *Address) Empty() bool {
+	isEmpty := func(s string) bool {
+		return s == ""
+	}
+	return stringslice.All(a.StringSlice(), isEmpty)
+
+}
 func (a *Address) String() string {
 	//PO BOX deliberately ignored for now; 9/7/2017
 	components := []string{
