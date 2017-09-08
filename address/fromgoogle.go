@@ -15,6 +15,7 @@ func FromGoogleAddressComponents(components []maps.AddressComponent) (address Ad
 				street.name = val
 			case "route":
 				street.number = val
+
 			case "administrative_area_level_1":
 				address.Region = val
 			case "country":
@@ -22,6 +23,7 @@ func FromGoogleAddressComponents(components []maps.AddressComponent) (address Ad
 			case "postal_code":
 				address.PostalCode = val
 			}
+			//note: PO box doesn't seem to be handled.
 		}
 	}
 	address.Street = street.number + " " + street.name

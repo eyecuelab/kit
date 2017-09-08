@@ -50,6 +50,33 @@ func FilterFalse(a []string, f predicate) []string {
 	return filtered
 }
 
+func GroupBy(a []string, f func(string) string) (groups [][]string) {
+	var group []string
+	var prev string
+	for _, s := range a {
+		if len(group) == 0 {
+			group, prev = append(group, s), f(s)
+		} else if f(s) == prev {
+			group = append(group, s)
+		} else {
+			groups = append(groups, group)
+			group = nil
+		}
+	}
+	if len(group) > 0 {
+		groups = append(groups, group)
+	}
+	return groups
+}
+
+func GroupByID(a []string) (groups [][]string) {
+	return GroupBy(a, noOp)
+}
+
+func noOp(s string) string {
+	return s
+}
+
 func AppendIfNonEmpty(a []string, strings ...string) []string {
 	for _, s := range strings {
 		if s != "" {
