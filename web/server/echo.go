@@ -62,6 +62,9 @@ func AuthedSkipper() func(echo.Context) bool {
 
 	re := regexp.MustCompile(skip)
 	return func(c echo.Context) bool {
+		if c.Request().Method == echo.OPTIONS {
+			return true
+		}
 		return re.MatchString(c.Request().URL.Path)
 	}
 }
