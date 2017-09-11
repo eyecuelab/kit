@@ -15,7 +15,8 @@ func FromGoogleAddressComponents(components []maps.AddressComponent) (address Ad
 				street.name = val
 			case "route":
 				street.number = val
-
+			case "subpremise":
+				address.Extension = val
 			case "administrative_area_level_1":
 				address.Region = val
 			case "country":
