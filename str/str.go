@@ -37,7 +37,7 @@ func SRemoveRunes(s string, toRemove string) string {
 
 //MapErr maps f(string)string, err across a slice. If any error results, it
 // it immediately returns an empty slice and the error.
-func MapErr(f func(string) (string, error), strings ...string) ([]string, error) {
+func MapErr(f func(string) (string, error), strings []string) ([]string, error) {
 	for i, str := range strings {
 		result, err := f(str)
 		if err != nil {
@@ -49,7 +49,7 @@ func MapErr(f func(string) (string, error), strings ...string) ([]string, error)
 }
 
 //Map maps f(string) across the remaining arguments, returning [f(str) for str in str]
-func Map(f func(string) string, strings ...string) []string {
+func Map(f func(string) string, strings []string) []string {
 	for i, str := range strings {
 		strings[i] = f(str)
 	}

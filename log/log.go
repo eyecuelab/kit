@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/eyecuelab/kit/goenv"
 	"github.com/pkg/errors"
@@ -29,6 +30,11 @@ func Info(msg string) {
 func Infof(format string, args ...interface{}) {
 	s := spew.Sprintf(format, args...)
 	log.Info(s)
+}
+
+func Infofln(format string, args ...interface{}) {
+	fmt.Println("")
+	Infof(format, args...)
 }
 
 func ErrorWrap(err error, msg string) {
