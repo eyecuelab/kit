@@ -1,8 +1,6 @@
 package address
 
 import (
-	"strings"
-
 	"github.com/eyecuelab/kit/str"
 	"github.com/eyecuelab/kit/stringslice"
 )
@@ -38,11 +36,4 @@ func NormalizedSharedComponentDistance(placeA, placeB *Address) (distance int) {
 	a, b = str.Map(normalize, a), str.Map(normalize, b)
 	distance, _ = stringslice.TotalDistance(a, b)
 	return distance
-}
-
-func normalize(s string) string {
-	s = str.NKFC(s)
-	s = str.RemoveRunes(s, ';', ':', '.', ',', '!', '?', '*')
-	s = strings.TrimSpace(s)
-	return strings.ToLower(s)
 }
