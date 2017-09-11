@@ -4,10 +4,74 @@ import (
 	"reflect"
 	"testing"
 
+	"googlemaps.github.io/maps"
 	"gopkg.in/mgo.v2/bson"
 )
 
-var hellRecord = bson.M{
+func TestFromFactualRecord(t *testing.T) {
+	type args struct {
+		factualRecord bson.M
+	}
+	tests := []struct {
+		name string
+		args args
+		want Address
+	}{
+		{"hell", args{hellFactualRecord}, hellAddress},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := FromFactualRecord(tt.args.factualRecord); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FromFactualRecord() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAddress_String(t *testing.T) {
+	tests := []struct {
+		name string
+		arg  Address
+		want string
+	}{
+		{"hell", hellAddress, "1 S Hell St, #666, Newark, NJ, 66666, us"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.arg.String(); got != tt.want {
+				t.Errorf("Address.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAddress_SharedComponentsOf(t *testing.T) {
+	type args struct {
+		b Address
+	}
+	tests := []struct {
+		name     string
+		reciever Address
+		arg      Address
+		want     Address
+	}{
+		{"copy", heavenAddress, hellAddress, hellWithHeavenFieldsOnly},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			argCopy := tt.arg
+			a := tt.reciever
+			if got := a.SharedComponentsOf(tt.arg); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Address.SharedComponentsOf() = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(tt.arg, argCopy) {
+				t.Errorf("should not modify %v", tt.arg)
+			}
+		})
+	}
+}
+
+var hellFactualRecord = bson.M{
 	"address":          "1 S Hell St",
 	"existence":        "0.7",
 	"admin_region":     nil,
@@ -59,64 +123,21 @@ var hellWithHeavenFieldsOnly = Address{
 	Country:   "us",
 }
 
-func TestFromFactualRecord(t *testing.T) {
+func TestFromGoogleAddressComponents(t *testing.T) {
 	type args struct {
-		factualRecord bson.M
+		components []maps.AddressComponent
 	}
 	tests := []struct {
-		name string
-		args args
-		want Address
+		name        string
+		args        args
+		wantAddress Address
 	}{
-		{"hell", args{hellRecord}, hellAddress},
+	// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := FromFactualRecord(tt.args.factualRecord); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FromFactualRecord() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestAddress_String(t *testing.T) {
-	tests := []struct {
-		name string
-		arg  Address
-		want string
-	}{
-		{"hell", hellAddress, "1 S Hell St, #666, Newark, NJ, 66666, us"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.arg.String(); got != tt.want {
-				t.Errorf("Address.String() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestAddress_SharedComponentsOf(t *testing.T) {
-	type args struct {
-		b Address
-	}
-	tests := []struct {
-		name     string
-		reciever Address
-		arg      Address
-		want     Address
-	}{
-		{"copy", heavenAddress, hellAddress, hellWithHeavenFieldsOnly},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			argCopy := tt.arg
-			a := tt.reciever
-			if got := a.SharedComponentsOf(tt.arg); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Address.SharedComponentsOf() = %v, want %v", got, tt.want)
-			}
-			if !reflect.DeepEqual(tt.arg, argCopy) {
-				t.Errorf("should not modify %v", tt.arg)
+			if gotAddress := FromGoogleAddressComponents(tt.args.components); !reflect.DeepEqual(gotAddress, tt.wantAddress) {
+				t.Errorf("FromGoogleAddressComponents() = %v, want %v", gotAddress, tt.wantAddress)
 			}
 		})
 	}
