@@ -24,7 +24,7 @@ func SharedComponentDistance(placeA, placeB *Address) (distance int) {
 func NormalizedTotalDistance(placeA, placeB *Address) (distance int) {
 	filteredA, filteredB := SharedComponents(*placeA, *placeB)
 	a, b := filteredA.StringSlice(), filteredB.StringSlice()
-	a, b = str.Map(normalize, a), str.Map(normalize, b)
+	a, b = str.Map(Normalize, a), str.Map(Normalize, b)
 	distance, _ = stringslice.TotalDistance(a, b)
 	return distance
 }
@@ -33,7 +33,7 @@ func NormalizedTotalDistance(placeA, placeB *Address) (distance int) {
 func NormalizedSharedComponentDistance(placeA, placeB *Address) (distance int) {
 	filteredA, filteredB := SharedComponents(*placeA, *placeB)
 	a, b := filteredA.StringSliceFromNonempty(), filteredB.StringSliceFromNonempty()
-	a, b = str.Map(normalize, a), str.Map(normalize, b)
+	a, b = str.Map(Normalize, a), str.Map(Normalize, b)
 	distance, _ = stringslice.TotalDistance(a, b)
 	return distance
 }
