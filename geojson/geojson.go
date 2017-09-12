@@ -1,25 +1,26 @@
 package geojson
 
-import "gopkg.in/mgo.v2/bson"
-
 type Type string
 
 const (
 	PointType      = Type("Point")
-	PolyGonType    = Type("Polygon")
+	PolygonType    = Type("Polygon")
 	MultiPointType = Type("MultiPoint")
 )
 
-type GeoJSON interface {
+type Geometry interface {
 	Type() Type
-	Coordinates() interface{}
-	ToBSON() bson.M
+	Coordinates() Coordinates
+	GeoJSON() GeoJSON
 }
 
-func toBSON(geoJSON GeoJSON) bson.M {
-	return bson.M{
-		"type":        geoJSON.Type(),
-		"coordinates": geoJSON.Coordinates(),
+type Coordinates interface{}
+
+type GeoJSON map[string]interface{}
+
+func geoJSON(geo Geometry) GeoJSON {
+	return GeoJSON{
+		"type":        geo.Type(),
+		"coordinates": geo.Coordinates(),
 	}
 }
-
