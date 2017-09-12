@@ -2,7 +2,6 @@ package geojson
 
 import (
 	"github.com/kellydunn/golang-geo"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type Polygon struct {
@@ -26,7 +25,6 @@ func (poly *Polygon) Type() Type {
 func (poly *Polygon) GeoJSON() GeoJSON {
 	return geoJSON(poly)
 }
-
 
 func NewPolygon(latlngs [][2]float64) Polygon {
 	points := make([]*geo.Point, len(latlngs))
