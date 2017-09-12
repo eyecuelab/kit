@@ -27,13 +27,6 @@ func (poly *Polygon) GeoJSON() GeoJSON {
 	return geoJSON(poly)
 }
 
-func WithinPolygonRequest(poly *Polygon) bson.M {
-	return bson.M{
-		"$geoWithin": bson.M{
-			"$geometry": poly.GeoJSON(),
-		},
-	}
-}
 
 func NewPolygon(latlngs [][2]float64) Polygon {
 	points := make([]*geo.Point, len(latlngs))

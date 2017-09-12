@@ -3,9 +3,8 @@ package geojson
 type Type string
 
 const (
-	PointType      = Type("Point")
-	PolygonType    = Type("Polygon")
-	MultiPointType = Type("MultiPoint")
+	PointType   = Type("Point")
+	PolygonType = Type("Polygon")
 )
 
 type Geometry interface {
