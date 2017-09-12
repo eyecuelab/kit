@@ -94,7 +94,7 @@ func (c *apiContext) BindIdParam(idValue *int, named ...string) error {
 	}
 
 	var err error
-	*idValue, err = strconv.Atoi(paramName)
+	*idValue, err = strconv.Atoi(c.Param(paramName))
 	return err
 }
 
