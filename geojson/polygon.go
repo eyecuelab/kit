@@ -1,23 +1,21 @@
 package geojson
 
+import "strings"
+
 type Polygon []Point
 
-func (poly Polygon) Coordinates() Coordinates {
-	coords := make([]interface{}, len(poly))
+func (poly Polygon) Coordinates() string {
+	coords := make([]string, len(poly))
 	for i, p := range poly {
 		coords[i] = p.Coordinates()
 	}
-	return coords
+	return "[" + strings.Join(coords, ", ") + "]"
 }
 
-func (poly Polygon) Type() Type {
+func (poly Polygon) Type() string {
 	return PolygonType
 }
 
-func (poly Polygon) GeoJSON() GeoJSON {
+func (poly Polygon) GeoJSON() []byte {
 	return geoJSON(poly)
-}
-
-func (poly Polygon) Valid() bool {
-	return len(poly) >= 3 && poly[0] == poly[len(poly)-1]
 }

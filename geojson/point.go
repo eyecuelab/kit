@@ -1,18 +1,23 @@
 package geojson
 
+import "fmt"
+
 type Point struct {
 	Lat float64
 	Lng float64
 }
 
-func (p *Point) Coordinates() Coordinates {
-	return [2]float64{p.Lng, p.Lat}
+//Coordinates is the coordinates.
+func (p *Point) Coordinates() string {
+	return fmt.Sprintf(`[%f, %f]`, p.Lat, p.Lng)
 }
 
-func (p *Point) Type() Type {
+//Type is the type.
+func (p *Point) Type() string {
 	return PointType
 }
 
-func (p *Point) GeoJSON() GeoJSON {
+//GeoJSON formats to GeoJSON:  {type : "Point", coordinates : [lat, lng]}
+func (p *Point) GeoJSON() []byte {
 	return geoJSON(p)
 }

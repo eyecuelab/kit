@@ -1,25 +1,18 @@
 package geojson
 
-type Type string
+import "fmt"
 
 const (
-	PointType   = Type("Point")
-	PolygonType = Type("Polygon")
+	PointType   = "Point"
+	PolygonType = "Polygon"
 )
 
 type Geometry interface {
-	Type() Type
-	Coordinates() Coordinates
-	GeoJSON() GeoJSON
+	Type() string
+	Coordinates() string
+	GeoJSON() []byte
 }
 
-type Coordinates interface{}
-
-type GeoJSON map[string]interface{}
-
-func geoJSON(geo Geometry) GeoJSON {
-	return GeoJSON{
-		"type":        geo.Type(),
-		"coordinates": geo.Coordinates(),
-	}
+func geoJSON(geo Geometry) []byte {
+	return []byte(fmt.Sprintf(`{"type": %s, "coordinates": %s}`, geo.Type(), geo.Coordinates()))
 }
