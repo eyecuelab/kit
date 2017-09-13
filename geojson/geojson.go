@@ -1,6 +1,8 @@
 package geojson
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const (
 	PointType   = "Point"
@@ -11,6 +13,7 @@ type Geometry interface {
 	Type() string
 	Coordinates() string
 	GeoJSON() []byte
+	GetBSON() interface{}
 }
 
 func geoJSON(geo Geometry) []byte {

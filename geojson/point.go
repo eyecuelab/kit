@@ -21,3 +21,10 @@ func (p *Point) Type() string {
 func (p *Point) GeoJSON() []byte {
 	return geoJSON(p)
 }
+
+func (p *Point) GetBSON() interface{} {
+	return map[string]interface{}{
+		"type":        p.Type(),
+		"coordinates": [2]float64{p.Lng, p.Lat},
+	}
+}

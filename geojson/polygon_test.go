@@ -45,3 +45,20 @@ func TestPolygon_Coordinates(t *testing.T) {
 		})
 	}
 }
+
+func TestPolygon_GetBSON(t *testing.T) {
+	tests := []struct {
+		name string
+		poly Polygon
+		want interface{}
+	}{
+	// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.poly.GetBSON(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Polygon.GetBSON() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
