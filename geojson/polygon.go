@@ -20,13 +20,14 @@ func (poly Polygon) GeoJSON() []byte {
 	return geoJSON(poly)
 }
 
-func (poly Polygon) GetBSON() interface{} {
+func (poly Polygon) GetBSON() (interface{}, error) {
 	coords := make([][2]float64, len(poly))
 	for i, p := range poly {
 		coords[i] = [2]float64{p.Lng, p.Lat}
 	}
-	return map[string]interface{}{
+	bdoc := map[string]interface{}{
 		"type":        poly.Type(),
 		"coordinates": coords,
 	}
+	return bdoc, nil
 }

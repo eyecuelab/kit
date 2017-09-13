@@ -22,9 +22,10 @@ func (p *Point) GeoJSON() []byte {
 	return geoJSON(p)
 }
 
-func (p *Point) GetBSON() interface{} {
-	return map[string]interface{}{
+func (p *Point) GetBSON() (interface{}, error) {
+	bdoc := map[string]interface{}{
 		"type":        p.Type(),
 		"coordinates": [2]float64{p.Lng, p.Lat},
 	}
+	return bdoc, nil
 }

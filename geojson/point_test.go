@@ -15,7 +15,6 @@ func TestPoint_GeoJSON(t *testing.T) {
 		want []byte
 	}{
 		{"trivial", &p, []byte(`{"type": Point, "coordinates": [1.000000, 2.000000]}`)},
-		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
