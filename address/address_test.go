@@ -45,7 +45,7 @@ func TestAddress_String(t *testing.T) {
 	}
 }
 
-func TestAddress_SharedComponentsOf(t *testing.T) {
+func TestAddress_filterOutComponentsMissingFromReciever(t *testing.T) {
 	type args struct {
 		b Address
 	}
@@ -61,8 +61,8 @@ func TestAddress_SharedComponentsOf(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			argCopy := tt.arg
 			a := tt.reciever
-			if got := a.SharedComponentsOf(tt.arg); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Address.SharedComponentsOf() = %v, want %v", got, tt.want)
+			if got := a.filterOutComponentsMissingFromReciever(tt.arg); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Address.filterOutComponentsMissingFromReciever() = %v, want %v", got, tt.want)
 			}
 			if !reflect.DeepEqual(tt.arg, argCopy) {
 				t.Errorf("should not modify %v", tt.arg)
