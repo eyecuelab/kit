@@ -2,6 +2,8 @@ package geojson
 
 import (
 	"fmt"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 const (
@@ -10,10 +12,10 @@ const (
 )
 
 type Geometry interface {
+	bson.Getter
 	Type() string
 	Coordinates() string
 	GeoJSON() []byte
-	GetBSON() interface{}
 }
 
 func geoJSON(geo Geometry) []byte {
