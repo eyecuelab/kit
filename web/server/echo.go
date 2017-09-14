@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	valid "github.com/asaskevich/govalidator"
-	"github.com/eyecuelab/kit/log"
 	"github.com/eyecuelab/kit/web"
 	"github.com/facebookgo/grace/gracehttp"
 	"github.com/labstack/echo"
@@ -77,7 +76,6 @@ func AuthedSkipper() func(echo.Context) bool {
 			return true
 		}
 		re, ok := skipper[c.Request().Method]
-		log.Infof("HERE! %v", skipper)
 		if !ok {
 			return false
 		}
