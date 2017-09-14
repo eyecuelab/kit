@@ -3,8 +3,10 @@ package server
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	valid "github.com/asaskevich/govalidator"
+	"github.com/eyecuelab/kit/log"
 	"github.com/eyecuelab/kit/web"
 	"github.com/facebookgo/grace/gracehttp"
 	"github.com/labstack/echo"
@@ -54,15 +56,33 @@ func AddMiddleWare(mw echo.MiddlewareFunc) {
 	mws = append(mws, mw)
 }
 
+type authSkipperConfig map[string]*regexp.Regexp
+
+var foo int
+
 func AuthedSkipper() func(echo.Context) bool {
-	skip := viper.GetString("skipjwt")
-	if len(skip) == 0 {
+	config := viper.GetStringMapString("skipjwt")
+
+	if config == nil || len(config) == 0 {
 		return emw.DefaultSkipper
 	}
 
-	re := regexp.MustCompile(skip)
+	skipper := authSkipperConfig{}
+	for method, exp := range config {
+		skipper[strings.ToUpper(method)] = regexp.MustCompile(exp)
+	}
+
 	return func(c echo.Context) bool {
-		return isOptionsRequest(c) || re.MatchString(c.Request().URL.Path)
+		if isOptionsRequest(c) {
+			return true
+		}
+		re, ok := skipper[c.Request().Method]
+		log.Infof("HERE! %v", skipper)
+		if !ok {
+			return false
+		}
+
+		return re.MatchString(c.Request().URL.Path)
 	}
 }
 
