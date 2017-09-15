@@ -22,6 +22,9 @@ func (p *Point) GeoJSON() []byte {
 	return geoJSON(p)
 }
 
+func (p *Point) String() string {
+	return fmt.Sprintf("%f, %f", p.Lat, p.Lng)
+}
 func (p *Point) GetBSON() (interface{}, error) {
 	bdoc := map[string]interface{}{
 		"type":        p.Type(),
