@@ -3,6 +3,7 @@ package web
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -30,6 +31,7 @@ type (
 		JsonApi(interface{}, int) error
 		JsonApiOK(interface{}) error
 		ApiError(string, ...int) *echo.HTTPError
+		RestrictedParam(string, ...string) (string, error)
 	}
 
 	apiContext struct {
@@ -127,6 +129,14 @@ func (c *apiContext) ApiError(msg string, codes ...int) *echo.HTTPError {
 	return echo.NewHTTPError(status, msg)
 }
 
+func (c *apiContext) RestrictedParam(paramName string, allowedValues ...string) (string, error) {
+	return restrictedValue(c.Param(paramName), allowedValues, "Param value %v not allowed")
+}
+
+func (c *apiContext) RestrictedQueryParam(paramName string, allowedValues ...string) (string, error) {
+	return restrictedValue(c.QueryParam(paramName), allowedValues, "Query param value %v not allowed")
+}
+
 func ApiContextMiddleWare() func(echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -134,4 +144,13 @@ func ApiContextMiddleWare() func(echo.HandlerFunc) echo.HandlerFunc {
 			return next(ac)
 		}
 	}
+}
+
+func restrictedValue(value string, slice []string, errorText string) (string, error) {
+	for _, v := range slice {
+		if value == v {
+			return value, nil
+		}
+	}
+	return "", fmt.Errorf(errorText, value)
 }
