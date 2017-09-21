@@ -1,26 +1,43 @@
 package tsv
 
 import (
-	"os"
+	"fmt"
+	"io/ioutil"
 	"reflect"
 	"strings"
 	"testing"
+
+	httpmock "gopkg.in/jarcoal/httpmock.v1"
 )
 
 const (
-	johnFirst = `"john"`
-	johnLast  = `"doe"`
-	johnAge   = `22`
-	janeFirst = `"jane"`
-	janeLast  = `"doe"`
-	janeAge   = `58`
-	last, lng = 22.3, -22.4
+	johnFirst   = `"john"`
+	johnLast    = `"doe"`
+	johnAge     = `22`
+	janeFirst   = `"jane"`
+	janeLast    = `"doe"`
+	janeAge     = `58`
+	last, lng   = 22.3, -22.4
+	firstLabel  = "first"
+	lastLabel   = "last"
+	ageLabel    = "age"
+	mockHTTPURL = "https://somedomain.co.uk/foo/bar.tsv"
 )
 
 var (
-	testLabels = []string{"first", "last", "age"}
-	johnDoe    = []string{johnFirst, johnLast, johnAge}
-	janeDoe    = []string{johnFirst, johnLast, johnAge}
+	testLabels  = []string{firstLabel, lastLabel, ageLabel}
+	johnDoe     = []string{johnFirst, johnLast, johnAge}
+	janeDoe     = []string{johnFirst, johnLast, johnAge}
+	testTSVBody = strings.Join([]string{
+		strings.Join(testLabels, "\t"),
+		strings.Join(johnDoe, "\t"),
+		strings.Join(janeDoe, "\t"),
+	},
+		"\n",
+	)
+	testBodyBytes = []byte(testTSVBody)
+
+	mockHTTPStringResponder = httpmock.NewBytesResponder(200, testBodyBytes)
 )
 
 func TestRecord_getFloat64(t *testing.T) {
@@ -100,32 +117,68 @@ func TestParseLine(t *testing.T) {
 			if ok != tt.ok {
 				t.Errorf("ParseLine() ok = %v, want %v", ok, tt.ok)
 			}
+			recover()
 		})
 	}
 }
 
-func Test_asFile(t *testing.T) {
+func Test_asReadCloser(t *testing.T) {
 	type args struct {
 		s string
 	}
+
+	tempFile, err := ioutil.TempFile("", "test")
+	if err == nil {
+		defer tempFile.Close()
+		tempFile.Write(testBodyBytes)
+	}
+
+	httpmock.Activate()
+	defer httpmock.Deactivate()
+	httpmock.RegisterResponder("GET", mockHTTPURL, mockHTTPStringResponder)
+
 	tests := []struct {
-		name     string
-		args     args
-		wantFile *os.File
-		wantErr  bool
+		name      string
+		args      args
+		wantBytes []byte
+		wantErr   bool
 	}{
-	// TODO: Add test cases.
+		{
+			name:      "good url",
+			args:      args{mockHTTPURL},
+			wantBytes: testBodyBytes,
+		}, {
+			name:    "bad url",
+			args:    args{"thisseemslike.agoodurl.com/right.tsv"},
+			wantErr: true,
+		},
+		{
+			name: "good file",
+			args: args{tempFile.Name()},
+		},
+		{
+			name:    "bad file",
+			args:    args{"thisfiledoesnotexist.tsv"},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotFile, err := asFile(tt.args.s)
+			gotReadCloser, err := asReadCloser(tt.args.s)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("asFile() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("asReadCloser() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			} else if err != nil {
 				return
 			}
-			if !reflect.DeepEqual(gotFile, tt.wantFile) {
-				t.Errorf("asFile() = %v, want %v", gotFile, tt.wantFile)
+			var gotBytes []byte
+			gotReadCloser.Read(gotBytes)
+			fmt.Print(gotBytes)
+			if !reflect.DeepEqual(gotBytes, tt.wantBytes) {
+				t.Errorf("asReadCLoser(): got %v, want %v", gotBytes, tt.wantBytes)
 			}
+
 		})
+
 	}
 }

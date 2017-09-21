@@ -66,3 +66,9 @@ func Download(url string, filepath string) (err error) {
 	}
 	return file.Close()
 }
+
+//DownloadBody downloads the url and returns the body. Remember to close it!
+func DownloadBody(url string) (io.ReadCloser, error) {
+	resp, err := http.Get(url)
+	return resp.Body, err
+}

@@ -37,7 +37,7 @@ var (
 //downloads the file(s) if necessary, then parses them and returns the records
 func FromPaths(paths ...string) (records []Record, err error) {
 	for _, path := range paths {
-		r, err := FromPath(path)
+		r, err := parseFromPath(path)
 		if err != nil {
 			return records, err
 		}
@@ -48,13 +48,13 @@ func FromPaths(paths ...string) (records []Record, err error) {
 
 //FromPath parses a path to see whether it is a URL or local path,
 //downloads the file if necessary, then parses it and returns the records
-func FromPath(path string) (records []Record, err error) {
-	file, err := asFile(path)
+func parseFromPath(path string) (records []Record, err error) {
+	readCloser, err := asReadCloser(path)
 	if err != nil {
-		return nil, errorF("asFile: %v", err)
+		return nil, err
 	}
-	defer file.Close()
-	return Parse(file)
+	defer readCloser.Close()
+	return Parse(readCloser)
 }
 
 //ParseLine parses a single line of a TSV using the given labels
@@ -71,26 +71,26 @@ func ParseLine(line string, labels []string) (Record, bool) {
 
 }
 
-//asFile takes a URL or local path, downloads if necessary, and returns a file handle
-func asFile(s string) (file *os.File, err error) {
+//asReadClosertakes a URL or local path, downloads if necessary, and returns a file handle
+func asReadCloser(s string) (readCloser io.ReadCloser, err error) {
 	if fileurl.IsFileURL(s) {
-		file, err = fileurl.DownloadTemp(s, "factual")
+		readCloser, err = fileurl.DownloadTemp(s, "factual")
 		if err != nil {
 			return nil, errCannotReadURL
 		}
-		return file, nil
+		return readCloser, nil
 	}
 
-	file, err = os.Open(s)
+	readCloser, err = os.Open(s)
 	if err != nil {
 		return nil, Error{err.Error()}
 	}
-	return file, nil
+	return readCloser, nil
 }
 
 //Parse an io.Reader and extract the Records.
-func Parse(file io.Reader) (records []Record, err error) {
-	scanner := bufio.NewScanner(file)
+func Parse(reader io.Reader) (records []Record, err error) {
+	scanner := bufio.NewScanner(reader)
 	scanner.Scan()
 	labels := strings.Fields(scanner.Text())
 	fmt.Println(labels)
