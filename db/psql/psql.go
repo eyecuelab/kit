@@ -5,6 +5,7 @@ import (
 
 	"database/sql/driver"
 	"encoding/json"
+
 	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -29,9 +30,10 @@ func ConnectDB() {
 	if len(url) == 0 {
 		DBError = errors.New("Missing database_url")
 	} else {
-		if scheme != "postgres" {
-			gorm.RegisterDialect(scheme, gorm.DialectsMap["postgres"])
-		}
+		// TODO: seems like a bug, breaks the build for me
+		// if scheme != "postgres" {
+		// 	gorm.RegisterDialect(scheme, gorm.DialectsMap["postgres"])
+		// }
 		DB, DBError = gorm.Open(scheme, url)
 
 	}
