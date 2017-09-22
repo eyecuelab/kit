@@ -6,8 +6,6 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-
-	httpmock "gopkg.in/jarcoal/httpmock.v1"
 )
 
 const (
@@ -36,8 +34,6 @@ var (
 		"\n",
 	)
 	testBodyBytes = []byte(testTSVBody)
-
-	mockHTTPStringResponder = httpmock.NewBytesResponder(200, testBodyBytes)
 )
 
 func TestRecord_getFloat64(t *testing.T) {

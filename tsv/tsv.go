@@ -2,6 +2,7 @@ package tsv
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -107,8 +108,8 @@ func Parse(reader io.Reader) (records []Record, err error) {
 	return records, nil
 }
 
-func (record Record) getFloat64(key string) (float64, error) {
-	s, ok := record[key]
+func (r Record) Float64(key string) (float64, error) {
+	s, ok := r[key]
 	if !ok {
 		return 0, errKeyDoesNotExist
 	}
@@ -117,4 +118,53 @@ func (record Record) getFloat64(key string) (float64, error) {
 		return 0, errCannotConvertKey
 	}
 	return val, nil
+}
+
+func (r Record) Bool(key string) (bool, error) {
+	s, ok := r[key]
+	if !ok {
+		return false, errKeyDoesNotExist
+	}
+	if s == "true" {
+		return true, nil
+	}
+	if s == "false" {
+		return false, nil
+	}
+	return false, errCannotConvertKey
+}
+
+func (r Record) Int(key string) (int, error) {
+	s, ok := r[key]
+	if !ok {
+		return 0, errKeyDoesNotExist
+	}
+	return strconv.Atoi(s)
+}
+
+func (r Record) StringSlice(key string) (a []string, err error) {
+	s, ok := r[key]
+	if !ok {
+		return nil, errKeyDoesNotExist
+	}
+	err = json.Unmarshall([]byte(s), &a)
+	return a, err
+}
+
+func (r Record) IntSlice(key string) (a []int, err error) {
+	s, ok := r[key]
+	if !ok {
+		return nil, errKeyDoesNotExist
+	}
+	err = json.Unmarshall([]byte(s), &a)
+	return a, err
+}
+
+func (r Record) FloatSlice(key string) (a []float64, err error) {
+	s, ok := r[key]
+	if !ok {
+		return nil, errKeyDoesNotExist
+	}
+	err = json.Unmarshall([]byte(s), &a)
+	return a, err
 }
