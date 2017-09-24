@@ -31,9 +31,9 @@ func ConnectDB() {
 		DBError = errors.New("Missing database_url")
 	} else {
 		// TODO: seems like a bug, breaks the build for me
-		// if scheme != "postgres" {
-		// 	gorm.RegisterDialect(scheme, gorm.DialectsMap["postgres"])
-		// }
+		if scheme != "postgres" {
+			gorm.RegisterDialect(scheme, gorm.DialectsMap["postgres"])
+		}
 		DB, DBError = gorm.Open(scheme, url)
 
 	}
