@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/eyecuelab/kit/fileurl"
 )
 
 //Record represents a single line of a TSV
@@ -30,7 +29,6 @@ func errorF(format string, a ...interface{}) Error {
 var (
 	errKeyDoesNotExist   = Error{"key does not exist"}
 	errCannotConvertKey  = Error{"cannot convert key"}
-	errCannotReadURL     = Error{"fileurl.downloadtemp: cannot read url"}
 	errWrongElementCount = Error{"line has different number of elmeents than record has fields"}
 )
 
@@ -72,21 +70,14 @@ func ParseLine(line string, labels []string) (Record, bool) {
 
 }
 
-//asReadClosertakes a URL or local path, downloads if necessary, and returns a file handle
+//asReadCloser takes a URL or local path, downloads if necessary, and returns a ReadCloser containing the information
 func asReadCloser(s string) (readCloser io.ReadCloser, err error) {
-	if fileurl.IsFileURL(s) {
-		readCloser, err = fileurl.DownloadTemp(s, "factual")
-		if err != nil {
-			return nil, errCannotReadURL
-		}
-		return readCloser, nil
+	resp, err := http.Get(s)
+	if err == nil {
+		return resp.Body, nil
 	}
 
-	readCloser, err = os.Open(s)
-	if err != nil {
-		return nil, Error{err.Error()}
-	}
-	return readCloser, nil
+	return os.Open(s)
 }
 
 //Parse an io.Reader and extract the Records.
@@ -108,6 +99,7 @@ func Parse(reader io.Reader) (records []Record, err error) {
 	return records, nil
 }
 
+//Float64 gets the specified key as a Float64, if possible
 func (r Record) Float64(key string) (float64, error) {
 	s, ok := r[key]
 	if !ok {
@@ -120,6 +112,7 @@ func (r Record) Float64(key string) (float64, error) {
 	return val, nil
 }
 
+//Bool gets the specified key as a Bool, if possible
 func (r Record) Bool(key string) (bool, error) {
 	s, ok := r[key]
 	if !ok {
@@ -134,6 +127,7 @@ func (r Record) Bool(key string) (bool, error) {
 	return false, errCannotConvertKey
 }
 
+//Int gets the specified key as an Int, if possible
 func (r Record) Int(key string) (int, error) {
 	s, ok := r[key]
 	if !ok {
@@ -142,29 +136,32 @@ func (r Record) Int(key string) (int, error) {
 	return strconv.Atoi(s)
 }
 
+//StringSlice gets the specified key as a []string, if possible
 func (r Record) StringSlice(key string) (a []string, err error) {
 	s, ok := r[key]
 	if !ok {
 		return nil, errKeyDoesNotExist
 	}
-	err = json.Unmarshall([]byte(s), &a)
+	err = json.Unmarshal([]byte(s), &a)
 	return a, err
 }
 
+//IntSlice gets the specified key as a  []Int, if possible
 func (r Record) IntSlice(key string) (a []int, err error) {
 	s, ok := r[key]
 	if !ok {
 		return nil, errKeyDoesNotExist
 	}
-	err = json.Unmarshall([]byte(s), &a)
+	err = json.Unmarshal([]byte(s), &a)
 	return a, err
 }
 
+//FloatSlice gets the specified key as a []Float64, if possible
 func (r Record) FloatSlice(key string) (a []float64, err error) {
 	s, ok := r[key]
 	if !ok {
 		return nil, errKeyDoesNotExist
 	}
-	err = json.Unmarshall([]byte(s), &a)
+	err = json.Unmarshal([]byte(s), &a)
 	return a, err
 }

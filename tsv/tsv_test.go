@@ -1,42 +1,76 @@
 package tsv
 
 import (
-	"fmt"
+	"bytes"
+	"io"
 	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 const (
-	johnFirst   = `"john"`
-	johnLast    = `"doe"`
-	johnAge     = `22`
-	janeFirst   = `"jane"`
-	janeLast    = `"doe"`
-	janeAge     = `58`
-	last, lng   = 22.3, -22.4
-	firstLabel  = "first"
-	lastLabel   = "last"
-	ageLabel    = "age"
-	mockHTTPURL = "https://somedomain.co.uk/foo/bar.tsv"
+	johnFirst                  = `john`
+	johnLast                   = `doe`
+	johnAge                    = `22`
+	janeFirst                  = `jane`
+	janeLast                   = `doe`
+	janeAge                    = `58`
+	last, lng                  = 22.3, -22.4
+	firstLabel                 = "first"
+	lastLabel                  = "last"
+	ageLabel                   = "age"
+	testFileName               = "test.tsv"
+	localURL                   = `http://localhost:3000/test.tsv`
+	allPermissions os.FileMode = 0777
 )
 
 var (
-	testLabels  = []string{firstLabel, lastLabel, ageLabel}
-	johnDoe     = []string{johnFirst, johnLast, johnAge}
-	janeDoe     = []string{johnFirst, johnLast, johnAge}
-	testTSVBody = strings.Join([]string{
+	wd, _        = os.Getwd()
+	testFilePath = wd + "/" + testFileName
+	testLabels   = []string{firstLabel, lastLabel, ageLabel}
+	johnDoe      = []string{johnFirst, johnLast, johnAge}
+	janeDoe      = []string{janeFirst, janeLast, janeAge}
+	testTSVBody  = strings.Join([]string{
 		strings.Join(testLabels, "\t"),
 		strings.Join(johnDoe, "\t"),
 		strings.Join(janeDoe, "\t"),
 	},
 		"\n",
 	)
-	testBodyBytes = []byte(testTSVBody)
 )
 
-func TestRecord_getFloat64(t *testing.T) {
+func serveFromMockTSVServer() http.Handler {
+	fs := http.FileServer(http.Dir(""))
+	http.Handle("/", fs)
+	log.Println("serving...")
+	go func() {
+		err := http.ListenAndServe(":3000", nil)
+		if err != nil {
+			log.Println("serving failed")
+		}
+	}()
+	return fs
+}
+
+func createTestFile() error {
+	return ioutil.WriteFile("test.tsv", []byte(testTSVBody), os.FileMode(0755))
+}
+
+func init() {
+	if err := createTestFile(); err != nil {
+		log.Fatalf("could not create test file")
+	}
+	time.Sleep(10 * time.Millisecond)
+	serveFromMockTSVServer()
+
+}
+
+func TestRecord_Float64(t *testing.T) {
 	type args struct {
 		key string
 	}
@@ -66,13 +100,13 @@ func TestRecord_getFloat64(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.record.getFloat64(tt.args.key)
+			got, err := tt.record.Float64(tt.args.key)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Record.getFloat64() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Record.Float64() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("Record.getFloat64() = %v, want %v", got, tt.want)
+				t.Errorf("Record.Float64() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -122,35 +156,27 @@ func Test_asReadCloser(t *testing.T) {
 	type args struct {
 		s string
 	}
-
-	tempFile, err := ioutil.TempFile("", "test")
-	if err == nil {
-		defer tempFile.Close()
-		tempFile.Write(testBodyBytes)
-	}
-
-	httpmock.Activate()
-	defer httpmock.Deactivate()
-	httpmock.RegisterResponder("GET", mockHTTPURL, mockHTTPStringResponder)
+	wd, _ := os.Getwd()
 
 	tests := []struct {
-		name      string
-		args      args
-		wantBytes []byte
-		wantErr   bool
+		name       string
+		args       args
+		wantString string
+		wantErr    bool
 	}{
 		{
-			name:      "good url",
-			args:      args{mockHTTPURL},
-			wantBytes: testBodyBytes,
+			name:       "good url",
+			args:       args{localURL},
+			wantString: testTSVBody,
 		}, {
-			name:    "bad url",
+			name:    "does not exist",
 			args:    args{"thisseemslike.agoodurl.com/right.tsv"},
 			wantErr: true,
 		},
 		{
-			name: "good file",
-			args: args{tempFile.Name()},
+			name:       "good file",
+			wantString: testTSVBody,
+			args:       args{wd + "/" + testFileName},
 		},
 		{
 			name:    "bad file",
@@ -167,11 +193,10 @@ func Test_asReadCloser(t *testing.T) {
 			} else if err != nil {
 				return
 			}
-			var gotBytes []byte
-			gotReadCloser.Read(gotBytes)
-			fmt.Print(gotBytes)
-			if !reflect.DeepEqual(gotBytes, tt.wantBytes) {
-				t.Errorf("asReadCLoser(): got %v, want %v", gotBytes, tt.wantBytes)
+			var got bytes.Buffer
+			io.Copy(&got, gotReadCloser)
+			if !reflect.DeepEqual(got.String(), tt.wantString) {
+				t.Errorf("asReadCLoser(): got %v, want %v", got.String(), tt.wantString)
 			}
 
 		})
