@@ -32,22 +32,9 @@ var (
 	errWrongElementCount = Error{"line has different number of elmeents than record has fields"}
 )
 
-//FromPaths parses the path(s) to see whether they are URLs or local paths,
-//downloads the file(s) if necessary, then parses them and returns the records
-func FromPaths(paths ...string) (records []Record, err error) {
-	for _, path := range paths {
-		r, err := parseFromPath(path)
-		if err != nil {
-			return records, err
-		}
-		records = append(records, r...)
-	}
-	return records, nil
-}
-
 //FromPath parses a path to see whether it is a URL or local path,
 //downloads the file if necessary, then parses it and returns the records
-func parseFromPath(path string) (records []Record, err error) {
+func FromPath(path string) (records []Record, err error) {
 	readCloser, err := asReadCloser(path)
 	if err != nil {
 		return nil, err
@@ -85,7 +72,6 @@ func Parse(reader io.Reader) (records []Record, err error) {
 	scanner := bufio.NewScanner(reader)
 	scanner.Scan()
 	labels := strings.Fields(scanner.Text())
-	fmt.Println(labels)
 	for scanner.Scan() {
 		if scanner.Text() == "" {
 			continue
