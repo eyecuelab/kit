@@ -1,19 +1,21 @@
 package web
 
 import (
+	"fmt"
 	"github.com/labstack/echo"
 )
 
 type MethodHandler struct {
-	Method  string
-	Handler echo.HandlerFunc
-	// Handler    HandlerFunc
+	Method     string
+	Handler    echo.HandlerFunc
 	MiddleWare []echo.MiddlewareFunc
 }
 
 type Route struct {
 	Path     string
 	Handlers []*MethodHandler
+	Name     string
+	ERoute   *echo.Route
 }
 
 type RouteConfig struct {
@@ -27,8 +29,16 @@ func (route *Route) Handle(m string, hf HandlerFunc, mw ...echo.MiddlewareFunc) 
 	return route
 }
 
+func (route *Route) SetName(n string) *Route {
+	route.Name = n
+	return route
+}
+
 func (config *RouteConfig) AddRoute(path string) *Route {
-	route := &Route{path, []*MethodHandler{}}
+	route := &Route{
+		Path:     path,
+		Handlers: []*MethodHandler{},
+	}
 	config.Routes = append(config.Routes, route)
 	return route
 }
@@ -43,6 +53,15 @@ func AddRoute(path string) *Route {
 	return Routing.AddRoute(path)
 }
 
+func RouteByName(name string) (*Route, error) {
+	for _, r := range Routing.Routes {
+		if r.Name == name {
+			return r, nil
+		}
+	}
+	return nil, fmt.Errorf("Could not find route with name %v", name)
+}
+
 type HandlerFunc func(ApiContext) error
 
 func wrapApiRoute(f HandlerFunc) echo.HandlerFunc {
@@ -55,7 +74,9 @@ func wrapApiRoute(f HandlerFunc) echo.HandlerFunc {
 func InitRoutes(e *echo.Echo) {
 	for _, route := range Routing.Routes {
 		for _, handler := range route.Handlers {
-			e.Add(handler.Method, route.Path, handler.Handler, handler.MiddleWare...)
+			er := e.Add(handler.Method, route.Path, handler.Handler, handler.MiddleWare...)
+			er.Name = route.Name
+			route.ERoute = er
 		}
 	}
 }

@@ -22,8 +22,9 @@ func (v *apiValidator) Validate(i interface{}) error {
 }
 
 var (
-	Echo *echo.Echo
-	mws  = []echo.MiddlewareFunc{}
+	Echo   *echo.Echo
+	mws    = []echo.MiddlewareFunc{}
+	domain string
 )
 
 func NewEcho(port int) *echo.Echo {
@@ -44,11 +45,25 @@ func NewEcho(port int) *echo.Echo {
 	return e
 }
 
-func Start(port int) {
+func Start(port int, d string) {
 	Echo = NewEcho(port)
+	domain = d
 	web.InitRoutes(Echo)
 
 	Echo.Logger.Fatal(gracehttp.Serve(Echo.Server))
+}
+
+func URI(routeName string, args ...interface{}) (string, error) {
+	path := Echo.Reverse(routeName, args...)
+	if path == "" {
+		return "", fmt.Errorf("Cannot form URI, route name '%v' not found", routeName)
+	}
+
+	if domain == "" {
+		return "", fmt.Errorf("Cannot form URI, domain not set. (use --domain to set one)")
+	}
+
+	return domain + path, nil
 }
 
 func AddMiddleWare(mw echo.MiddlewareFunc) {
