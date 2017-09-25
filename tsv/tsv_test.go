@@ -10,23 +10,22 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 )
 
 const (
-	johnFirst                  = `john`
-	johnLast                   = `doe`
-	johnAge                    = `22`
-	janeFirst                  = `jane`
-	janeLast                   = `doe`
-	janeAge                    = `58`
-	last, lng                  = 22.3, -22.4
-	firstLabel                 = "first"
-	lastLabel                  = "last"
-	ageLabel                   = "age"
-	testFileName               = "test.tsv"
-	localURL                   = `http://localhost:3000/test.tsv`
-	allPermissions os.FileMode = 0777
+	johnFirst               = `john`
+	johnLast                = `doe`
+	johnAge                 = `22`
+	janeFirst               = `jane`
+	janeLast                = `doe`
+	janeAge                 = `58`
+	last, lng               = 22.3, -22.4
+	firstLabel              = "first"
+	lastLabel               = "last"
+	ageLabel                = "age"
+	testFileName            = "test.tsv"
+	localURL                = `http://localhost:3000/test.tsv`
+	ownerAllUserReadExecute = os.FileMode(0755)
 )
 
 var (
@@ -69,14 +68,13 @@ func serveFromMockTSVServer() http.Handler {
 }
 
 func createTestFile() error {
-	return ioutil.WriteFile("test.tsv", []byte(testTSVBody), os.FileMode(0755))
+	return ioutil.WriteFile("test.tsv", []byte(testTSVBody), ownerAllUserReadExecute)
 }
 
 func init() {
 	if err := createTestFile(); err != nil {
 		log.Fatalf("could not create test file")
 	}
-	time.Sleep(10 * time.Millisecond)
 	serveFromMockTSVServer()
 
 }
@@ -151,7 +149,7 @@ func TestParseLine(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, ok := ParseLine(tt.args.line, tt.args.labels)
+			got, ok := parseLine(tt.args.line, tt.args.labels)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ParseLine() got = %v, want %v", got, tt.want)
 			}

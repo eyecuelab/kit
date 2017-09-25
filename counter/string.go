@@ -1,6 +1,9 @@
 package counter
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 //String counts the occurence of strings.
 type String map[string]int
@@ -13,6 +16,17 @@ func (counter String) Add(items ...string) {
 			counter[item] = 1
 		}
 	}
+}
+
+func (counter String) String() string {
+	formatted := make([]string, len(counter))
+	i := 0
+	for key, val := range counter {
+		formatted[i] = fmt.Sprintf("%s:%d", key, val)
+		i++
+	}
+	return strings.Join(formatted, ", ") + "\n"
+
 }
 
 func CombineStringCounters(counters ...String) String {
@@ -57,14 +71,6 @@ func Max(counters ...String) String {
 		}
 	}
 	return max
-}
-
-func (counter String) String() string {
-	str := "{"
-	for key, val := range counter {
-		str += fmt.Sprintf("\n\t%v:  %v", key, val)
-	}
-	return str + "\n}"
 }
 
 func FromStrings(strings ...string) String {

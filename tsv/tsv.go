@@ -13,6 +13,11 @@ import (
 
 //Record represents a single line of a TSV
 type Record map[string]string
+type labels []string
+
+func (l labels) ParseLine(line string) (Record, bool) {
+	return parseLine(line, l)
+}
 
 type Error struct {
 	msg string
@@ -44,7 +49,7 @@ func FromPath(path string) (records []Record, err error) {
 }
 
 //ParseLine parses a single line of a TSV using the given labels
-func ParseLine(line string, labels []string) (Record, bool) {
+func parseLine(line string, labels labels) (Record, bool) {
 	split := strings.Split(line, "\t")
 	if len(split) != len(labels) {
 		return nil, false
@@ -71,12 +76,12 @@ func asReadCloser(s string) (readCloser io.ReadCloser, err error) {
 func Parse(reader io.Reader) (records []Record, err error) {
 	scanner := bufio.NewScanner(reader)
 	scanner.Scan()
-	labels := strings.Fields(scanner.Text())
+	labels := labels(strings.Fields(scanner.Text()))
 	for scanner.Scan() {
 		if scanner.Text() == "" {
 			continue
 		}
-		record, ok := ParseLine(scanner.Text(), labels)
+		record, ok := labels.ParseLine(scanner.Text())
 		if !ok {
 			return nil, errWrongElementCount
 		}
