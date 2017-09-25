@@ -215,7 +215,7 @@ func Test_asReadCloser(t *testing.T) {
 	}
 }
 
-func Test_parseFromPath(t *testing.T) {
+func Test_FromPath(t *testing.T) {
 	want := []Record{johnRecord, janeRecord}
 	type args struct {
 		path string
@@ -242,7 +242,7 @@ func Test_parseFromPath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotRecords, err := parseFromPath(tt.args.path)
+			gotRecords, err := FromPath(tt.args.path)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseFromPath() error = %v, wantErr %v", err, tt.wantErr)
 				return
