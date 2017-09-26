@@ -6,9 +6,9 @@ var yes interface{}
 
 type String map[string]signal
 
-//Contains shows whether strS is in the String.
-func (s String) Contains(strS string) bool {
-	_, ok := s[strS]
+//Contains shows whether key is in the String.
+func (s String) Contains(key string) bool {
+	_, ok := s[key]
 	return ok
 }
 
@@ -40,8 +40,8 @@ func (s String) Intersection(strings ...String) (intersection String) {
 
 //Equal shows whether two Strings are equal; i.e, they contain the same items.
 func (s String) Equal(other String) bool {
-	for strS := range s {
-		if !other.Contains(strS) {
+	for key := range s {
+		if !other.Contains(key) {
 			return false
 		}
 	}
@@ -52,8 +52,8 @@ func (s String) Equal(other String) bool {
 func (s String) Union(strings ...String) (union String) {
 	union = s.Copy()
 	for _, set := range strings {
-		for strS := range set {
-			union[strS] = yes
+		for key := range set {
+			union[key] = yes
 		}
 	}
 	return union
@@ -82,8 +82,8 @@ func (s String) Difference(strings ...String) (difference String) {
 //FromStrings creates a set from strings
 func FromStrings(strings ...string) String {
 	s := make(String)
-	for _, strS := range strings {
-		s[strS] = yes
+	for _, key := range strings {
+		s[key] = yes
 	}
 	return s
 }

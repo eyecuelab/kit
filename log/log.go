@@ -2,24 +2,26 @@ package log
 
 import (
 	"fmt"
+
 	"github.com/davecgh/go-spew/spew"
 	"github.com/eyecuelab/kit/goenv"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	//Print is an alias for log.Print
+	Print = log.Print
+
+	//Fatalf is an alias for log.Fatalf
+	Fatalf = log.Fatalf
+
+	//Fatal is an alias for log.Fatal
+	Fatal = log.Fatal
+)
+
 func FatalWrap(err error, msg string) {
 	log.Fatalf("%+v", errors.Wrap(err, msg))
-}
-
-//Fatal is an alias for log.Fatal
-func Fatal(err error) {
-	log.Fatal(err)
-}
-
-//Fatalf is an alias for log.Fatalf in the standard library
-func Fatalf(format string, args ...interface{}) {
-	log.Fatalf(format, args...)
 }
 
 //Info is an alias for log.Info in the standard library
