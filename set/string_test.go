@@ -2,6 +2,7 @@ package set
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -71,8 +72,6 @@ func TestString_Difference(t *testing.T) {
 			s:    fooBarBaz,
 			args: args{[]String{fooBar, barBaz}},
 		},
-
-		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -92,12 +91,21 @@ func TestString_Add(t *testing.T) {
 		name string
 		s    String
 		args args
+		want String
 	}{
-	// TODO: Add test cases.
+		{
+			name: "add",
+			s:    String{foo: yes},
+			args: args{[]string{foo, foo, bar, baz}},
+			want: fooBarBaz,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.s.Add(tt.args.keys...)
+			if !tt.s.Equal(tt.want) {
+				t.Errorf("reciever of s.Add() is %v, but should be %v", tt.s, tt.want)
+			}
 		})
 	}
 }
@@ -124,15 +132,23 @@ func TestFromStringSlice(t *testing.T) {
 
 func TestString_ToSlice(t *testing.T) {
 	tests := []struct {
-		name string
-		s    String
-		want []string
+		name     string
+		s        String
+		want     []string
+		wantFail bool
 	}{
-	// TODO: Add test cases.
+		{
+			name: "ok",
+			s:    fooBar,
+			want: []string{foo, bar},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.s.ToSlice(); !reflect.DeepEqual(got, tt.want) {
+			got := tt.s.ToSlice()
+			sort.Strings(got)
+			sort.Strings(tt.want)
+			if !reflect.DeepEqual(got, tt.want) && !tt.wantFail {
 				t.Errorf("String.ToSlice() = %v, want %v", got, tt.want)
 			}
 		})
@@ -156,6 +172,27 @@ func TestString_Intersection(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.s.Intersection(tt.args.strings...); !got.Equal(tt.wantIntersection) {
 				t.Errorf("String.Intersection() = %v, want %v", got, tt.wantIntersection)
+			}
+		})
+	}
+}
+
+func TestString_Equal(t *testing.T) {
+	type args struct {
+		other String
+	}
+	tests := []struct {
+		name string
+		s    String
+		args args
+		want bool
+	}{
+	// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.s.Equal(tt.args.other); got != tt.want {
+				t.Errorf("String.Equal() = %v, want %v", got, tt.want)
 			}
 		})
 	}
