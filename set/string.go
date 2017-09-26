@@ -1,6 +1,10 @@
 package set
 
-type String map[string]bool
+type signal interface{}
+
+var yes interface{}
+
+type String map[string]signal
 
 //Contains shows whether strS is in the String.
 func (s String) Contains(strS string) bool {
@@ -18,12 +22,17 @@ func (s String) Copy() String {
 
 //Intersection returns the intersection of the strings;
 func (s String) Intersection(strings ...String) (intersection String) {
-	intersection = s.Copy()
-	for _, set := range strings {
-		for strS, ok := range set {
-			if !ok {
-				delete(intersection, strS)
+	intersection = make(String)
+	for key := range s {
+		all := true
+		for _, set := range append(strings, s) {
+			if _, ok := set[key]; !ok {
+				all = false
+				break
 			}
+		}
+		if all {
+			intersection[key] = yes
 		}
 	}
 	return intersection
@@ -44,20 +53,27 @@ func (s String) Union(strings ...String) (union String) {
 	union = s.Copy()
 	for _, set := range strings {
 		for strS := range set {
-			union[strS] = true
+			union[strS] = yes
 		}
 	}
 	return union
+}
+
+//IUnion modifies the StringSet in place rather than returning a copy.
+func (s String) IUnion(strings ...String) {
+	for _, set := range strings {
+		for key := range set {
+			s[key] = yes
+		}
+	}
 }
 
 //Difference returns the items in the reciever but not any other arguments
 func (s String) Difference(strings ...String) (difference String) {
 	difference = s.Copy()
 	for _, set := range strings {
-		for strS, ok := range set {
-			if ok {
-				delete(difference, strS)
-			}
+		for key := range set {
+			delete(difference, key)
 		}
 	}
 	return difference
@@ -67,14 +83,14 @@ func (s String) Difference(strings ...String) (difference String) {
 func FromStrings(strings ...string) String {
 	s := make(String)
 	for _, strS := range strings {
-		s[strS] = true
+		s[strS] = yes
 	}
 	return s
 }
 
 func (s String) Add(keys ...string) {
 	for _, key := range keys {
-		s[key] = true
+		s[key] = yes
 	}
 }
 
