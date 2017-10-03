@@ -35,7 +35,7 @@ func ConnectDB() {
 			gorm.RegisterDialect(scheme, gorm.DialectsMap["postgres"])
 		}
 		DB, DBError = gorm.Open(scheme, url)
-
+		//DB.LogMode(true)
 	}
 }
 
@@ -61,5 +61,35 @@ func (j *JsonB) Scan(src interface{}) error {
 		return errors.New("Type assertion .(map[string]interface{}) failed.")
 	}
 
+	return nil
+}
+
+func DeleteModelWithAssociations(value interface{}, associations ...string) error {
+	tx := DB.Begin()
+
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	for _, a := range associations {
+		if err := tx.Model(value).Association(a).Clear().Error; err != nil {
+			return err
+		}
+	}
+
+	tx = tx.Delete(value)
+
+	if tx.RowsAffected < 1 {
+		return gorm.ErrRecordNotFound
+	}
+
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return err
+	}
 	return nil
 }
