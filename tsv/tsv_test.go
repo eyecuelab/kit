@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -53,6 +54,10 @@ var (
 		ageLabel:   janeAge,
 	}
 )
+
+func testTSV(args ...string) string {
+	return strings.Join(args, "\t")
+}
 
 func serveFromMockTSVServer() http.Handler {
 	fs := http.FileServer(http.Dir(""))
@@ -120,9 +125,6 @@ func TestRecord_Float64(t *testing.T) {
 		})
 	}
 }
-func tsv(s ...string) string {
-	return strings.Join(s, "\t")
-}
 
 func TestParseLine(t *testing.T) {
 	type args struct {
@@ -137,12 +139,12 @@ func TestParseLine(t *testing.T) {
 	}{
 		{
 			name: "ok",
-			args: args{line: tsv(johnDoe...), labels: testLabels},
+			args: args{line: testTSV(johnDoe...), labels: testLabels},
 			want: Record{"first": johnFirst, "last": johnLast, "age": johnAge},
 			ok:   true,
 		}, {
 			name: "wrong length",
-			args: args{line: tsv(`"hello"`, `"my"`, `"name"`, `"is"`), labels: testLabels},
+			args: args{line: testTSV(`"hello"`, `"my"`, `"name"`, `"is"`), labels: testLabels},
 			want: nil,
 			ok:   false,
 		},
@@ -283,6 +285,71 @@ func TestParse(t *testing.T) {
 			if !reflect.DeepEqual(gotRecords, tt.wantRecords) {
 				t.Errorf("Parse() = %v, want %v", gotRecords, tt.wantRecords)
 			}
+		})
+	}
+}
+
+type byFirstName []Record
+
+func (r byFirstName) Less(i, j int) bool {
+	fI, _ := r[i]["first"]
+	fJ, _ := r[j]["first"]
+	return fI < fJ
+}
+
+func (r byFirstName) Len() int {
+	return len(r)
+}
+
+func (r byFirstName) Swap(i, j int) {
+	r[i], r[j] = r[j], r[i]
+}
+
+func chanToSlice(ch <-chan Record) []Record {
+	var records []Record
+	for r := range ch {
+		records = append(records, r)
+	}
+	return records
+}
+
+func TestStreamFromPaths(t *testing.T) {
+	type args struct {
+		out   chan Record
+		paths []string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []Record
+		wantErr bool
+	}{
+		{
+			name: "ok - one path",
+			args: args{paths: []string{testFileName}, out: make(chan Record)},
+			want: []Record{johnRecord, janeRecord},
+		}, {
+			name: "ok - two paths",
+			args: args{paths: []string{testFileName, localURL}, out: make(chan Record, 2)},
+			want: []Record{johnRecord, johnRecord, janeRecord, janeRecord},
+		}, {
+			name:    "err - bad filepath",
+			args:    args{paths: []string{"somebadfilename"}, out: make(chan Record)},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := StreamFromPaths(tt.args.out, tt.args.paths...); (err != nil) != tt.wantErr {
+				t.Errorf("StreamFromPaths() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			got := chanToSlice(tt.args.out)
+			sort.Sort(byFirstName(got))
+			sort.Sort(byFirstName(tt.want))
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("StreamFromPaths(): \n got %v: \n want %v", got, tt.want)
+			}
+
 		})
 	}
 }

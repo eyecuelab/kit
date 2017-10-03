@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 //Record represents a single line of a TSV
@@ -34,7 +36,7 @@ func errorF(format string, a ...interface{}) Error {
 var (
 	errKeyDoesNotExist   = Error{"key does not exist"}
 	errCannotConvertKey  = Error{"cannot convert key"}
-	errWrongElementCount = Error{"line has different number of elmeents than record has fields"}
+	errWrongElementCount = Error{"line has different number of elements than record has fields"}
 )
 
 //FromPath parses a path to see whether it is a URL or local path,
@@ -46,6 +48,20 @@ func FromPath(path string) (records []Record, err error) {
 	}
 	defer readCloser.Close()
 	return Parse(readCloser)
+}
+
+func StreamFromPaths(out chan Record, paths ...string) error {
+	readClosers := make([]io.ReadCloser, len(paths))
+	for i, path := range paths {
+		rc, err := asReadCloser(path)
+		if err != nil {
+			close(out)
+			return err
+		}
+		readClosers[i] = rc
+	}
+	go parseStreams(out, readClosers...)
+	return nil
 }
 
 //ParseLine parses a single line of a TSV using the given labels
@@ -88,6 +104,39 @@ func Parse(reader io.Reader) (records []Record, err error) {
 		records = append(records, record)
 	}
 	return records, nil
+}
+
+func parseStream(out chan<- Record, readCloser io.ReadCloser) error {
+	defer readCloser.Close()
+	scanner := bufio.NewScanner(readCloser)
+	scanner.Scan()
+	labels := labels(strings.Fields(scanner.Text()))
+	for scanner.Scan() {
+		if scanner.Text() == "" {
+			continue
+		}
+		record, ok := labels.ParseLine(scanner.Text())
+		if !ok {
+			return errWrongElementCount
+		}
+		out <- record
+	}
+	return nil
+}
+
+func parseStreams(out chan<- Record, readClosers ...io.ReadCloser) {
+	defer close(out)
+	wg := &sync.WaitGroup{}
+	for _, readCloser := range readClosers {
+		wg.Add(1)
+		go func(r io.ReadCloser) {
+			defer wg.Done()
+			if err := parseStream(out, r); err != nil {
+				log.Println(err)
+			}
+		}(readCloser)
+	}
+	wg.Wait()
 }
 
 //Float64 gets the specified key as a Float64, if possible
