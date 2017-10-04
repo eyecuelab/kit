@@ -7,7 +7,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 )
 
 var apiArgs = []string{"port", "secret"}
@@ -47,8 +46,8 @@ func run(cmd *cobra.Command, args []string) {
 		Port = viper.GetInt("port")
 	}
 
-	if envHost, ok := os.LookupEnv("HOST"); ok && Host == "" {
-		Host = envHost
+	if Host == "" {
+		Host = viper.GetString("HOST")
 	}
 
 	log.Infof("Serving API on port %d...", Port)
