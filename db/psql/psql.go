@@ -35,7 +35,7 @@ func ConnectDB() {
 			gorm.RegisterDialect(scheme, gorm.DialectsMap["postgres"])
 		}
 		DB, DBError = gorm.Open(scheme, url)
-		//DB.LogMode(true)
+		DB.LogMode(true)
 	}
 }
 
