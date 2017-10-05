@@ -75,3 +75,26 @@ func (a *Address) String() string {
 	}
 	return strings.Join(stringslice.NonEmpty(components), ", ")
 }
+
+//NonEmptyComponents is the number of nonempty components of a; that is, an address with only a steet has 1,
+//street and locality is 2, ...
+func (a *Address) NonEmptyComponents() int {
+	return sumBools(
+		a.Street != "",
+		a.Extension != "",
+		a.POBox != "",
+		a.Locality != "",
+		a.Region != "",
+		a.PostalCode != "",
+		a.Country != "")
+}
+
+func sumBools(bools ...bool) int {
+	sum := 0
+	for _, b := range bools {
+		if b {
+			sum++
+		}
+	}
+	return sum
+}
