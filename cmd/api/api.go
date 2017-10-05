@@ -21,7 +21,7 @@ var ApiCmd = &cobra.Command{
 
 var (
 	Port      int
-	Domain    string
+	Host      string
 	checkMigs bool
 )
 
@@ -29,7 +29,7 @@ func init() {
 	ApiCmd.PersistentFlags().IntVar(&Port, "port", 3000, "port to attach server")
 	ApiCmd.PersistentFlags().String("secret", "", "secret key used for token hashing")
 	ApiCmd.PersistentFlags().BoolVar(&checkMigs, "check-migrations", true, "check pending migrations before starting server")
-	ApiCmd.PersistentFlags().StringVar(&Domain, "domain", "", "the url to reach this api eg, https://foo.ngrok.io")
+	ApiCmd.PersistentFlags().StringVar(&Host, "host", "", "the host of this api eg, http://foo.ngrok.io")
 
 	for _, a := range apiArgs {
 		viper.BindPFlag(a, ApiCmd.PersistentFlags().Lookup(a))
@@ -45,9 +45,14 @@ func run(cmd *cobra.Command, args []string) {
 	if viper.GetInt("port") > 0 {
 		Port = viper.GetInt("port")
 	}
+
+	if Host == "" {
+		Host = viper.GetString("HOST")
+	}
+
 	log.Infof("Serving API on port %d...", Port)
 
-	server.Start(Port, Domain)
+	server.Start(Port, Host)
 }
 
 func checkMigrations() {

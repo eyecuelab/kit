@@ -22,9 +22,9 @@ func (v *apiValidator) Validate(i interface{}) error {
 }
 
 var (
-	Echo   *echo.Echo
-	mws    = []echo.MiddlewareFunc{}
-	domain string
+	Echo *echo.Echo
+	mws  = []echo.MiddlewareFunc{}
+	host string
 )
 
 func NewEcho(port int) *echo.Echo {
@@ -45,10 +45,10 @@ func NewEcho(port int) *echo.Echo {
 	return e
 }
 
-func Start(port int, d string) {
+func Start(port int, h string) {
 	Echo = NewEcho(port)
-	domain = d
 	web.InitRoutes(Echo)
+	host = h
 
 	Echo.Logger.Fatal(gracehttp.Serve(Echo.Server))
 }
@@ -59,11 +59,11 @@ func URI(routeName string, args ...interface{}) (string, error) {
 		return "", fmt.Errorf("Cannot form URI, route name '%v' not found", routeName)
 	}
 
-	if domain == "" {
-		return "", fmt.Errorf("Cannot form URI, domain not set. (use --domain to set one)")
+	if host == "" {
+		return "", fmt.Errorf("Cannot form URI, host not set. (use --host or env to set one)")
 	}
 
-	return domain + path, nil
+	return host + path, nil
 }
 
 func AddMiddleWare(mw echo.MiddlewareFunc) {
@@ -71,8 +71,6 @@ func AddMiddleWare(mw echo.MiddlewareFunc) {
 }
 
 type authSkipperConfig map[string]*regexp.Regexp
-
-var foo int
 
 func AuthedSkipper() func(echo.Context) bool {
 	config := viper.GetStringMapString("skipjwt")
