@@ -52,14 +52,12 @@ func isNonSpacingMark(r rune) bool {
 }
 
 var removeNonSpacingMarks = runes.Remove(runes.In(unicode.Mn))
-var diacriticRemover = transform.Chain(norm.NFD, transform.RemoveFunc(isNonSpacingMark), norm.NFC)
+var diacriticRemover = transform.Chain(norm.NFD, removeNonSpacingMarks, norm.NFC)
 
 //RemoveDiacriticsNFC creates a copy of s with the diacritics removed. It also transforms it to NFC.
 //Thread Safe
 func RemoveDiacriticsNFC(s string) string {
-	b := []byte(s)
-	b, _, _ = transform.Bytes(norm.NFD, b)
-	b, _, _ = transform.Bytes(removeNonSpacingMarks, b)
-	b, _, _ = transform.Bytes(diacriticRemover, b)
-	return string(b)
+	var diacriticRemover = transform.Chain(norm.NFD, removeNonSpacingMarks, norm.NFC)
+	out, _, _ := transform.String(diacriticRemover, s)
+	return out
 }
