@@ -4,6 +4,8 @@ import (
 	"strings"
 	"unicode"
 
+	"golang.org/x/text/runes"
+
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
 )
@@ -49,10 +51,15 @@ func isNonSpacingMark(r rune) bool {
 	return unicode.Is(unicode.Mn, r) // Mn: nonspacing marks
 }
 
+var removeNonSpacingMarks = runes.Remove(runes.In(unicode.Mn))
 var diacriticRemover = transform.Chain(norm.NFD, transform.RemoveFunc(isNonSpacingMark), norm.NFC)
 
 //RemoveDiacriticsNFC creates a copy of s with the diacritics removed. It also transforms it to NFC.
+//Thread Safe
 func RemoveDiacriticsNFC(s string) string {
-	s, _, _ = transform.String(diacriticRemover, s)
-	return s
+	b := []byte(s)
+	b, _, _ = transform.Bytes(norm.NFD, b)
+	b, _, _ = transform.Bytes(removeNonSpacingMarks, b)
+	b, _, _ = transform.Bytes(diacriticRemover, b)
+	return string(b)
 }
