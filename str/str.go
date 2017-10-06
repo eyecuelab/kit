@@ -7,7 +7,7 @@ import (
 	"github.com/eyecuelab/kit/runeset"
 )
 
-//RemoveRunes removes any runes listed from the string.
+//Runes removes any runes listed from the string.
 //Note that this converts to runes and back to UTF-8, so RemoveRunes(s) == s
 //does not necessarially hold, since the code points may differ.
 func RemoveRunes(s string, toRemove ...rune) string {

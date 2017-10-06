@@ -49,34 +49,41 @@ var (
 	removeWhiteSpace      = runes.Remove(runes.In(unicode.White_Space))
 	removePunctuation     = runes.Remove(runes.In(unicode.Punct))
 	removeControl         = runes.Remove(runes.In(unicode.C))
+	extremeNormalizer     = transform.Chain(
+		norm.NFKD,
+		removeNonSpacingMarks,
+		removeWhiteSpace,
+		removePunctuation,
+		removeControl,
+		norm.NFKC)
 )
 
 //RemoveDiacriticsNFC creates a copy of s with the diacritics removed. It also transforms it to NFC.
-//Thread Safe
+//It is NOT thread Safe
 func RemoveDiacriticsNFC(s string) string {
 	var diacriticRemover = transform.Chain(norm.NFD, removeNonSpacingMarks, norm.NFC)
 	out, _, _ := transform.String(diacriticRemover, s)
 	return out
 }
 
-//RemovePunctuationNTS removes punctuation (as defined by unicode) from a string, but is NOT thread safe.
+//RemovePunctuation removes punctuation (as defined by unicode) from a string.
 //Note that this converts to runes and back to UTF-8, so RemoveWhiteSpace(s) == s
 //for a string that contains non-punctuation characters does not necessarially hold, since the code points may differ.
-func RemovePunctuationNTS(s string) string {
+func RemovePunctuation(s string) string {
 	out, _, _ := transform.String(removePunctuation, s)
 	return out
 }
 
-//RemoveWhiteSpaceNTS removes whitespace (as defined by unicode) from a string, but is NOT thread safe.
+//RemoveWhiteSpace removes whitespace (as defined by unicode) from a string.
 //Note that this converts to runes and back to UTF-8, so RemoveWhiteSpace(s) == s
 //for a non-whitespace string does not necessarially hold, since the code points may differ.
 //Note that this is faster than RemoveWhitespace, but is not thread safe.
-func RemoveWhiteSpaceNTS(s string) string {
+func RemoveWhiteSpace(s string) string {
 	out, _, _ := transform.String(removePunctuation, s)
 	return out
 }
 
-//RemoveControlNTS removes whitespace (as defined by unicode) from a string, but is NOT thread safe.
+//RemoveControlNTS removes whitespace (as defined by unicode) from a string.
 //Note that this converts to runes and back to UTF-8, so RemoveWhiteSpace(s) == s
 //for a non-whitespace string does not necessarially hold, since the code points may differ.
 //Note that this is faster than RemoveWhitespace, but is not thread safe.
@@ -85,7 +92,7 @@ func RemoveControlNTS(s string) string {
 	return out
 }
 
-//ExtremeNormalization heavily normalizes a stirng for purposes of comparison and safety.
+//ExtremeNormalization heavily normalizes a string for purposes of comparison and safety.
 //It removes ALL nonspacing marks, whitespace, punctuation, control characters, and transforms the
 //string to NFKC encoding. This can and will lose a lot of information!
 func ExtremeNormalization(s string) string {
@@ -98,5 +105,11 @@ func ExtremeNormalization(s string) string {
 		removeControl,
 		norm.NFKC)
 	out, _, _ := transform.String(normalizer, s)
+	return out
+}
+
+func ExtremeNormalizationNTS(s string) string {
+	s = strings.ToLower(s)
+	out, _, _ := transform.String(extremeNormalizer, s)
 	return out
 }
