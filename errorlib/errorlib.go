@@ -6,6 +6,16 @@ import (
 	"log"
 )
 
+//ErrorString is a string with an Error() method. This lets you declare errors as compile-time constants,
+//which facilitates various IDE tools.
+type ErrorString string
+
+func (err ErrorString) Error() string {
+	return string(err)
+}
+
+const someErr = ErrorString("")
+
 //chErrorF checks an error for nil and if non-nil, sends
 //fmt.Errorf(format+": %v", args, err) to the channel specified.
 //Note that this is deliberately unexported.

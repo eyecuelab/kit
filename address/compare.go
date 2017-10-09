@@ -24,7 +24,7 @@ func SharedComponentDistance(placeA, placeB *Address) (distance int) {
 func NormalizedTotalDistance(placeA, placeB *Address) (distance int) {
 	filteredA, filteredB := SharedComponents(*placeA, *placeB)
 	a, b := filteredA.StringSlice(), filteredB.StringSlice()
-	a, b = str.Map(Normalize, a), str.Map(Normalize, b)
+	a, b = str.Map(str.ExtremeNormalization, a), str.Map(str.ExtremeNormalization, b)
 	distance, _ = stringslice.TotalDistance(a, b)
 	return distance
 }
@@ -33,7 +33,7 @@ func NormalizedTotalDistance(placeA, placeB *Address) (distance int) {
 func NormalizedSharedComponentDistance(placeA, placeB *Address) (distance int) {
 	filteredA, filteredB := SharedComponents(*placeA, *placeB)
 	a, b := filteredA.StringSliceFromNonempty(), filteredB.StringSliceFromNonempty()
-	a, b = str.Map(Normalize, a), str.Map(Normalize, b)
+	a, b = str.Map(str.ExtremeNormalization, a), str.Map(str.ExtremeNormalization, b)
 	distance, _ = stringslice.TotalDistance(a, b)
 	return distance
 }
@@ -41,7 +41,7 @@ func NormalizedSharedComponentDistance(placeA, placeB *Address) (distance int) {
 func NormalizedSharedComponentDistanceSlice(placeA, placeB Address) (distances []int) {
 	filteredA, filteredB := SharedComponents(placeA, placeB)
 	a, b := filteredA.StringSliceFromNonempty(), filteredB.StringSliceFromNonempty()
-	a, b = str.Map(Normalize, a), str.Map(Normalize, b)
+	a, b = str.Map(str.ExtremeNormalization, a), str.Map(str.ExtremeNormalization, b)
 	distances = make([]int, len(a))
 	for i := range distances {
 		distances[i] = levenshteinDistance(a[i], b[i])
