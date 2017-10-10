@@ -104,8 +104,3 @@ func min2(a, b int) int {
 	}
 	return b
 }
-
-func normalizeComponent(s string) string {
-	s = str.ExtremeNormalization(s)
-	return suffixReplacer.Replace(s)
-}
