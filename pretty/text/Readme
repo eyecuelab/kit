@@ -1,0 +1,5 @@
+This is a clone of the repositor github.com/kr/text, taken under the MIT license.
+
+This is a Go package for manipulating paragraphs of text.
+
+See http://go.pkgdoc.org/github.com/kr/text for full documentation.
