@@ -13,8 +13,7 @@ import (
 func RemoveRunes(s string, toRemove ...rune) string {
 	buf := bytes.Buffer{}
 	set := runeset.FromRunes(toRemove...)
-	var r rune
-	for _, r = range s {
+	for _, r := range s {
 		if !set.Contains(r) {
 			buf.WriteRune(r)
 		}
