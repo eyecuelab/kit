@@ -34,6 +34,9 @@ func SRemoveRunes(s string, toRemove string) string {
 	return buf.String()
 }
 
+//RemoveWhiteSpace is an alias for RemoveASCIIWhiteSpace.
+var RemoveWhiteSpace = RemoveASCIIWhiteSpace
+
 //MapErr maps f(string)string, err across a slice. If any error results, it
 // it immediately returns an empty slice and the error.
 func MapErr(f func(string) (string, error), strings []string) ([]string, error) {
