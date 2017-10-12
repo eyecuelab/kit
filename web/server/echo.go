@@ -2,9 +2,6 @@ package server
 
 import (
 	"fmt"
-	"regexp"
-	"strings"
-
 	valid "github.com/asaskevich/govalidator"
 	"github.com/eyecuelab/kit/web"
 	"github.com/facebookgo/grace/gracehttp"
@@ -12,6 +9,8 @@ import (
 	"github.com/labstack/echo/middleware"
 	emw "github.com/labstack/echo/middleware"
 	"github.com/spf13/viper"
+	"regexp"
+	"strings"
 )
 
 type apiValidator struct{}
@@ -64,6 +63,10 @@ func URI(routeName string, args ...interface{}) (string, error) {
 	}
 
 	return host + path, nil
+}
+
+func AddValidator(name string, f valid.CustomTypeValidator) {
+	valid.CustomTypeTagMap.Set("score", f)
 }
 
 func AddMiddleWare(mw echo.MiddlewareFunc) {
