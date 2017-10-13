@@ -75,12 +75,14 @@ func DeleteModelWithAssociations(value interface{}, associations ...string) erro
 
 	tx = tx.Delete(value)
 
-	if tx.RowsAffected < 1 {
-		return gorm.ErrRecordNotFound
+	if tx.Error != nil {
+		tx.Rollback()
+		return tx.Error
 	}
 
-	if tx.Error != nil {
-		return tx.Error
+	if tx.RowsAffected < 1 {
+		tx.Rollback()
+		return gorm.ErrRecordNotFound
 	}
 
 	if err := tx.Commit().Error; err != nil {
