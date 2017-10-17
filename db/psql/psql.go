@@ -1,11 +1,10 @@
 package psql
 
 import (
-	"errors"
-
 	"database/sql/driver"
 	"encoding/json"
-
+	"errors"
+	"fmt"
 	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -57,6 +56,33 @@ func (j *JsonB) Scan(src interface{}) error {
 		return errors.New("Type assertion .(map[string]interface{}) failed.")
 	}
 
+	return nil
+}
+
+func UndeleteOrCreate(model interface{}, query string, args ...interface{}) error {
+	tx := DB.Begin()
+	tx = tx.Unscoped().Model(model).Where(query, args...).UpdateColumn("deleted_at", nil)
+
+	if err := tx.Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if tx.RowsAffected > 1 {
+		tx.Rollback()
+		return fmt.Errorf("UndeleteOrCreate can only undelete one record, you're trying to undelete %v", tx.RowsAffected)
+	}
+
+	if tx.RowsAffected < 1 {
+		if err := tx.Create(model).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return err
+	}
 	return nil
 }
 
