@@ -10,23 +10,24 @@ import (
 )
 
 var (
-	//Print is an alias for log.Print
+	//Print is an alias for log.Print in the stdlib
 	Print = log.Print
 
-	//Fatalf is an alias for log.Fatalf
+	//Fatalf is an alias for log.Fatalf in the stdlib
 	Fatalf = log.Fatalf
 
-	//Fatal is an alias for log.Fatal
+	//Fatal is an alias for log.Fatal in the stdlib
 	Fatal = log.Fatal
+
+	//Println is an alias for log.Println in the stdlib
+	Println = log.Println
+
+	//Info is an alias for log.Info in the stdlib
+	Info = log.Info
 )
 
 func FatalWrap(err error, msg string) {
 	log.Fatalf("%+v", errors.Wrap(err, msg))
-}
-
-//Info is an alias for log.Info in the standard library
-func Info(msg string) {
-	log.Info(msg)
 }
 
 func Infof(format string, args ...interface{}) {
