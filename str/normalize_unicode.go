@@ -31,14 +31,6 @@ var (
 	removeUnicodeNonPrintable                  = runes.Remove(UnicodeNonPrintable)
 )
 
-func isUnicodePrintable(r rune) bool {
-	return unicode.In(r, unicode.PrintRanges...)
-}
-
-func RemoveUnicodeNonPrintable(s string) string {
-	return removeUnicodeNonPrintable.String(s)
-}
-
 //RemoveDiacriticsNFC creates a copy of s with the diacritics removed. It also transforms it to NFC.
 //It is NOT thread Safe
 func RemoveDiacriticsNFC(s string) string {

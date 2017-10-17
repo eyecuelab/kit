@@ -107,81 +107,6 @@ func TestDiff(t *testing.T) {
 	}
 }
 
-func TestSRemoveRunes(t *testing.T) {
-	type args struct {
-		s        string
-		toRemove string
-	}
-	const accented_e = 'é'
-	tests := []struct {
-		name string
-		args args
-		want string
-	}{
-
-		{
-			name: "ascii",
-			args: args{s: NFC("Finé"), toRemove: ASCIILowercase},
-			want: "Fé",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := SRemoveRunes(tt.args.s, tt.args.toRemove); got != tt.want {
-				t.Errorf("SRemoveRunes() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestMapErr(t *testing.T) {
-	type args struct {
-		f       func(string) (string, error)
-		strings []string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    []string
-		wantErr bool
-	}{
-	// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := MapErr(tt.args.f, tt.args.strings)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("MapErr() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MapErr() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestMap(t *testing.T) {
-	type args struct {
-		f       func(string) string
-		strings []string
-	}
-	tests := []struct {
-		name string
-		args args
-		want []string
-	}{
-	// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := Map(tt.args.f, tt.args.strings); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Map() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_subIfNoChar(t *testing.T) {
 	type args struct {
 		r rune
@@ -191,54 +116,20 @@ func Test_subIfNoChar(t *testing.T) {
 		args args
 		want string
 	}{
-	// TODO: Add test cases.
+		{
+			name: "ok",
+			args: args{noChar},
+			want: "NO_CHAR",
+		},
+		{name: "self",
+			args: args{'f'},
+			want: "f",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := subIfNoChar(tt.args.r); got != tt.want {
 				t.Errorf("subIfNoChar() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_min(t *testing.T) {
-	type args struct {
-		a int
-		b int
-	}
-	tests := []struct {
-		name string
-		args args
-		want int
-	}{
-	// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := min(tt.args.a, tt.args.b); got != tt.want {
-				t.Errorf("min() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_max(t *testing.T) {
-	type args struct {
-		a int
-		b int
-	}
-	tests := []struct {
-		name string
-		args args
-		want int
-	}{
-	// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := max(tt.args.a, tt.args.b); got != tt.want {
-				t.Errorf("max() = %v, want %v", got, tt.want)
 			}
 		})
 	}

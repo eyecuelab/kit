@@ -90,16 +90,6 @@ func TestAbs(t *testing.T) {
 	})
 }
 
-func all(bools ...bool) bool {
-	for _, b := range bools {
-		if !b {
-			return false
-		}
-	}
-	return true
-
-}
-
 func TestPow(t *testing.T) {
 
 	t.Run("random small pairs", func(t *testing.T) {
