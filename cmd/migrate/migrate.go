@@ -39,7 +39,9 @@ func run(cmd *cobra.Command, args []string) {
 
 	dir := direction()
 	n, err := migrate.ExecMax(psql.DB.DB(), "postgres", getMigrations(), dir, max)
-	log.Check(err)
+	if err != nil {
+		log.Fatalf("migrate.run: migrate.ExecMax: %v", err)
+	}
 	if down {
 		log.Infof("Rolled-back %d migrations.\n", n)
 	} else {
@@ -65,9 +67,8 @@ func direction() migrate.MigrationDirection {
 			max = 1
 		}
 		return migrate.Down
-	} else {
-		return migrate.Up
 	}
+	return migrate.Up
 }
 
 func migrationsDirExists() bool {
