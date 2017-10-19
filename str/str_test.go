@@ -2,6 +2,7 @@ package str
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/eyecuelab/kit/pretty"
@@ -130,6 +131,80 @@ func Test_subIfNoChar(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := subIfNoChar(tt.args.r); got != tt.want {
 				t.Errorf("subIfNoChar() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRuneDiff_String(t *testing.T) {
+	type fields struct {
+		a        rune
+		b        rune
+		position int
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+	// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rd := RuneDiff{
+				a:        tt.fields.a,
+				b:        tt.fields.b,
+				position: tt.fields.position,
+			}
+			if got := rd.String(); got != tt.want {
+				t.Errorf("RuneDiff.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_min(t *testing.T) {
+	type args struct {
+		a int
+		b int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+	// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := min(tt.args.a, tt.args.b); got != tt.want {
+				t.Errorf("min() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMap(t *testing.T) {
+	type args struct {
+		f func(string) string
+		a []string
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "capitalize",
+			args: args{strings.ToUpper, []string{"lower", "upper"}},
+			want: []string{"LOWER", "UPPER"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Map(tt.args.f, tt.args.a); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Map() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -10,20 +10,26 @@ import (
 )
 
 var (
-	//Print is an alias for log.Print in the stdlib
+	//Print is an alias for log.Print in logrus
 	Print = log.Print
 
-	//Fatalf is an alias for log.Fatalf in the stdlib
+	//Fatalf is an alias for log.Fatalf in logrus
 	Fatalf = log.Fatalf
 
-	//Fatal is an alias for log.Fatal in the stdlib
+	//Fatal is an alias for log.Fatal in logrus
 	Fatal = log.Fatal
 
-	//Println is an alias for log.Println in the stdlib
+	//Println is an alias for log.Println in logrus
 	Println = log.Println
 
-	//Info is an alias for log.Info in the stdlib
+	//Info is an alias for log.Info in logrus
 	Info = log.Info
+
+	//Warn is an alias for log.Warn in logrus
+	Warn = log.Warn
+
+	//Warnf is an alias for log.Warnf in logrus
+	Warnf = log.Warnf
 )
 
 func FatalWrap(err error, msg string) {

@@ -47,15 +47,14 @@ func (ticker *TickerTape) repeatSignal() {
 	}
 }
 func (ticker *TickerTape) listen() {
-	for i := 0; ; i++ {
+	for {
 		select {
 		case event := <-ticker.events:
 			fmt.Print("\r", strings.Repeat(" ", 120))
 			fmt.Print(strings.Repeat("\b", 120))
 			fmt.Print("\r", event)
 			// we want to be able to see each message as it comes up.
-		default:
-			<-ticker.signals
+		case <-ticker.signals:
 			fmt.Print(".")
 		}
 	}
@@ -76,6 +75,14 @@ func (ticker *TickerTape) Print(args ...interface{}) {
 		ticker.startListening()
 	}
 	ticker.events <- fmt.Sprint(args...)
+}
+
+func (ticker *TickerTape) Write(b []byte) (n int, err error) {
+	if !ticker.listening {
+		return 0, fmt.Errorf("tickertape is not listening")
+	}
+	ticker.events <- string(b)
+	return len(b), nil
 }
 
 //Printf to the internal ticker.

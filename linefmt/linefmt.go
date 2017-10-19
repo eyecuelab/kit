@@ -33,8 +33,3 @@ func Print(args ...interface{}) (int, error) {
 	ClearAll()
 	return fmt.Print(args...)
 }
-
-//TickerPrintf prints to the internal ticker.
-func TickerPrintf(format string, args ...interface{}) {
-	internalTicker.Printf(format, args...)
-}

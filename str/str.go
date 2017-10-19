@@ -90,3 +90,12 @@ func min(a, b int) int {
 	}
 	return b
 }
+
+//Map a function over a slice, returning a slice containing f(s) for s in a.
+func Map(f func(string) string, a []string) []string {
+	mapped := make([]string, len(a))
+	for i, s := range a {
+		mapped[i] = f(s)
+	}
+	return mapped
+}

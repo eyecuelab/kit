@@ -20,8 +20,6 @@ func TestRemoveASCIIWhitespace(t *testing.T) {
 		{"all", args{ASCIIWhitespace}, ""},
 	}
 
-	// TODO: Add test cases.
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := RemoveASCIIWhiteSpace(tt.args.s); got != tt.want {
@@ -31,9 +29,7 @@ func TestRemoveASCIIWhitespace(t *testing.T) {
 	}
 }
 
-
-
-func TestASCIIHeavyNormalization(t *testing.T) {
+func TestRemoveASCIIWhiteSpace(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -46,8 +42,28 @@ func TestASCIIHeavyNormalization(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ASCIIHeavyNormalization(tt.args.s); got != tt.want {
-				t.Errorf("ASCIIHeavyNormalization() = %v, want %v", got, tt.want)
+			if got := RemoveASCIIWhiteSpace(tt.args.s); got != tt.want {
+				t.Errorf("RemoveASCIIWhiteSpace() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRemoveNonASCII(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+	// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := RemoveNonASCII(tt.args.s); got != tt.want {
+				t.Errorf("RemoveNonASCII() = %v, want %v", got, tt.want)
 			}
 		})
 	}
