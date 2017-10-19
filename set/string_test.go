@@ -187,12 +187,48 @@ func TestString_Equal(t *testing.T) {
 		args args
 		want bool
 	}{
-	// TODO: Add test cases.
+		{
+			"yes",
+			String{"foo": yes, "bar": yes},
+			args{String{"foo": yes, "bar": yes}},
+			true,
+		},
+		{
+			"no",
+			String{"foo": yes, "bar": yes},
+			args{String{}},
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.s.Equal(tt.args.other); got != tt.want {
 				t.Errorf("String.Equal() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestString_XOR(t *testing.T) {
+	type args struct {
+		a String
+		b String
+	}
+	tests := []struct {
+		name string
+		args args
+		want String
+	}{
+		{
+			"ok",
+			args{String{"foo": yes, "bar": yes}, String{"foo": yes, "baz": yes}},
+			String{"bar": yes, "baz": yes},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.args.a.XOR(tt.args.b); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("XOR() = %v, want %v", got, tt.want)
 			}
 		})
 	}

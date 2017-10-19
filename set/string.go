@@ -1,45 +1,53 @@
 package set
 
-type signal interface{}
-
-var yes interface{}
-
+//String is a set of strings
 type String map[string]signal
 
-//Contains shows whether key is in the String.
+//Contains shows whether a given key is in the String.
 func (s String) Contains(key string) bool {
 	_, ok := s[key]
 	return ok
 }
 
+//Copy copies the set of strings.
 func (s String) Copy() String {
 	copy := make(String)
-	for k, v := range s {
-		copy[k] = v
+	for k := range s {
+		copy[k] = yes
 	}
 	return copy
 }
 
-//Intersection returns the intersection of the strings;
+//Intersection returns a new set containing the intersection of the strings;
 func (s String) Intersection(strings ...String) (intersection String) {
-	intersection = make(String)
+	intersection = s.Copy()
 	for key := range s {
-		all := true
 		for _, set := range append(strings, s) {
-			if _, ok := set[key]; !ok {
-				all = false
-				break
+			if !set.Contains(key) {
+				delete(intersection, key)
 			}
-		}
-		if all {
-			intersection[key] = yes
 		}
 	}
 	return intersection
 }
 
+//XOR returns the keys in one set but not the other.
+func (s String) XOR(other String) String {
+	union := s.Union(other)
+	xor := make(String)
+	for k := range union {
+		if (s.Contains(k) && !other.Contains(k)) || (other.Contains(k) && !s.Contains(k)) {
+			xor[k] = yes
+		}
+	}
+	return xor
+}
+
 //Equal shows whether two Strings are equal; i.e, they contain the same items.
 func (s String) Equal(other String) bool {
+	if len(s) != len(other) {
+		return false
+	}
 	for key := range s {
 		if !other.Contains(key) {
 			return false
@@ -48,7 +56,7 @@ func (s String) Equal(other String) bool {
 	return true
 }
 
-//Union returns the union of the strings.
+//Union returns a new set containing the union of the string sets.
 func (s String) Union(strings ...String) (union String) {
 	union = s.Copy()
 	for _, set := range strings {
@@ -88,19 +96,21 @@ func FromStrings(strings ...string) String {
 	return s
 }
 
+//Add a key or key(s) to the set, in-place.
 func (s String) Add(keys ...string) {
 	for _, key := range keys {
 		s[key] = yes
 	}
 }
 
+//Remove a key from the set, in-place.
 func (s String) Remove(keys ...string) {
 	for _, key := range keys {
 		delete(s, key)
 	}
 }
 
-//FromSlices creates a slice of sets from slices of strings
+//FromStringSlice creates a slice of sets from slices of strings
 func FromStringSlice(stringSlices ...[]string) []String {
 	sets := make([]String, len(stringSlices))
 	for i, slice := range stringSlices {
@@ -109,6 +119,7 @@ func FromStringSlice(stringSlices ...[]string) []String {
 	return sets
 }
 
+//ToSlice returns a slice containing the keys of a set. No order is guaranteed.
 func (s String) ToSlice() []string {
 	slice := make([]string, len(s))
 	var i = 0
