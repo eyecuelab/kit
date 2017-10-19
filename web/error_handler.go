@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/eyecuelab/kit/goenv"
 	"github.com/eyecuelab/kit/log"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
@@ -51,28 +50,26 @@ func logErr(err error) {
 func toApiError(err error) (int, *jsonapi.ErrorObject) {
 	status := http.StatusInternalServerError
 
-	if he, ok := err.(*jsonapi.ErrorObject); ok {
-		status, _ = strconv.Atoi(he.Status)
-		return status, he
-	}
-
 	var (
 		detail interface{}
 		code   string
 	)
-	if he, ok := err.(*echo.HTTPError); ok {
-		status = he.Code
-		detail = he.Message
-	} else if he, ok := err.(*pq.Error); ok {
-		detail = he.Message
-		code = he.Code.Name()
-		if !pq500s[code] {
+	switch err := err.(type) {
+	case *jsonapi.ErrorObject:
+		status, _ = strconv.Atoi(he.Status)
+		return status, err
+
+	case *echo.HTTPError:
+		status, detail = err.Code, err.Message
+	case *pq.Error:
+		detail = err.Message
+		code = err.Code.Name()
+		if _, ok := !pq500s[code]; !ok {
 			status = http.StatusBadRequest
 		}
-	} else if he, ok := err.(govalidator.Errors); ok {
-		status = http.StatusBadRequest
-		detail = he.Error()
-	} else if !goenv.Prod {
+	case govalidator.Errors:
+		status, detail = http.StatusBadRequest, err.Error()
+	default:
 		detail = err.Error()
 	}
 
