@@ -65,7 +65,7 @@ func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
 	case *pq.Error:
 		detail = err.Message
 		code = err.Code.Name()
-		if _, ok := !pq500s[code]; !ok {
+		if _, ok := pq500s[code]; !ok {
 			status = http.StatusBadRequest
 		}
 	case govalidator.Errors:
