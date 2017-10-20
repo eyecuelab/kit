@@ -32,6 +32,7 @@ func ErrorHandler(err error, c echo.Context) {
 	}
 
 	if err := renderApiErrors(c, apiError); err != nil {
+		//FIXME: are we supposed to log this error twice?
 		logErr(err)
 		goto ERROR
 	}
@@ -39,7 +40,7 @@ func ErrorHandler(err error, c echo.Context) {
 	if status < 500 {
 		return
 	}
-ERROR:
+ERROR: //FIXME - I feel like we should justify a GOTO
 	logErr(err)
 }
 
@@ -47,8 +48,7 @@ func logErr(err error) {
 	log.ErrorWrap(err, "Uncaught Error")
 }
 
-func toApiError(err error) (int, *jsonapi.ErrorObject) {
-	status := http.StatusInternalServerError
+func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
 
 	var (
 		detail interface{}
@@ -56,7 +56,7 @@ func toApiError(err error) (int, *jsonapi.ErrorObject) {
 	)
 	switch err := err.(type) {
 	case *jsonapi.ErrorObject:
-		status, _ = strconv.Atoi(he.Status)
+		status, _ = strconv.Atoi(err.Status)
 		return status, err
 
 	case *echo.HTTPError:
@@ -70,7 +70,8 @@ func toApiError(err error) (int, *jsonapi.ErrorObject) {
 	case govalidator.Errors:
 		status, detail = http.StatusBadRequest, err.Error()
 	default:
-		detail = err.Error()
+		status, detail = http.StatusInternalServerError, err.Error()
+
 	}
 
 	return status, valuesToApiError(status, http.StatusText(status), &detail, code)
