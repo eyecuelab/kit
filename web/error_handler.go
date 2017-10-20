@@ -54,6 +54,7 @@ func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
 		detail interface{}
 		code   string
 	)
+	status = http.StatusInternalServerError
 	switch err := err.(type) {
 	case *jsonapi.ErrorObject:
 		status, _ = strconv.Atoi(err.Status)
@@ -70,7 +71,7 @@ func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
 	case govalidator.Errors:
 		status, detail = http.StatusBadRequest, err.Error()
 	default:
-		status, detail = http.StatusInternalServerError, err.Error()
+		detail = err.Error()
 
 	}
 
