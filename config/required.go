@@ -35,13 +35,6 @@ func RequiredStringSlice(key string) []string {
 	return viper.GetStringSlice(key)
 }
 
-//RequiredSlice returns the value of the configuration variable specified by key.
-//If that configuration var does not exist, it calls log.Fatalf
-func RequiredSlice(key string) []interface{} {
-	FatalCheck(key)
-	return viper.Get(key).([]interface{})
-}
-
 //FatalCheck checks that a key exists in the viper configuration. If not, it calls fatalf.
 func FatalCheck(key string) {
 	if viper.Get(key) == nil {
