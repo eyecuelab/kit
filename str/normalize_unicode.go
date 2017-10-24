@@ -39,15 +39,6 @@ func RemoveDiacriticsNFC(s string) string {
 	return out
 }
 
-//RemoveControlNTS removes whitespace (as defined by unicode) from a string.
-//Note that this converts to runes and back to UTF-8, so RemoveWhiteSpace(s) == s
-//for a non-whitespace string does not necessarially hold, since the code points may differ.
-//Note that this is faster than RemoveWhitespace, but is not thread safe.
-func RemoveControlNTS(s string) string {
-	out, _, _ := transform.String(removeUnicodeControl, s)
-	return out
-}
-
 //ExtremeNormalization heavily normalizes a string for purposes of comparison and safety.
 //It lowercases the string, removes ALL nonspacing marks, nonprinting marks, whitespace, control characters, and punctuation, and transforms the string to NFKC encoding. This can and will lose a lot of information!
 func ExtremeNormalization(s string) string {

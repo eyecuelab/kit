@@ -40,24 +40,6 @@ var (
 	ASCIISet = runeset.FromString(ASCII)
 )
 
-func printableASCII() runeset.RuneSet {
-	printable := make(runeset.RuneSet)
-	var yes runeset.Signal
-	for b := rune(32); b < 128; b++ {
-		printable[b] = yes
-	}
-	return printable
-}
-
-func nonprintableASCII() runeset.RuneSet {
-	nonprintable := make(runeset.RuneSet)
-	var yes runeset.Signal
-	for b := rune(0); b < 32; b++ {
-		nonprintable[b] = yes
-	}
-	return nonprintable
-}
-
 //RemovePunctuation removes punctuation (as defined by unicode) from a string.
 //Note that this converts to runes and back to UTF-8, so RemoveWhiteSpace(s) == s
 //for a string that contains non-punctuation characters does not necessarially hold, since the code points may differ.

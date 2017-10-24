@@ -1,8 +1,11 @@
 package imath
 
 import (
+	"math"
 	"math/rand"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMin(t *testing.T) {
@@ -121,23 +124,10 @@ func TestPowMod(t *testing.T) {
 
 }
 */
-func Test_naivePow(t *testing.T) {
-	type args struct {
-		base int
-		exp  int
-	}
-	tests := []struct {
-		name string
-		args args
-		want int
-	}{
-	// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := naivePow(tt.args.base, tt.args.exp); got != tt.want {
-				t.Errorf("naivePow() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+
+func TestSign(t *testing.T) {
+	assert := assert.New(t)
+	assert.Equal(-1, Sign(-5), "sign -5 == -1")
+	assert.Equal(0, Sign(0), "sign 0 == 0")
+	assert.Equal(1, Sign(math.MaxInt32), "sign(math.MaxInt32) == 1")
 }
