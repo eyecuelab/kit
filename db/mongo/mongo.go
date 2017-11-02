@@ -43,3 +43,10 @@ func UniqueInCollection(collection *mgo.Collection, selector interface{}) bool {
 	n, _ := collection.Find(selector).Count()
 	return n == 1
 }
+
+func EnsureLocationIndex(collection *mgo.Collection) error {
+	index := mgo.Index{
+		Key: []string{"$2dsphere:location"},
+	}
+	return collection.EnsureIndex(index)
+}
