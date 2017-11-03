@@ -9,17 +9,17 @@ import (
 )
 
 const (
-	_foo = "_foo"
-	_bar = "_bar"
-	_baz = "_baz"
-	_moo = "_moo"
+	_str_foo = "a"
+	_str_bar = "b"
+	_str_baz = "c"
+	_str_moo = "d"
 )
 
 var (
-	fooBar    = FromStrings(_foo, _bar)
-	barBaz    = FromStrings(_bar, _baz)
-	fooBaz    = FromStrings(_foo, _baz)
-	fooBarBaz = FromStrings(_foo, _bar, _baz)
+	_str_fooBar    = FromStrings(_str_foo, _str_bar)
+	_str_barBaz    = FromStrings(_str_bar, _str_baz)
+	_str_fooBaz    = FromStrings(_str_foo, _str_baz)
+	_str_fooBarBaz = FromStrings(_str_foo, _str_bar, _str_baz)
 )
 
 func TestString_Union(t *testing.T) {
@@ -35,9 +35,9 @@ func TestString_Union(t *testing.T) {
 	}{
 		{
 			name:      "ok",
-			s:         fooBar,
-			args:      args{[]String{barBaz}},
-			wantUnion: fooBarBaz,
+			s:         _str_fooBar,
+			args:      args{[]String{_str_barBaz}},
+			wantUnion: _str_fooBarBaz,
 		},
 	}
 	for _, tt := range tests {
@@ -61,19 +61,19 @@ func TestString_Difference(t *testing.T) {
 	}{
 		{
 			name:           "ok",
-			s:              fooBarBaz,
-			args:           args{[]String{fooBar}},
-			wantDifference: FromStrings(_baz),
+			s:              _str_fooBarBaz,
+			args:           args{[]String{_str_fooBar}},
+			wantDifference: FromStrings(_str_baz),
 		},
 		{
 			name:           "return self",
-			s:              fooBarBaz,
-			wantDifference: fooBarBaz,
+			s:              _str_fooBarBaz,
+			wantDifference: _str_fooBarBaz,
 		},
 		{
 			name: "multiples ok",
-			s:    fooBarBaz,
-			args: args{[]String{fooBar, barBaz}},
+			s:    _str_fooBarBaz,
+			args: args{[]String{_str_fooBar, _str_barBaz}},
 		},
 	}
 	for _, tt := range tests {
@@ -98,9 +98,9 @@ func TestString_Add(t *testing.T) {
 	}{
 		{
 			name: "add",
-			s:    String{_foo: yes},
-			args: args{[]string{_foo, _foo, _bar, _baz}},
-			want: fooBarBaz,
+			s:    String{_str_foo: yes},
+			args: args{[]string{_str_foo, _str_foo, _str_bar, _str_baz}},
+			want: _str_fooBarBaz,
 		},
 	}
 	for _, tt := range tests {
@@ -113,7 +113,7 @@ func TestString_Add(t *testing.T) {
 	}
 }
 
-func TestString_ToSlice(t *testing.T) {
+func TestString_Sorted(t *testing.T) {
 	tests := []struct {
 		name     string
 		s        String
@@ -122,13 +122,13 @@ func TestString_ToSlice(t *testing.T) {
 	}{
 		{
 			name: "ok",
-			s:    fooBar,
-			want: []string{_foo, _bar},
+			s:    _str_fooBar,
+			want: []string{_str_foo, _str_bar},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.s.ToSlice()
+			got := tt.s.Sorted()
 			sort.Strings(got)
 			sort.Strings(tt.want)
 			if !reflect.DeepEqual(got, tt.want) && !tt.wantFail {
@@ -148,8 +148,8 @@ func TestString_Intersection(t *testing.T) {
 		args             args
 		wantIntersection String
 	}{
-		{"ok", fooBar, args{[]String{barBaz}}, FromStrings(_bar)},
-		{"multiples", fooBar, args{[]String{fooBarBaz, barBaz}}, FromStrings(_bar)},
+		{"ok", _str_fooBar, args{[]String{_str_barBaz}}, FromStrings(_str_bar)},
+		{"multiples", _str_fooBar, args{[]String{_str_fooBarBaz, _str_barBaz}}, FromStrings(_str_bar)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -161,11 +161,11 @@ func TestString_Intersection(t *testing.T) {
 }
 func TestString_Remove(t *testing.T) {
 	var set = make(String)
-	set.Add(_foo, _bar, _baz)
+	set.Add(_str_foo, _str_bar, _str_baz)
 	assert.Equal(t, 3, len(set))
-	set.Remove(_foo, _bar)
+	set.Remove(_str_foo, _str_bar)
 	assert.Equal(t, 1, len(set))
-	set.Remove(_foo)
+	set.Remove(_str_foo)
 	assert.Equal(t, 1, len(set))
 }
 
@@ -181,19 +181,19 @@ func TestString_Equal(t *testing.T) {
 	}{
 		{
 			"yes",
-			String{_foo: yes, _bar: yes},
-			args{String{_foo: yes, _bar: yes}},
+			String{_str_foo: yes, _str_bar: yes},
+			args{String{_str_foo: yes, _str_bar: yes}},
 			true,
 		},
 		{
 			"no",
-			String{_foo: yes, _bar: yes},
+			String{_str_foo: yes, _str_bar: yes},
 			args{String{}},
 			false,
 		}, {
 			"no - nonoverlapping keys",
-			FromStrings(_foo, _bar),
-			args{other: FromStrings(_baz, _moo)},
+			FromStrings(_str_foo, _str_bar),
+			args{other: FromStrings(_str_baz, _str_moo)},
 			false,
 		},
 	}
@@ -208,8 +208,8 @@ func TestString_Equal(t *testing.T) {
 
 func TestString_IUnion(t *testing.T) {
 	set := make(String)
-	a := FromStrings(_foo, _bar)
-	b := FromStrings(_baz)
+	a := FromStrings(_str_foo, _str_bar)
+	b := FromStrings(_str_baz)
 
 	set.IUnion(a)
 	assert.Equal(t, set, a)
@@ -229,8 +229,8 @@ func TestString_XOR(t *testing.T) {
 	}{
 		{
 			"ok",
-			args{String{_foo: yes, _bar: yes}, String{_foo: yes, _baz: yes}},
-			String{_bar: yes, _baz: yes},
+			args{String{_str_foo: yes, _str_bar: yes}, String{_str_foo: yes, _str_baz: yes}},
+			String{_str_bar: yes, _str_baz: yes},
 		},
 	}
 	for _, tt := range tests {

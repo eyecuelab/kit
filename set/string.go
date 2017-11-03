@@ -1,5 +1,7 @@
 package set
 
+import "sort"
+
 //String is a set of strings
 type String map[string]signal
 
@@ -118,5 +120,11 @@ func (s String) ToSlice() []string {
 		slice[i] = k
 		i++
 	}
+	return slice
+}
+
+func (s String) Sorted() []string {
+	slice := s.ToSlice()
+	sort.Strings(slice)
 	return slice
 }
