@@ -96,7 +96,7 @@ func FromStrings(strings ...string) String {
 	return s
 }
 
-//Add a key or key(s) to the set, in-place.
+//Add a key or key(s) to the set, in-place. Don't call on a nil set.
 func (s String) Add(keys ...string) {
 	for _, key := range keys {
 		s[key] = yes
@@ -108,15 +108,6 @@ func (s String) Remove(keys ...string) {
 	for _, key := range keys {
 		delete(s, key)
 	}
-}
-
-//FromStringSlice creates a slice of sets from slices of strings
-func FromStringSlice(stringSlices ...[]string) []String {
-	sets := make([]String, len(stringSlices))
-	for i, slice := range stringSlices {
-		sets[i] = FromStrings(slice...)
-	}
-	return sets
 }
 
 //ToSlice returns a slice containing the keys of a set. No order is guaranteed.

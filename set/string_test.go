@@ -4,19 +4,22 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const (
-	foo = "foo"
-	bar = "bar"
-	baz = "baz"
+	_foo = "_foo"
+	_bar = "_bar"
+	_baz = "_baz"
+	_moo = "_moo"
 )
 
 var (
-	fooBar    = FromStrings(foo, bar)
-	barBaz    = FromStrings(bar, baz)
-	fooBaz    = FromStrings(foo, baz)
-	fooBarBaz = FromStrings(foo, bar, baz)
+	fooBar    = FromStrings(_foo, _bar)
+	barBaz    = FromStrings(_bar, _baz)
+	fooBaz    = FromStrings(_foo, _baz)
+	fooBarBaz = FromStrings(_foo, _bar, _baz)
 )
 
 func TestString_Union(t *testing.T) {
@@ -60,7 +63,7 @@ func TestString_Difference(t *testing.T) {
 			name:           "ok",
 			s:              fooBarBaz,
 			args:           args{[]String{fooBar}},
-			wantDifference: FromStrings(baz),
+			wantDifference: FromStrings(_baz),
 		},
 		{
 			name:           "return self",
@@ -95,8 +98,8 @@ func TestString_Add(t *testing.T) {
 	}{
 		{
 			name: "add",
-			s:    String{foo: yes},
-			args: args{[]string{foo, foo, bar, baz}},
+			s:    String{_foo: yes},
+			args: args{[]string{_foo, _foo, _bar, _baz}},
 			want: fooBarBaz,
 		},
 	}
@@ -105,26 +108,6 @@ func TestString_Add(t *testing.T) {
 			tt.s.Add(tt.args.keys...)
 			if !tt.s.Equal(tt.want) {
 				t.Errorf("reciever of s.Add() is %v, but should be %v", tt.s, tt.want)
-			}
-		})
-	}
-}
-
-func TestFromStringSlice(t *testing.T) {
-	type args struct {
-		stringSlices [][]string
-	}
-	tests := []struct {
-		name string
-		args args
-		want []String
-	}{
-	// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := FromStringSlice(tt.args.stringSlices...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FromStringSlice() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -140,7 +123,7 @@ func TestString_ToSlice(t *testing.T) {
 		{
 			name: "ok",
 			s:    fooBar,
-			want: []string{foo, bar},
+			want: []string{_foo, _bar},
 		},
 	}
 	for _, tt := range tests {
@@ -165,8 +148,8 @@ func TestString_Intersection(t *testing.T) {
 		args             args
 		wantIntersection String
 	}{
-		{"ok", fooBar, args{[]String{barBaz}}, FromStrings(bar)},
-		{"multiples", fooBar, args{[]String{fooBarBaz, barBaz}}, FromStrings(bar)},
+		{"ok", fooBar, args{[]String{barBaz}}, FromStrings(_bar)},
+		{"multiples", fooBar, args{[]String{fooBarBaz, barBaz}}, FromStrings(_bar)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -175,6 +158,15 @@ func TestString_Intersection(t *testing.T) {
 			}
 		})
 	}
+}
+func TestString_Remove(t *testing.T) {
+	var set = make(String)
+	set.Add(_foo, _bar, _baz)
+	assert.Equal(t, 3, len(set))
+	set.Remove(_foo, _bar)
+	assert.Equal(t, 1, len(set))
+	set.Remove(_foo)
+	assert.Equal(t, 1, len(set))
 }
 
 func TestString_Equal(t *testing.T) {
@@ -189,14 +181,19 @@ func TestString_Equal(t *testing.T) {
 	}{
 		{
 			"yes",
-			String{"foo": yes, "bar": yes},
-			args{String{"foo": yes, "bar": yes}},
+			String{_foo: yes, _bar: yes},
+			args{String{_foo: yes, _bar: yes}},
 			true,
 		},
 		{
 			"no",
-			String{"foo": yes, "bar": yes},
+			String{_foo: yes, _bar: yes},
 			args{String{}},
+			false,
+		}, {
+			"no - nonoverlapping keys",
+			FromStrings(_foo, _bar),
+			args{other: FromStrings(_baz, _moo)},
 			false,
 		},
 	}
@@ -209,6 +206,17 @@ func TestString_Equal(t *testing.T) {
 	}
 }
 
+func TestString_IUnion(t *testing.T) {
+	set := make(String)
+	a := FromStrings(_foo, _bar)
+	b := FromStrings(_baz)
+
+	set.IUnion(a)
+	assert.Equal(t, set, a)
+	set.IUnion(b)
+	b.IUnion(a)
+	assert.Equal(t, set, b)
+}
 func TestString_XOR(t *testing.T) {
 	type args struct {
 		a String
@@ -221,8 +229,8 @@ func TestString_XOR(t *testing.T) {
 	}{
 		{
 			"ok",
-			args{String{"foo": yes, "bar": yes}, String{"foo": yes, "baz": yes}},
-			String{"bar": yes, "baz": yes},
+			args{String{_foo: yes, _bar: yes}, String{_foo: yes, _baz: yes}},
+			String{_bar: yes, _baz: yes},
 		},
 	}
 	for _, tt := range tests {
