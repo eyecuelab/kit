@@ -129,3 +129,43 @@ func (s Int) Sorted() []int {
 	sort.Ints(slice)
 	return slice
 }
+
+//Map a function f(x) across the set, returning a new set containing f(x) for all x in the set.
+func (s Int) Map(f func(int) int) Int {
+	mapped := make(Int)
+	for k := range s {
+		mapped[f(k)] = yes
+	}
+	return mapped
+
+}
+
+//Reduce applies a reducing function across the set. It will return (0, false) for a set with zero entries.
+func (s Int) Reduce(f func(int, int) int) (int, bool) {
+	if len(s) == 0 {
+		return 0, false
+	}
+	first := true
+	var reduced int
+	for k := range s {
+		if first {
+			reduced = k
+			first = false
+
+		} else {
+			reduced = f(reduced, k)
+		}
+	}
+	return reduced, true
+}
+
+//Filter applies a filtering function across the set, returning a set containing x where f(x) is true.
+func (s Int) Filter(f func(int) bool) Int {
+	filtered := make(Int)
+	for k := range s {
+		if f(k) {
+			filtered.Add(k)
+		}
+	}
+	return filtered
+}

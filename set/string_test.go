@@ -241,3 +241,56 @@ func TestString_XOR(t *testing.T) {
 		})
 	}
 }
+
+func TestString_Reduce(t *testing.T) {
+	min := func(a, b string) string {
+		if a < b {
+			return a
+		}
+		return b
+	}
+
+	set := FromStrings("aaa", "ab", "ccc")
+	want := "aaa"
+	got, _ := set.Reduce(min)
+	if want != got {
+		t.Errorf("reduce broken: should get %s, but got %s", want, got)
+	}
+	var emptySet String
+	if _, ok := emptySet.Reduce(min); ok {
+		t.Errorf("should not get OK on empty set")
+	}
+}
+
+func TestString_Map(t *testing.T) {
+	double := func(s string) string {
+		out := ""
+		for _, r := range s {
+			out += string(r) + string(r)
+		}
+		return out
+	}
+	set := FromStrings("ab", "cd")
+	want := FromStrings("aabb", "ccdd")
+	got := set.Map(double)
+	if !got.Equal(want) {
+		t.Errorf("map broken: %v", got.XOR(want))
+	}
+}
+
+func TestString_Filter(t *testing.T) {
+	capital := func(s string) bool {
+		for _, r := range s {
+			if r < 'A' || r > 'Z' {
+				return false
+			}
+		}
+		return true
+	}
+	set := FromStrings("AAA", "BBB", "crasn", "44s")
+	want := FromStrings("AAA", "BBB")
+	got := set.Filter(capital)
+	if !want.Equal(got) {
+		t.Errorf("should get %v, but got %v", want, got)
+	}
+}

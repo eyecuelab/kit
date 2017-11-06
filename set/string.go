@@ -128,3 +128,43 @@ func (s String) Sorted() []string {
 	sort.Strings(slice)
 	return slice
 }
+
+//Map a function f(x) across the set, returning a new set containing f(x) for all x in the set.
+func (s String) Map(f func(string) string) String {
+	mapped := make(String)
+	for k := range s {
+		mapped[f(k)] = yes
+	}
+	return mapped
+
+}
+
+//Reduce applies a reducing function across the set. It will return (0, false) for a set with zero entries.
+func (s String) Reduce(f func(string, string) string) (string, bool) {
+	if len(s) == 0 {
+		return "", false
+	}
+	first := true
+	var reduced string
+	for k := range s {
+		if first {
+			reduced = k
+			first = false
+
+		} else {
+			reduced = f(reduced, k)
+		}
+	}
+	return reduced, true
+}
+
+//Filter applies a filtering function across the set, returning a set containing x where f(x) is true.
+func (s String) Filter(f func(string) bool) String {
+	filtered := make(String)
+	for k := range s {
+		if f(k) {
+			filtered.Add(k)
+		}
+	}
+	return filtered
+}

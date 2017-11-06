@@ -238,3 +238,47 @@ func TestInt_XOR(t *testing.T) {
 		})
 	}
 }
+
+func TestInt_Map(t *testing.T) {
+	double := func(n int) int {
+		return 2 * n
+	}
+	set := FromInts(1, 2, 4, 8)
+	want := FromInts(2, 4, 8, 16)
+	got := set.Map(double)
+	if !got.Equal(want) {
+		t.Errorf("map broken: %v", got.XOR(want))
+	}
+}
+
+func TestInt_Reduce(t *testing.T) {
+	min := func(a, b int) int {
+		if a < b {
+			return a
+		}
+		return b
+	}
+
+	set := FromInts(-1, -5, 2, 8)
+	want := -5
+	got, _ := set.Reduce(min)
+	if want != got {
+		t.Errorf("reduce broken: should get %d, but got %d", want, got)
+	}
+	var emptySet Int
+	if _, ok := emptySet.Reduce(min); ok {
+		t.Errorf("should not get OK on empty set")
+	}
+}
+
+func TestInt_Filter(t *testing.T) {
+	nonneg := func(n int) bool {
+		return n >= 0
+	}
+	set := FromInts(-1, 0, 2, 3)
+	want := FromInts(0, 2, 3)
+	got := set.Filter(nonneg)
+	if !want.Equal(got) {
+		t.Errorf("should get %v, but got %v", want, got)
+	}
+}
