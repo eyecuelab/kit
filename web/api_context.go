@@ -32,6 +32,7 @@ type (
 		JsonApiOK(interface{}) error
 		ApiError(string, ...int) *echo.HTTPError
 		RestrictedParam(string, ...string) (string, error)
+		QueryParamTrue(string) (bool, bool)
 	}
 
 	apiContext struct {
@@ -98,6 +99,20 @@ func (c *apiContext) BindIdParam(idValue *int, named ...string) error {
 	var err error
 	*idValue, err = strconv.Atoi(c.Param(paramName))
 	return err
+}
+
+func (c *apiContext) QueryParamTrue(name string) (bool, ok bool) {
+	value := strings.ToLower(c.QueryParam(name))
+
+	if value == "true" || value == "1" {
+		return true, true
+	}
+
+	if value == "false" || value == "0" {
+		return false, true
+	}
+
+	return false, false
 }
 
 func jsonApiBind(c *apiContext, i interface{}) error {
