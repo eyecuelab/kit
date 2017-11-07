@@ -13,31 +13,26 @@ func (opts tagOpts) HasOption(name string) bool {
 	return functools.StringSliceContains(opts, name)
 }
 
-func TagValues(t reflect.StructTag, name string) (value string, opts tagOpts, ok bool) {
+func tagValues(t reflect.StructTag, name string) (value string, opts tagOpts, ok bool) {
 	fullValue, ok := t.Lookup(name)
 	if !ok {
 		return
 	}
 	splitValue := strings.Split(fullValue, ",")
-	for i := 1; i < len(splitValue); i++ {
-		opts = append(opts, splitValue[i])
+	if len(splitValue) > 0 {
+		opts = tagOpts(splitValue[1:])
 	}
 	return splitValue[0], opts, true
 }
 
 func GroupValuesByTagOption(tag string, structs ...interface{}) map[string]map[string]interface{} {
-	toScan := make([]reflect.Value, len(structs))
 	optsMap := make(map[string]map[string]interface{})
 
-	for i, s := range structs {
-		toScan[i] = reflect.ValueOf(s)
-	}
-
-	for _, scan := range toScan {
-		for i := 0; i < scan.NumField(); i++ {
-			tagValue, tagOpts, ok := TagValues(scan.Type().Field(i).Tag, tag)
+	for _, val := range values(structs) {
+		for i, field := range fields(val) {
+			tagValue, tagOpts, ok := tagValues(field.Tag, tag)
 			if ok {
-				attrValue := scan.Field(i).Interface()
+				attrValue := val.Field(i).Interface()
 				for _, tagOpt := range tagOpts {
 					if optsMap[tagOpt] == nil {
 						optsMap[tagOpt] = make(map[string]interface{})
@@ -50,19 +45,29 @@ func GroupValuesByTagOption(tag string, structs ...interface{}) map[string]map[s
 	return optsMap
 }
 
-func GroupNonEmptyValuesByTagOption(tag string, structs ...interface{}) map[string]map[string]interface{} {
-	toScan := make([]reflect.Value, len(structs))
-	optsMap := make(map[string]map[string]interface{})
-
+func values(structs ...interface{}) []reflect.Value {
+	values := make([]reflect.Value, len(structs))
 	for i, s := range structs {
-		toScan[i] = reflect.ValueOf(s)
+		values[i] = reflect.ValueOf(s)
 	}
+	return values
+}
 
-	for _, scan := range toScan {
-		for i := 0; i < scan.NumField(); i++ {
-			tagValue, tagOpts, ok := TagValues(scan.Type().Field(i).Tag, tag)
+func fields(val reflect.Value) []reflect.StructField {
+	fields := make([]reflect.StructField, val.NumField())
+	for i := range fields {
+		fields[i] = val.Type().Field(i)
+	}
+	return fields
+}
+
+func GroupNonEmptyValuesByTagOption(tag string, structs ...interface{}) map[string]map[string]interface{} {
+	optsMap := make(map[string]map[string]interface{})
+	for _, val := range values(structs) {
+		for i, field := range fields(val) {
+			tagValue, tagOpts, ok := tagValues(field.Tag, tag)
 			if ok {
-				attrValue := scan.Field(i).Interface()
+				attrValue := val.Field(i).Interface()
 				if IsZeroOfType(attrValue) {
 					continue
 				}
