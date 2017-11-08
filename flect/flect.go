@@ -28,7 +28,7 @@ func tagValues(t reflect.StructTag, name string) (value string, opts tagOpts, ok
 func GroupValuesByTagOption(tag string, structs ...interface{}) map[string]map[string]interface{} {
 	optsMap := make(map[string]map[string]interface{})
 
-	for _, val := range values(structs) {
+	for _, val := range values(structs...) {
 		for i, field := range fields(val) {
 			tagValue, tagOpts, ok := tagValues(field.Tag, tag)
 			if ok {
@@ -63,7 +63,7 @@ func fields(val reflect.Value) []reflect.StructField {
 
 func GroupNonEmptyValuesByTagOption(tag string, structs ...interface{}) map[string]map[string]interface{} {
 	optsMap := make(map[string]map[string]interface{})
-	for _, val := range values(structs) {
+	for _, val := range values(structs...) {
 		for i, field := range fields(val) {
 			tagValue, tagOpts, ok := tagValues(field.Tag, tag)
 			if ok {
