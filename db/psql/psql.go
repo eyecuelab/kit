@@ -117,3 +117,19 @@ func DeleteModelWithAssociations(value interface{}, associations ...string) erro
 	}
 	return nil
 }
+
+func Transact(db *gorm.DB, txFunc func(*gorm.DB) error) (err error) {
+	tx := db.Begin()
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		} else if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+	err = txFunc(tx)
+	return err
+}
