@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/eyecuelab/kit/maputil"
 	"github.com/google/jsonapi"
+	"github.com/jinzhu/inflection"
 	"github.com/labstack/echo"
 )
 
@@ -161,4 +163,16 @@ func restrictedValue(value string, slice []string, errorText string) (string, er
 		}
 	}
 	return "", fmt.Errorf(errorText, value)
+}
+
+func JSONApiSelfLink(i interface{}) *jsonapi.Links{
+	name := reflect.TypeOf(i).Name()
+	name = inflection.Plural(strings.ToLower(name))
+
+	id := reflect.ValueOf(i).FieldByName("ID").Interface()
+
+	return &jsonapi.Links{
+		"self": jsonapi.Link{
+			Href: fmt.Sprintf("/%v/%v", name, id)},
+	}
 }
