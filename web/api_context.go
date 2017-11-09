@@ -15,8 +15,6 @@ import (
 	"github.com/labstack/echo"
 )
 
-const MIMEJsonAPI = "application/vnd.api+json"
-
 var notJsonApi = regexp.MustCompile("(not a jsonapi|EOF)")
 
 type (
@@ -57,16 +55,20 @@ func (c *apiContext) AttrKeys() []string {
 func (c *apiContext) Bind(i interface{}) error {
 	ctype := c.Request().Header.Get(echo.HeaderContentType)
 
-	if strings.HasPrefix(ctype, MIMEJsonAPI) {
-		return jsonApiBind(c, i)
+	if isJSONAPI(ctype) {
+		return jsonAPIBind(c, i)
 	}
+	return c.defaultBind(i)
+}
 
+func (c *apiContext) defaultBind(i interface{}) error {
 	db := new(echo.DefaultBinder)
-	if err := db.Bind(i, c); err != nil {
-		return err
-	}
+	return db.Bind(i, c)
+}
 
-	return nil
+func isJSONAPI(s string) bool {
+	const MIMEJsonAPI = "application/vnd.api+json"
+	return strings.HasPrefix(s, MIMEJsonAPI)
 }
 
 func (c *apiContext) BindAndValidate(i interface{}) error {
@@ -90,34 +92,29 @@ func (c *apiContext) JsonApiOK(i interface{}) error {
 	return c.JsonApi(i, http.StatusOK)
 }
 
-func (c *apiContext) BindIdParam(idValue *int, named ...string) error {
+func (c *apiContext) BindIdParam(idValue *int, named ...string) (err error) {
 	paramName := "id"
 	if len(named) > 0 {
 		paramName = named[0]
 	}
-
-	var err error
 	*idValue, err = strconv.Atoi(c.Param(paramName))
 	return err
 }
 
-func (c *apiContext) QueryParamTrue(name string) (bool, ok bool) {
-	value := strings.ToLower(c.QueryParam(name))
-
-	if value == "true" || value == "1" {
+func (c *apiContext) QueryParamTrue(name string) (val, ok bool) {
+	switch strings.ToLower(c.QueryParam(name)) {
+	case "true", "1":
 		return true, true
-	}
-
-	if value == "false" || value == "0" {
+	case "false", "0":
 		return false, true
+	default:
+		return false, false
 	}
-
-	return false, false
 }
 
-func jsonApiBind(c *apiContext, i interface{}) error {
-	var buf bytes.Buffer
-	tee := io.TeeReader(c.Request().Body, &buf)
+func jsonAPIBind(c *apiContext, i interface{}) error {
+	buf := new(bytes.Buffer)
+	tee := io.TeeReader(c.Request().Body, buf)
 
 	if err := jsonapi.UnmarshalPayload(tee, i); err != nil {
 		if notJsonApi.MatchString(err.Error()) {
@@ -127,11 +124,7 @@ func jsonApiBind(c *apiContext, i interface{}) error {
 	}
 
 	c.payload = new(jsonapi.OnePayload)
-	if err := json.Unmarshal(buf.Bytes(), c.payload); err != nil {
-		return err
-	}
-
-	return nil
+	return json.Unmarshal(buf.Bytes(), c.payload)
 }
 
 func (c *apiContext) ApiError(msg string, codes ...int) *echo.HTTPError {

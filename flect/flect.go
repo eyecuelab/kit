@@ -45,22 +45,6 @@ func GroupValuesByTagOption(tag string, structs ...interface{}) map[string]map[s
 	return optsMap
 }
 
-func values(structs ...interface{}) []reflect.Value {
-	values := make([]reflect.Value, len(structs))
-	for i, s := range structs {
-		values[i] = reflect.ValueOf(s)
-	}
-	return values
-}
-
-func fields(val reflect.Value) []reflect.StructField {
-	fields := make([]reflect.StructField, val.NumField())
-	for i := range fields {
-		fields[i] = val.Type().Field(i)
-	}
-	return fields
-}
-
 func GroupNonEmptyValuesByTagOption(tag string, structs ...interface{}) map[string]map[string]interface{} {
 	optsMap := make(map[string]map[string]interface{})
 	for _, val := range values(structs...) {
@@ -81,6 +65,22 @@ func GroupNonEmptyValuesByTagOption(tag string, structs ...interface{}) map[stri
 		}
 	}
 	return optsMap
+}
+
+func values(structs ...interface{}) []reflect.Value {
+	values := make([]reflect.Value, len(structs))
+	for i, s := range structs {
+		values[i] = reflect.ValueOf(s)
+	}
+	return values
+}
+
+func fields(val reflect.Value) []reflect.StructField {
+	fields := make([]reflect.StructField, val.NumField())
+	for i := range fields {
+		fields[i] = val.Type().Field(i)
+	}
+	return fields
 }
 
 func IsZeroOfType(x interface{}) bool {

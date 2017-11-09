@@ -1,4 +1,4 @@
-package web
+package webtest
 
 import (
 	"net/http/httptest"
@@ -7,12 +7,10 @@ import (
 	"github.com/labstack/echo"
 )
 
-//
-func TestPost(e *echo.Echo, url, json string) (echo.Context, *httptest.ResponseRecorder) {
-
+func Post(url string, json string) (ctx echo.Context, rec *httptest.ResponseRecorder) {
 	req := httptest.NewRequest(echo.POST, url, strings.NewReader(json))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	ctx := e.NewContext(req, rec)
+	rec = httptest.NewRecorder()
+	ctx = echo.New().NewContext(req, rec)
 	return ctx, rec
 }
