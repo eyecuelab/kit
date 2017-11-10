@@ -19,7 +19,7 @@ func All(a []string, f predicate) bool {
 }
 
 //Any (returns true if f(s) is true for any s in a. Any([], f) is false.
-func Any(a []string, f predicate) bool {
+func Any(a []string, f func(string) bool) bool {
 	for _, s := range a {
 		if f(s) {
 			return true
@@ -29,7 +29,7 @@ func Any(a []string, f predicate) bool {
 }
 
 //Filter returns the elements of a where f(a) is true.
-func Filter(a []string, f predicate) []string {
+func Filter(a []string, f func(string) bool) []string {
 	filtered := make([]string, 0, len(a))
 	for _, s := range a {
 		if f(s) {
@@ -40,7 +40,7 @@ func Filter(a []string, f predicate) []string {
 }
 
 //FilterFalse returns the elements of a where f(a) is false.
-func FilterFalse(a []string, f predicate) []string {
+func FilterFalse(a []string, f func(string) bool) []string {
 	filtered := make([]string, 0, len(a))
 	for _, s := range a {
 		if !f(s) {
@@ -50,36 +50,17 @@ func FilterFalse(a []string, f predicate) []string {
 	return filtered
 }
 
-func GroupBy(a []string, f func(string) string) (groups [][]string) {
-	var group []string
-	var prev string
-	for _, s := range a {
-		if len(group) == 0 {
-			group, prev = append(group, s), f(s)
-		} else if f(s) == prev {
-			group = append(group, s)
-		} else {
-			groups = append(groups, group)
-			group = nil
-		}
+func Map(a []string, f func(string) string) []string {
+	mapped := make([]string, len(a))
+	for i, s := range a {
+		mapped[i] = f(s)
 	}
-	if len(group) > 0 {
-		groups = append(groups, group)
-	}
-	return groups
-}
-
-func GroupByID(a []string) (groups [][]string) {
-	return GroupBy(a, noOp)
-}
-
-func noOp(s string) string {
-	return s
+	return mapped
 }
 
 func AppendIfNonEmpty(a []string, strings ...string) []string {
 	for _, s := range strings {
-		if s != "" {
+		if len(s) > 0 {
 			a = append(a, s)
 		}
 	}
@@ -89,7 +70,7 @@ func AppendIfNonEmpty(a []string, strings ...string) []string {
 //TotalDistance returns the sum of the levanshtein distance of the strings. If the string slices are not the same length, OK is false.
 func TotalDistance(a []string, b []string) (distance int, ok bool) {
 	if len(a) != len(b) {
-		return
+		return 0, false
 	}
 	for i := range a {
 		distance += levenshteinDistance(a[i], b[i])
@@ -127,7 +108,6 @@ func levenshteinDistance(s, t string) int {
 			lastDiag = oldDiag
 		}
 	}
-
 	return column[len(r1)]
 }
 
