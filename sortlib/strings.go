@@ -1,6 +1,8 @@
 package sortlib
 
-import "sort"
+import (
+	"sort"
+)
 
 //ByteSlice is a sortable slice of bytes.
 type ByteSlice []byte
@@ -31,32 +33,16 @@ func (r RuneSlice) Len() int {
 	return len(r)
 }
 
-//ByBytes returns a sorted copy of the string, in ascending order (by bytes).
+//Bytes returns a sorted copy of the string, in ascending order (by bytes).
 func ByBytes(s string) string {
 	b := ByteSlice(s)
 	sort.Sort(b)
 	return string(b)
 }
 
-//ByRunes returns a sorted copy of the string, in ascending order (by runes).
-func ByRunes(s string) string {
+//Runes returns a sorted copy of the string, in ascending order (by runes).
+func Runes(s string) string {
 	r := RuneSlice(s)
 	sort.Sort(r)
 	return string(r)
-}
-
-//Bytes returns a sorted copy of the bytes, in ascending order.
-func Bytes(b []byte) []byte {
-	sorted := make(ByteSlice, len(b))
-	copy(sorted, b)
-	sort.Sort(sorted)
-	return sorted
-}
-
-//Runes returns a sorted copy of the runes, in ascending order.
-func Runes(r []rune) []rune {
-	sorted := make(RuneSlice, len(r))
-	copy(sorted, r)
-	sort.Sort(sorted)
-	return sorted
 }

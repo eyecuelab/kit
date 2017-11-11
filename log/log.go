@@ -38,11 +38,11 @@ func FatalWrap(err error, msg string) {
 
 func Infof(format string, args ...interface{}) {
 	s := spew.Sprintf(format, args...)
-	log.Info(s)
+	log.Infof(s)
 }
 
 func Infofln(format string, args ...interface{}) {
-	fmt.Println("")
+	
 	Infof(format, args...)
 }
 

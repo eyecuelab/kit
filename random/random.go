@@ -3,8 +3,10 @@ package random
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"math"
 )
 
+//RandomBytes returns a random slice of n bytes
 func RandomBytes(n int) ([]byte, error) {
 	b := make([]byte, n)
 	_, err := rand.Read(b)
@@ -15,7 +17,59 @@ func RandomBytes(n int) ([]byte, error) {
 	return b, nil
 }
 
-func RandomString(s int) (string, error) {
-	b, err := RandomBytes(s)
+//RandomString returns a random string comprised of n bytes
+func RandomString(n int) (string, error) {
+	b, err := RandomBytes(n)
 	return base64.URLEncoding.EncodeToString(b), err
+}
+
+func Int64s(n int) ([]int64, error) {
+	bytes, err := RandomBytes(8 * n)
+	if err != nil {
+		return nil, err
+	}
+
+	ints := make([]int64, 0, n)
+	for i := 0; i < len(bytes); i += 8 {
+		var out uint64
+		for i, b := range bytes[i : i+8] {
+			out |= uint64(b) << uint64(i)
+		}
+		ints = append(ints, int64(out))
+	}
+
+	return ints, nil
+}
+
+func Uint64s(n int) ([]uint64, error) {
+	bytes, err := RandomBytes(8 * n)
+	if err != nil {
+		return nil, err
+	}
+	uints := make([]uint64, 0, n)
+	for i := 0; i < len(bytes); i += 8 {
+		var out uint64
+		for i, b := range bytes[i : i+8] {
+			out |= uint64(b) << uint64(i)
+		}
+		uints = append(uints, out)
+	}
+
+	return uints, nil
+}
+
+func Float64s(n int) ([]float64, error) {
+	bytes, err := RandomBytes(8 * n)
+	if err != nil {
+		return nil, err
+	}
+	floats := make([]float64, 0, n)
+	for i := 0; i < len(bytes); i += 8 {
+		var out uint64
+		for i, b := range bytes[i : i+8] {
+			out |= uint64(b) << uint64(i)
+		}
+		floats = append(floats, math.Float64frombits(out))
+	}
+	return floats, nil
 }
