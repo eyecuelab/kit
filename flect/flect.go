@@ -13,7 +13,7 @@ func (opts tagOpts) HasOption(name string) bool {
 	return functools.StringSliceContains(opts, name)
 }
 
-func tagValues(t reflect.StructTag, name string) (value string, opts tagOpts, ok bool) {
+func TagValues(t reflect.StructTag, name string) (value string, opts tagOpts, ok bool) {
 	fullValue, ok := t.Lookup(name)
 	if !ok {
 		return
@@ -28,9 +28,9 @@ func tagValues(t reflect.StructTag, name string) (value string, opts tagOpts, ok
 func GroupValuesByTagOption(tag string, structs ...interface{}) map[string]map[string]interface{} {
 	optsMap := make(map[string]map[string]interface{})
 
-	for _, val := range values(structs...) {
-		for i, field := range fields(val) {
-			tagValue, tagOpts, ok := tagValues(field.Tag, tag)
+	for _, val := range Values(structs...) {
+		for i, field := range Fields(val) {
+			tagValue, tagOpts, ok := TagValues(field.Tag, tag)
 			if ok {
 				attrValue := val.Field(i).Interface()
 				for _, tagOpt := range tagOpts {
@@ -45,11 +45,27 @@ func GroupValuesByTagOption(tag string, structs ...interface{}) map[string]map[s
 	return optsMap
 }
 
+func Values(structs ...interface{}) []reflect.Value {
+	values := make([]reflect.Value, len(structs))
+	for i, s := range structs {
+		values[i] = reflect.ValueOf(s)
+	}
+	return values
+}
+
+func Fields(val reflect.Value) []reflect.StructField {
+	fields := make([]reflect.StructField, val.NumField())
+	for i := range fields {
+		fields[i] = val.Type().Field(i)
+	}
+	return fields
+}
+
 func GroupNonEmptyValuesByTagOption(tag string, structs ...interface{}) map[string]map[string]interface{} {
 	optsMap := make(map[string]map[string]interface{})
-	for _, val := range values(structs...) {
-		for i, field := range fields(val) {
-			tagValue, tagOpts, ok := tagValues(field.Tag, tag)
+	for _, val := range Values(structs...) {
+		for i, field := range Fields(val) {
+			tagValue, tagOpts, ok := TagValues(field.Tag, tag)
 			if ok {
 				attrValue := val.Field(i).Interface()
 				if IsZeroOfType(attrValue) {
@@ -65,22 +81,6 @@ func GroupNonEmptyValuesByTagOption(tag string, structs ...interface{}) map[stri
 		}
 	}
 	return optsMap
-}
-
-func values(structs ...interface{}) []reflect.Value {
-	values := make([]reflect.Value, len(structs))
-	for i, s := range structs {
-		values[i] = reflect.ValueOf(s)
-	}
-	return values
-}
-
-func fields(val reflect.Value) []reflect.StructField {
-	fields := make([]reflect.StructField, val.NumField())
-	for i := range fields {
-		fields[i] = val.Type().Field(i)
-	}
-	return fields
 }
 
 func IsZeroOfType(x interface{}) bool {

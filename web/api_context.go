@@ -15,6 +15,7 @@ import (
 	"github.com/google/jsonapi"
 	"github.com/jinzhu/inflection"
 	"github.com/labstack/echo"
+	"github.com/eyecuelab/kit/flect"
 )
 
 var notJsonApi = regexp.MustCompile("(not a jsonapi|EOF)")
@@ -165,7 +166,7 @@ func restrictedValue(value string, slice []string, errorText string) (string, er
 	return "", fmt.Errorf(errorText, value)
 }
 
-func JSONApiSelfLink(i interface{}) *jsonapi.Links{
+func JSONApiSelfLink(i interface{}) *jsonapi.Links {
 	name := reflect.TypeOf(i).Name()
 	name = inflection.Plural(strings.ToLower(name))
 
@@ -175,4 +176,26 @@ func JSONApiSelfLink(i interface{}) *jsonapi.Links{
 		"self": jsonapi.Link{
 			Href: fmt.Sprintf("/%v/%v", name, id)},
 	}
+}
+
+func JSONApiRefLink(i interface{}, rel string) *jsonapi.Links {
+	fields := flect.Fields(reflect.ValueOf(i))
+	name := reflect.TypeOf(i).Name()
+	id := reflect.ValueOf(i).FieldByName("ID").Interface()
+	for _, f := range fields {
+		value, opts, ok := flect.TagValues(f.Tag, "jsonapi")
+		if ok && value == "relation" && opts.HasOption(rel) {
+			if _,_, ok := flect.TagValues(f.Tag, "link"); ok {
+				return &jsonapi.Links {
+					"related": fmt.Sprintf(
+						"/%v/%v/%v",
+						strings.ToLower(inflection.Plural(name)),
+						id,
+						strings.ToLower(inflection.Plural(f.Name)),
+					),
+				}
+			}
+		}
+	}
+	return &jsonapi.Links{}
 }
