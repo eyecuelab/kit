@@ -1,8 +1,6 @@
 package log
 
 import (
-	"fmt"
-
 	"github.com/davecgh/go-spew/spew"
 	"github.com/eyecuelab/kit/goenv"
 	"github.com/pkg/errors"
@@ -42,7 +40,7 @@ func Infof(format string, args ...interface{}) {
 }
 
 func Infofln(format string, args ...interface{}) {
-	
+
 	Infof(format, args...)
 }
 
