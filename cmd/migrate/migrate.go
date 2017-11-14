@@ -7,7 +7,6 @@ import (
 	"github.com/eyecuelab/kit/assets"
 	"github.com/eyecuelab/kit/db/psql"
 	"github.com/eyecuelab/kit/log"
-	"github.com/jinzhu/gorm"
 	migrate "github.com/rubenv/sql-migrate"
 	"github.com/spf13/cobra"
 )
@@ -22,18 +21,14 @@ var MigrateCmd = &cobra.Command{
 }
 
 var (
-	down, files   bool
-	max           int
-	migrateTestDB bool
-	db            *gorm.DB
+	down, files bool
+	max         int
 )
 
 func init() {
-
 	MigrateCmd.Flags().BoolVar(&down, "down", false, "rollback migrations")
 	MigrateCmd.Flags().IntVar(&max, "max", 0, "number of migrations to run, default will run all")
 	MigrateCmd.Flags().BoolVar(&files, "files", false, fmt.Sprintf("use files directly rather than bindata"))
-	MigrateCmd.Flags().BoolVar(&migrateTestDB, "testdb", false, "migrate on the test database")
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -42,17 +37,8 @@ func run(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	if migrateTestDB {
-		log.Infof("migrating test DB")
-		var err error
-		db, err = psql.TestDB()
-		log.Check(err)
-	} else {
-		db = psql.DB
-	}
-
 	dir := direction()
-	n, err := migrate.ExecMax(db.DB(), "postgres", getMigrations(), dir, max)
+	n, err := migrate.ExecMax(psql.DB.DB(), "postgres", getMigrations(), dir, max)
 	if err != nil {
 		log.Fatalf("migrate.run: migrate.ExecMax: %v", err)
 	}
@@ -64,11 +50,11 @@ func run(cmd *cobra.Command, args []string) {
 }
 
 func MigrateAll() (int, error) {
-	return migrate.Exec(db.DB(), "postgres", getMigrations(), migrate.Up)
+	return migrate.Exec(psql.DB.DB(), "postgres", getMigrations(), migrate.Up)
 }
 
 func PendingMigrationCount() (int, error) {
-	plans, _, err := migrate.PlanMigration(db.DB(), "postgres", getMigrations(), migrate.Up, 0)
+	plans, _, err := migrate.PlanMigration(psql.DB.DB(), "postgres", getMigrations(), migrate.Up, 0)
 	if err != nil {
 		return -1, err
 	}
