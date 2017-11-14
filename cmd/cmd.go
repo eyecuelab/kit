@@ -29,7 +29,10 @@ func Use(cmds ...string) {
 
 func Init(appName string, rootCmd *cobra.Command, assetGet assets.AssetGet, assetDir assets.AssetDir) error {
 	assets.Manager = &assets.AssetManager{assetGet, assetDir}
-	addRoot(rootCmd)
+
+	if rootCmd != nil {
+		addRoot(rootCmd)
+	}
 
 	return config.Load(appName, cfgFile)
 }
