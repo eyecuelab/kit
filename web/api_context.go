@@ -33,6 +33,7 @@ type (
 		QueryParamTrue(string) (bool, bool)
 		RequiredQueryParams(...string) (map[string]string, error)
 		OptionalQueryParams(...string) (map[string]string)
+		QParams(...string) (map[string]string, error)
 	}
 
 	apiContext struct {
