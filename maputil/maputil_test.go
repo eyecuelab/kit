@@ -52,3 +52,11 @@ func (s sorter) Len() int {
 func (s sorter) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
+
+func TestCopy(t *testing.T) {
+	start := map[string]interface{}{"1": 1}
+	got := Copy(start)
+	assert.Equal(t, start, got)
+	start["2"] = 2
+	assert.NotEqual(t, start, got) // no leak
+}

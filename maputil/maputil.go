@@ -27,3 +27,11 @@ func SortedKeys(m map[string]interface{}) []string {
 	sort.Strings(keys)
 	return keys
 }
+
+func Copy(m map[string]interface{}) map[string]interface{} {
+	copy := make(map[string]interface{})
+	for k, v := range m {
+		copy[k] = v
+	}
+	return copy
+}
