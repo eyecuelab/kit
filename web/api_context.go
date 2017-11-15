@@ -31,6 +31,8 @@ type (
 		ApiError(string, ...int) *echo.HTTPError
 		RestrictedParam(string, ...string) (string, error)
 		QueryParamTrue(string) (bool, bool)
+		RequiredQueryParams(...string) (map[string]string, error)
+		OptionalQueryParams(...string) (map[string]string)
 	}
 
 	apiContext struct {
@@ -143,6 +145,35 @@ func (c *apiContext) RestrictedParam(paramName string, allowedValues ...string) 
 
 func (c *apiContext) RestrictedQueryParam(paramName string, allowedValues ...string) (string, error) {
 	return restrictedValue(c.QueryParam(paramName), allowedValues, "Query param value %v not allowed")
+}
+
+func (c *apiContext) RequiredQueryParams(required ...string) (map[string]string, error) {
+	missing := make([]string, 0, len(required))
+	params := make(map[string]string)
+
+	for _, key := range required {
+		val := c.QueryParam(key)
+		if val == "" {
+			missing = append(missing, key)
+			continue
+		}
+		params[key] = val
+	}
+
+	if len(missing) > 0 {
+		return nil, fmt.Errorf("missing required params: %v", missing)
+	}
+
+	return params, nil
+}
+
+func (c *apiContext) OptionalQueryParams(optional ...string) map[string]string {
+	params := make(map[string]string)
+	for _, key := range optional {
+		val := c.QueryParam(key)
+		params[key] = val
+	}
+	return params
 }
 
 func ApiContextMiddleWare() func(echo.HandlerFunc) echo.HandlerFunc {
