@@ -2,15 +2,19 @@ package tsv
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/eyecuelab/kit/assets"
 )
 
 //Record represents a single line of a TSV
@@ -64,6 +68,20 @@ func StreamFromPaths(out chan Record, paths ...string) error {
 	return nil
 }
 
+func StreamFromBindataPaths(out chan Record, paths ...string) error {
+	readClosers := make([]io.ReadCloser, len(paths))
+	for i, path := range paths {
+		rc, err := asBinReadCloser(path)
+		if err != nil {
+			close(out)
+			return err
+		}
+		readClosers[i] = rc
+	}
+	go parseStreams(out, readClosers...)
+	return nil
+}
+
 //ParseLine parses a single line of a TSV using the given labels
 func parseLine(line string, labels labels) (Record, bool) {
 	split := strings.Split(line, "\t")
@@ -76,6 +94,15 @@ func parseLine(line string, labels labels) (Record, bool) {
 	}
 	return record, true
 
+}
+
+//asReadCloser bindata path, and returns a ReadCloser containing the information
+func asBinReadCloser(s string) (readCloser io.ReadCloser, err error) {
+	b, err := assets.Get(s)
+	if err != nil {
+		return nil, err
+	}
+	return ioutil.NopCloser(bytes.NewReader(b)), nil
 }
 
 //asReadCloser takes a URL or local path, downloads if necessary, and returns a ReadCloser containing the information
