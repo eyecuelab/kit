@@ -167,6 +167,26 @@ func (c *apiContext) RequiredQueryParams(required ...string) (map[string]string,
 	return params, nil
 }
 
+func (c *apiContext) QParams(required ...string) (map[string]string, error) {
+	missing := make([]string, 0, len(required))
+	params := make(map[string]string)
+
+
+	for k, _ := range c.QueryParams() {
+		val := c.QueryParam(k)
+		if val == "" {
+			missing = append(missing, k)
+		}
+		params[k] = val
+	}
+
+	if len(missing) > 0 {
+		return nil, fmt.Errorf("missing required params: %v", missing)
+	}
+
+	return params, nil
+}
+
 func (c *apiContext) OptionalQueryParams(optional ...string) map[string]string {
 	params := make(map[string]string)
 	for _, key := range optional {
