@@ -11,6 +11,7 @@ import (
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
 	"github.com/lib/pq"
+	"github.com/eyecuelab/kit/brake"
 )
 
 var pq500s = map[string]bool{
@@ -33,7 +34,7 @@ func ErrorHandler(err error, c echo.Context) {
 
 	if err := renderApiErrors(c, apiError); err != nil {
 		//FIXME: are we supposed to log this error twice?
-		logErr(err)
+		logErr(err, c)
 		goto ERROR
 	}
 
@@ -41,10 +42,11 @@ func ErrorHandler(err error, c echo.Context) {
 		return
 	}
 ERROR: //FIXME - I feel like we should justify a GOTO
-	logErr(err)
+	logErr(err, c)
 }
 
-func logErr(err error) {
+func logErr(err error, c echo.Context) {
+	brake.Notify(err, c.Request())
 	log.ErrorWrap(err, "Uncaught Error")
 }
 
