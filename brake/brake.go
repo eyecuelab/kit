@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/airbrake/gobrake"
+	"github.com/eyecuelab/kit/goenv"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -11,6 +12,8 @@ import (
 var (
 	Airbrake *gobrake.Notifier
 )
+
+const traceDepth = 5
 
 func init() {
 	cobra.OnInitialize(setup)
@@ -31,6 +34,8 @@ func IsSetup() bool {
 
 func Notify(e error, req *http.Request) {
 	if IsSetup() {
-		Airbrake.Notify(e, req)
+		notice := gobrake.NewNotice(e, req, traceDepth)
+		notice.Context["environment"] = goenv.Env
+		Airbrake.SendNotice(notice)
 	}
 }
