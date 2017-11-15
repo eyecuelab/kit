@@ -29,8 +29,8 @@ func IsSetup() bool {
 	return Airbrake != nil
 }
 
-func Notify(e error, req http.Request) {
+func Notify(e error, req *http.Request) {
 	if IsSetup() {
-		Airbrake.Notify(err, req)
+		Airbrake.Notify(e, req)
 	}
 }
