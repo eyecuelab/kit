@@ -15,7 +15,11 @@ import (
 	"github.com/labstack/echo"
 )
 
-var notJsonApi = regexp.MustCompile("(not a jsonapi|EOF)")
+var reNotJsonApi = regexp.MustCompile("not a jsonapi|EOF")
+
+func notJsonApi(err error) bool {
+	return reNotJsonApi.MatchString(err.Error())
+}
 
 type (
 	ApiContext interface {
@@ -32,7 +36,7 @@ type (
 		RestrictedParam(string, ...string) (string, error)
 		QueryParamTrue(string) (bool, bool)
 		RequiredQueryParams(...string) (map[string]string, error)
-		OptionalQueryParams(...string) (map[string]string)
+		OptionalQueryParams(...string) map[string]string
 	}
 
 	apiContext struct {
@@ -119,7 +123,7 @@ func jsonAPIBind(c *apiContext, i interface{}) error {
 	tee := io.TeeReader(c.Request().Body, buf)
 
 	if err := jsonapi.UnmarshalPayload(tee, i); err != nil {
-		if notJsonApi.MatchString(err.Error()) {
+		if notJsonApi(err) {
 			return c.ApiError("Request Body is not valid JsonAPI")
 		}
 		return err
@@ -130,13 +134,11 @@ func jsonAPIBind(c *apiContext, i interface{}) error {
 }
 
 func (c *apiContext) ApiError(msg string, codes ...int) *echo.HTTPError {
-	status := http.StatusBadRequest
 	if len(codes) > 0 {
-		status = codes[0]
+		return echo.NewHTTPError(codes[0], msg)
 	}
-
 	// TODO: return jsonapi error instead
-	return echo.NewHTTPError(status, msg)
+	return echo.NewHTTPError(http.StatusBadRequest, msg)
 }
 
 func (c *apiContext) RestrictedParam(paramName string, allowedValues ...string) (string, error) {
@@ -185,11 +187,18 @@ func ApiContextMiddleWare() func(echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func restrictedValue(value string, slice []string, errorText string) (string, error) {
-	for _, v := range slice {
-		if value == v {
-			return value, nil
-		}
+func restrictedValue(value string, allowed []string, errorText string) (string, error) {
+	if contains(allowed, value) {
+		return value, nil
 	}
 	return "", fmt.Errorf(errorText, value)
+}
+
+func contains(set []string, s string) bool {
+	for _, v := range set {
+		if s == v {
+			return true
+		}
+	}
+	return false
 }
