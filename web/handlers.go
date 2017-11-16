@@ -10,23 +10,23 @@ import (
 )
 
 func Healthz(c ApiContext) error {
-	if c.QueryParam("oops") == "1" {
+	badParam := func(param string) bool { return c.QueryParam(param) == "1" }
+	switch {
+	case badParam("oops"):
 		panic("oops")
-	}
-	if c.QueryParam("apierr") == "1" {
+	case badParam("apiErr"):
 		return &jsonapi.ErrorObject{
 			Title:  "Api Error",
 			Status: fmt.Sprintf("%d", http.StatusBadRequest),
 			Detail: "missing parameters: foo,bar",
 		}
-	}
-	if c.QueryParam("500") == "1" {
+	case badParam("500"):
 		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	if c.QueryParam("400") == "1" {
+	case badParam("400"):
 		return echo.NewHTTPError(http.StatusBadRequest, "Missing value.")
+	default:
+		return c.String(http.StatusOK, "live")
 	}
-	return c.String(http.StatusOK, "live")
 }
 
 func Config(c ApiContext) error {
