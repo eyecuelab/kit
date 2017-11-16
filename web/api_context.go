@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/eyecuelab/kit/maputil"
+	"github.com/eyecuelab/kit/set"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
 )
@@ -37,6 +39,7 @@ type (
 		QueryParamTrue(string) (bool, bool)
 		RequiredQueryParams(...string) (map[string]string, error)
 		OptionalQueryParams(...string) map[string]string
+		QParams(...string) (map[string]string, error)
 	}
 
 	apiContext struct {
@@ -167,6 +170,36 @@ func (c *apiContext) RequiredQueryParams(required ...string) (map[string]string,
 	}
 
 	return params, nil
+}
+
+func (c *apiContext) QParams(required ...string) (map[string]string, error) {
+
+	missing := make([]string, 0, len(required))
+	params := make(map[string]string)
+
+	for k := range c.QueryParams() {
+		params[k] = c.QueryParam(k)
+	}
+
+	for _, k := range required {
+		if _, ok := params[k]; !ok {
+			missing = append(missing, k)
+		}
+	}
+
+	if len(missing) > 0 {
+		return nil, fmt.Errorf("missing required params: %v", missing)
+	}
+
+	return params, nil
+}
+
+func stringSet(m url.Values) set.String {
+	set := make(set.String)
+	for k := range m {
+		set.Add(k)
+	}
+	return set
 }
 
 func (c *apiContext) OptionalQueryParams(optional ...string) map[string]string {

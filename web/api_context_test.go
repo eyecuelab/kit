@@ -1,6 +1,7 @@
 package web
 
 import (
+	"net/url"
 	"testing"
 
 	"github.com/eyecuelab/kit/errorlib"
@@ -23,6 +24,14 @@ type mockParamsEchoContext struct {
 }
 
 var _ echo.Context = mockParamsEchoContext{}
+
+func (m mockParamsEchoContext) QueryParams() url.Values {
+	out := make(url.Values)
+	for k, v := range m.queryParams {
+		out[k] = []string{v}
+	}
+	return out
+}
 
 func (m mockParamsEchoContext) QueryParam(name string) string {
 	v, _ := m.queryParams[name]
@@ -63,6 +72,21 @@ func Test_apiContext_RequiredQueryParams(t *testing.T) {
 
 	_, err = ctx.RequiredQueryParams(foo, bar, baz)
 	assert.Error(t, err)
+}
+
+func Test_apiContext_QParams(t *testing.T) {
+	required := []string{foo, bar}
+	queryParams := map[string]string{foo: foo, bar: bar, baz: bar}
+	ctx := newMock(queryParams, nil)
+	got, err := ctx.QParams(required...)
+	assert.Equal(t, queryParams, got)
+	assert.NoError(t, err)
+
+	required = []string{"DNE"}
+	got, err = ctx.QParams(required...)
+	assert.Equal(t, map[string]string(nil), got)
+	assert.Error(t, err)
+
 }
 
 func Test_apiContext_OptionalQueryParams(t *testing.T) {
