@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/asaskevich/govalidator"
+
 	"github.com/google/jsonapi"
 	"github.com/lib/pq"
 
@@ -51,24 +53,29 @@ func TestErrorHandler(t *testing.T) {
 	assert.Equal(t, nilErr, ErrorHandler(nil, ctx))
 
 	ctx = newContext("GET")
-	//httpErr := echo.HTTPError{Code: 300, Message: "magic error", Inner: someErr}
-	//assert.Equal(t, rendered, ErrorHandler(&httpErr, ctx))
+	httpErr := echo.HTTPError{Code: 500, Message: "magic error", Inner: someErr}
+	assert.Equal(t, statusOver500, ErrorHandler(&httpErr, ctx))
+
+	ctx = newContext("GET")
+	httpErr = echo.HTTPError{Code: 200, Message: "OK", Inner: someErr}
+	assert.Equal(t, handledError, ErrorHandler(&httpErr, ctx))
+
+	ctx = newContext("GET")
+	err = &jsonapi.ErrorObject{Title: "hey", Status: "deliberately not an integer"}
+	assert.Equal(t, problemRendering, ErrorHandler(err, ctx))
+
 }
 
 func Test_logErr(t *testing.T) {
 }
 
 func Test_toApiError(t *testing.T) {
-	t.Run("panic!", func(t *testing.T) {
-		defer func() {
-			recover()
-		}()
-		toApiError(nil)
-		t.Error("should have panicked")
-	})
+	status, apiErr := toApiError(nil)
+	assert.Nil(t, apiErr)
+	assert.Equal(t, 200, status)
 
 	errObj := jsonapi.ErrorObject{Status: "200"}
-	status, apiErr := toApiError(&errObj)
+	status, apiErr = toApiError(&errObj)
 	assert.Equal(t, 200, status)
 	assert.Equal(t, errObj, *apiErr)
 
@@ -91,6 +98,7 @@ func Test_toApiError(t *testing.T) {
 	gotStatus, gotApiErr = toApiError(&httpErr)
 	assert.Equal(t, wantStatus, gotStatus)
 	assert.Equal(t, wantApiErr, *gotApiErr)
+
 	//pqErr
 	const (
 		msg      = "ok"
@@ -108,13 +116,29 @@ func Test_toApiError(t *testing.T) {
 	assert.Equal(t, wantStatus, gotStatus)
 	assert.Equal(t, wantApiErr, *gotApiErr)
 
+	//goValidator
+	gvErr := govalidator.Errors{someErr}
+	wantApiErr = jsonapi.ErrorObject{
+		Title:  http.StatusText(http.StatusBadRequest),
+		Detail: gvErr.Error(),
+		Code:   "",
+		Status: toStr(http.StatusBadRequest),
+	}
+	wantStatus = http.StatusBadRequest
+
+	gotStatus, gotApiErr = toApiError(gvErr)
+	assert.Equal(t, wantStatus, gotStatus)
+	assert.Equal(t, wantApiErr, *gotApiErr)
 }
 
 func toStr(n int) string {
 	return fmt.Sprintf("%d", n)
 }
 func Test_renderApiErrors(t *testing.T) {
+	ctx := newContext("HEAD")
+	assert.Error(t, renderApiErrors(ctx, nil))
 
+	assert.NoError(t, renderApiErrors(ctx, &jsonapi.ErrorObject{ID: "ok", Status: "404", Code: "hey"}))
 }
 
 func Test_valuesToApiError(t *testing.T) {

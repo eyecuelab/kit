@@ -15,14 +15,14 @@ import (
 	"github.com/lib/pq"
 )
 
-//these are for internal testing.
-type errorHandlerCode byte
+//errorHandlerCode is for internal testing
+type testCode byte
 
 const (
-	alreadyCommited errorHandlerCode = iota
+	alreadyCommited testCode = iota
 	methodIsHead
 	noContent
-	rendered
+	problemRendering
 	statusOver500
 	handledError
 	nilErr
@@ -32,7 +32,9 @@ var pq500s = map[string]bool{
 	"undefined_function": true,
 }
 
-func ErrorHandler(err error, c echo.Context) errorHandlerCode {
+//ErrorHandler handles errors. The testCode returned is for internal testing;
+//don't use the result in production code.
+func ErrorHandler(err error, c echo.Context) testCode {
 	if c.Response().Committed {
 		return alreadyCommited
 	}
@@ -50,10 +52,10 @@ func ErrorHandler(err error, c echo.Context) errorHandlerCode {
 		}
 		return methodIsHead
 	}
-	if renderedErr := renderApiErrors(c, apiError); renderedErr != nil {
-		logErr(renderedErr, c) //are we supposed to log this error twice?
+	if errRendering := renderApiErrors(c, apiError); errRendering != nil {
+		logErr(errRendering, c)
 		logErr(err, c)
-		return rendered
+		return problemRendering
 	}
 	if status >= 500 {
 		logErr(err, c)
@@ -75,8 +77,7 @@ func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
 	status = http.StatusInternalServerError
 	switch err := err.(type) {
 	case nil:
-		panic("nil error sent into toApiError")
-
+		return 200, nil
 	case *jsonapi.ErrorObject:
 		if status, convErr := strconv.Atoi(err.Status); convErr == nil {
 			return status, err
@@ -90,7 +91,7 @@ func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
 		if err.Message != nil {
 			detail = fmt.Sprint(err.Message)
 		}
-		return status, valuesToApiError(status, http.StatusText(status), detail, code)
+		return status, errorObj(status, http.StatusText(status), detail, code)
 
 	case *pq.Error:
 		detail = err.Message
@@ -98,20 +99,24 @@ func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
 		if _, ok := pq500s[code]; !ok {
 			status = http.StatusBadRequest
 		}
-		return status, valuesToApiError(status, http.StatusText(status), detail, code)
+		return status, errorObj(status, http.StatusText(status), detail, code)
 
 	case govalidator.Errors:
 		status, detail = http.StatusBadRequest, err.Error()
-		return status, valuesToApiError(status, http.StatusText(status), detail, code)
+		return status, errorObj(status, http.StatusText(status), detail, code)
 
 	default:
 		detail = err.Error()
-		return status, valuesToApiError(status, http.StatusText(status), detail, code)
+		return status, errorObj(status, http.StatusText(status), detail, code)
 	}
 }
 
 func renderApiErrors(c echo.Context, errors ...*jsonapi.ErrorObject) (err error) {
 	var b bytes.Buffer
+	if emptyOrAllNil(errors) {
+		return fmt.Errorf("no errors to render!")
+	}
+
 	if err = jsonapi.MarshalErrors(&b, errors); err != nil {
 		return err
 	}
@@ -122,7 +127,16 @@ func renderApiErrors(c echo.Context, errors ...*jsonapi.ErrorObject) (err error)
 	return c.Blob(code, jsonapi.MediaType, b.Bytes())
 }
 
-func valuesToApiError(status int, title, detail, code string) *jsonapi.ErrorObject {
+func emptyOrAllNil(errs []*jsonapi.ErrorObject) bool {
+	for _, err := range errs {
+		if err != nil {
+			return false
+		}
+	}
+	return true
+}
+
+func errorObj(status int, title, detail, code string) *jsonapi.ErrorObject {
 	return &jsonapi.ErrorObject{
 		Status: fmt.Sprintf("%d", status),
 		Title:  title,
