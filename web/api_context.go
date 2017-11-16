@@ -6,13 +6,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/eyecuelab/kit/maputil"
-	"github.com/eyecuelab/kit/set"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
 )
@@ -36,7 +34,9 @@ type (
 		JsonApiOK(interface{}) error
 		ApiError(string, ...int) *echo.HTTPError
 		RestrictedParam(string, ...string) (string, error)
+		RestrictedQueryParam(string, ...string) (string, error)
 		QueryParamTrue(string) (bool, bool)
+
 		RequiredQueryParams(...string) (map[string]string, error)
 		OptionalQueryParams(...string) map[string]string
 		QParams(...string) (map[string]string, error)
@@ -194,14 +194,6 @@ func (c *apiContext) QParams(required ...string) (map[string]string, error) {
 	return params, nil
 }
 
-func stringSet(m url.Values) set.String {
-	set := make(set.String)
-	for k := range m {
-		set.Add(k)
-	}
-	return set
-}
-
 func (c *apiContext) OptionalQueryParams(optional ...string) map[string]string {
 	params := make(map[string]string)
 	for _, key := range optional {
@@ -214,8 +206,7 @@ func (c *apiContext) OptionalQueryParams(optional ...string) map[string]string {
 func ApiContextMiddleWare() func(echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			ac := &apiContext{c, nil}
-			return next(ac)
+			return next(&apiContext{c, nil})
 		}
 	}
 }

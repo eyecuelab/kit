@@ -1,12 +1,12 @@
 package web
 
 import (
+	"net/http"
 	"net/url"
 	"testing"
 
 	"github.com/eyecuelab/kit/errorlib"
 
-	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
 	"github.com/stretchr/testify/assert"
 )
@@ -56,7 +56,6 @@ func newMock(queryParams, params map[string]string) ApiContext {
 			params:      params,
 			queryParams: queryParams,
 		},
-		payload: new(jsonapi.OnePayload),
 	}
 }
 
@@ -169,4 +168,13 @@ func Test_notJsonApi(t *testing.T) {
 	assert.True(t, notJsonApi(errorlib.ErrorString("not a jsonapi")))
 	assert.True(t, notJsonApi(errorlib.ErrorString("EOF")))
 	assert.False(t, notJsonApi(errorlib.ErrorString("foobar")))
+}
+
+func Test_ApiError(t *testing.T) {
+	want := echo.NewHTTPError(404, "not found")
+	ctx := newMock(nil, nil)
+	assert.Equal(t, want, ctx.ApiError("not found", 404, 505))
+
+	want = echo.NewHTTPError(http.StatusBadRequest, "bad request")
+	assert.Equal(t, want, ctx.ApiError("bad request"))
 }
