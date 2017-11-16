@@ -153,6 +153,18 @@ func Test_RestrictedParam(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func Test_RestrictedQueryParam(t *testing.T) {
+	allowed := []string{foo, bar, baz}
+
+	val, err := newMock(pair(foo, foo), nil).RestrictedQueryParam(foo, allowed...)
+	assert.Equal(t, val, foo)
+	assert.NoError(t, err)
+
+	val, err = newMock(pair(foo, foo), nil).RestrictedQueryParam(foo, "asdhjasod")
+	assert.NotEqual(t, val, foo)
+	assert.Error(t, err)
+}
+
 func Test_notJsonApi(t *testing.T) {
 	assert.True(t, notJsonApi(errorlib.ErrorString("not a jsonapi")))
 	assert.True(t, notJsonApi(errorlib.ErrorString("EOF")))
