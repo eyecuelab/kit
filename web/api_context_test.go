@@ -103,63 +103,63 @@ func Test_apiContext_BindIdParam(t *testing.T) {
 	var got int
 	want := 20
 
-	ctx := newMock(nil, pair("id", "20"))
+	ctx := newMock(nil, keyVal("id", "20"))
 	assert.NoError(t, ctx.BindIdParam(&got))
 	assert.Equal(t, want, got)
 
 	got, want = 0, 40
-	ctx = newMock(nil, pair("foobar", "40"))
+	ctx = newMock(nil, keyVal("foobar", "40"))
 	assert.NoError(t, ctx.BindIdParam(&got, "foobar"))
 
 }
 
-func pair(key, val string) map[string]string {
+func keyVal(key, val string) map[string]string {
 	return map[string]string{key: val}
 }
-func Test_QueryParamTrue(t *testing.T) {
+func Test_apiContext_QueryParamTrue(t *testing.T) {
 	const foo = foo
 
-	val, ok := newMock(pair(foo, "1"), nil).QueryParamTrue(foo)
+	val, ok := newMock(keyVal(foo, "1"), nil).QueryParamTrue(foo)
 	assert.True(t, val)
 	assert.True(t, ok)
 
-	val, ok = newMock(pair(foo, "true"), nil).QueryParamTrue(foo)
+	val, ok = newMock(keyVal(foo, "true"), nil).QueryParamTrue(foo)
 	assert.True(t, val)
 	assert.True(t, ok)
 
-	val, ok = newMock(pair(foo, "0"), nil).QueryParamTrue(foo)
+	val, ok = newMock(keyVal(foo, "0"), nil).QueryParamTrue(foo)
 	assert.False(t, val)
 	assert.True(t, ok)
 
-	val, ok = newMock(pair(foo, "false"), nil).QueryParamTrue(foo)
+	val, ok = newMock(keyVal(foo, "false"), nil).QueryParamTrue(foo)
 	assert.False(t, val)
 	assert.True(t, ok)
 
-	val, ok = newMock(pair(foo, "asdaqsd"), nil).QueryParamTrue(foo)
+	val, ok = newMock(keyVal(foo, "asdaqsd"), nil).QueryParamTrue(foo)
 	assert.False(t, val)
 	assert.False(t, ok)
 }
 
-func Test_RestrictedParam(t *testing.T) {
+func Test_apiContext_RestrictedParam(t *testing.T) {
 	allowed := []string{foo, bar, baz}
 
-	val, err := newMock(nil, pair(foo, foo)).RestrictedParam(foo, allowed...)
+	val, err := newMock(nil, keyVal(foo, foo)).RestrictedParam(foo, allowed...)
 	assert.Equal(t, val, foo)
 	assert.NoError(t, err)
 
-	val, err = newMock(nil, pair(foo, foo)).RestrictedParam(foo, "asdhjasod")
+	val, err = newMock(nil, keyVal(foo, foo)).RestrictedParam(foo, "asdhjasod")
 	assert.NotEqual(t, val, foo)
 	assert.Error(t, err)
 }
 
-func Test_RestrictedQueryParam(t *testing.T) {
+func Test_apiContext_RestrictedQueryParam(t *testing.T) {
 	allowed := []string{foo, bar, baz}
 
-	val, err := newMock(pair(foo, foo), nil).RestrictedQueryParam(foo, allowed...)
+	val, err := newMock(keyVal(foo, foo), nil).RestrictedQueryParam(foo, allowed...)
 	assert.Equal(t, val, foo)
 	assert.NoError(t, err)
 
-	val, err = newMock(pair(foo, foo), nil).RestrictedQueryParam(foo, "asdhjasod")
+	val, err = newMock(keyVal(foo, foo), nil).RestrictedQueryParam(foo, "asdhjasod")
 	assert.NotEqual(t, val, foo)
 	assert.Error(t, err)
 }
@@ -170,7 +170,7 @@ func Test_notJsonApi(t *testing.T) {
 	assert.False(t, notJsonApi(errorlib.ErrorString("foobar")))
 }
 
-func Test_ApiError(t *testing.T) {
+func Test_apiContext_ApiError(t *testing.T) {
 	want := echo.NewHTTPError(404, "not found")
 	ctx := newMock(nil, nil)
 	assert.Equal(t, want, ctx.ApiError("not found", 404, 505))

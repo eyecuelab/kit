@@ -7,11 +7,11 @@ import (
 	"strconv"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/eyecuelab/kit/brake"
 	"github.com/eyecuelab/kit/log"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
 	"github.com/lib/pq"
-	"github.com/eyecuelab/kit/brake"
 )
 
 var pq500s = map[string]bool{
@@ -24,25 +24,16 @@ func ErrorHandler(err error, c echo.Context) {
 	}
 
 	status, apiError := toApiError(err)
-
 	if c.Request().Method == "HEAD" {
 		if err := c.NoContent(status); err != nil {
-			goto ERROR
+			logErr(err, c)
 		}
-		return
-	}
-
-	if err := renderApiErrors(c, apiError); err != nil {
-		//FIXME: are we supposed to log this error twice?
+	} else if renderedErr := renderApiErrors(c, apiError); err != nil {
+		logErr(renderedErr, c) //are we supposed to log this error twice?
 		logErr(err, c)
-		goto ERROR
+	} else if status >= 500 {
+		logErr(err, c)
 	}
-
-	if status < 500 {
-		return
-	}
-ERROR: //FIXME - I feel like we should justify a GOTO
-	logErr(err, c)
 }
 
 func logErr(err error, c echo.Context) {
@@ -53,7 +44,7 @@ func logErr(err error, c echo.Context) {
 func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
 
 	var (
-		detail interface{}
+		detail string
 		code   string
 	)
 	status = http.StatusInternalServerError
@@ -63,7 +54,10 @@ func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
 		return status, err
 
 	case *echo.HTTPError:
-		status, detail = err.Code, err.Message
+		status = err.Code
+		if err.Message != nil {
+			detail = fmt.Sprint(err.Message)
+		}
 	case *pq.Error:
 		detail = err.Message
 		code = err.Code.Name()
@@ -77,31 +71,27 @@ func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
 
 	}
 
-	return status, valuesToApiError(status, http.StatusText(status), &detail, code)
+	return status, valuesToApiError(status, http.StatusText(status), detail, code)
 }
 
-func renderApiErrors(c echo.Context, errors ...*jsonapi.ErrorObject) error {
+func renderApiErrors(c echo.Context, errors ...*jsonapi.ErrorObject) (err error) {
 	var b bytes.Buffer
-	if err := jsonapi.MarshalErrors(&b, errors); err != nil {
+	if err = jsonapi.MarshalErrors(&b, errors); err != nil {
 		return err
 	}
+	var code int
+	if code, err = strconv.Atoi(errors[0].Status); err != nil {
+		return err
+	}
+	return c.Blob(code, jsonapi.MediaType, b.Bytes())
 
-	if i, err := strconv.Atoi(errors[0].Status); err != nil {
-		return err
-	} else {
-		return c.Blob(i, jsonapi.MediaType, b.Bytes())
-	}
 }
 
-func valuesToApiError(status int, title string, detail *interface{}, code string) *jsonapi.ErrorObject {
-	var d string
-	if *detail != nil {
-		d = fmt.Sprint(*detail)
-	}
+func valuesToApiError(status int, title, detail, code string) *jsonapi.ErrorObject {
 	return &jsonapi.ErrorObject{
 		Status: fmt.Sprintf("%d", status),
 		Title:  title,
-		Detail: d,
+		Detail: detail,
 		Code:   code,
 	}
 }
