@@ -11,6 +11,7 @@ import (
 
 var (
 	Airbrake *gobrake.Notifier
+	Env string
 )
 
 const traceDepth = 5
@@ -22,6 +23,7 @@ func init() {
 func setup() {
 	key := viper.GetString("airbrake_key")
 	project := viper.GetInt64("airbrake_project")
+	Env := viper.GetString("airbrake_env")
 
 	if len(key) != 0 && project != 0 {
 		Airbrake = gobrake.NewNotifier(project, key)
@@ -35,7 +37,7 @@ func IsSetup() bool {
 func Notify(e error, req *http.Request) {
 	if IsSetup() {
 		notice := gobrake.NewNotice(e, req, traceDepth)
-		notice.Context["environment"] = goenv.Env
+		notice.Context["environment"] = Env
 		Airbrake.SendNotice(notice)
 	}
 }
