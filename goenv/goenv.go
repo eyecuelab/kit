@@ -5,7 +5,7 @@ import (
 )
 
 var Env string
-var Dev, Test, Prod bool
+var Dev, Stage, Prod bool
 
 func init() {
 	Env = os.Getenv("GO_ENV")
@@ -13,6 +13,6 @@ func init() {
 		Env = "development"
 	}
 
-	environs := map[string]*bool{"development": &Dev, "test": &Test, "production": &Prod}
+	environs := map[string]*bool{"development": &Dev, "staging": &Stage, "production": &Prod}
 	*environs[Env] = true
 }
