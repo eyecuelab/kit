@@ -135,3 +135,10 @@ func Transact(db *gorm.DB, txFunc func(*gorm.DB) error) (err error) {
 	err = txFunc(tx)
 	return err
 }
+
+func DbWithError(e error) *gorm.DB {
+	db := DB.New()
+	db.Error = e
+	return db
+}
+
