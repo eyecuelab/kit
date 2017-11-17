@@ -123,7 +123,7 @@ func (s Int) ToSlice() []int {
 	return slice
 }
 
-//Sorted returns a slice containing the sorted keys of the set.
+//Sorted returns a slice containing the sorted keys of the set in the usual order.
 func (s Int) Sorted() []int {
 	slice := s.ToSlice()
 	sort.Ints(slice)

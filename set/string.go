@@ -5,7 +5,7 @@ import "sort"
 //String is a set of strings
 type String map[string]signal
 
-//Contains shows whether a given key is in the String.
+//Contains returns true if the given key is in the set.
 func (s String) Contains(key string) bool {
 	_, ok := s[key]
 	return ok
@@ -123,6 +123,7 @@ func (s String) ToSlice() []string {
 	return slice
 }
 
+//Sorted returns a slice containing the keys of the set in lexigraphic order.
 func (s String) Sorted() []string {
 	slice := s.ToSlice()
 	sort.Strings(slice)
