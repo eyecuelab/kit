@@ -140,30 +140,6 @@ func Test_apiContext_QueryParamTrue(t *testing.T) {
 	assert.False(t, ok)
 }
 
-func Test_apiContext_RestrictedParam(t *testing.T) {
-	allowed := []string{foo, bar, baz}
-
-	val, err := newMock(nil, keyVal(foo, foo)).RestrictedParam(foo, allowed...)
-	assert.Equal(t, val, foo)
-	assert.NoError(t, err)
-
-	val, err = newMock(nil, keyVal(foo, foo)).RestrictedParam(foo, "asdhjasod")
-	assert.NotEqual(t, val, foo)
-	assert.Error(t, err)
-}
-
-func Test_apiContext_RestrictedQueryParam(t *testing.T) {
-	allowed := []string{foo, bar, baz}
-
-	val, err := newMock(keyVal(foo, foo), nil).RestrictedQueryParam(foo, allowed...)
-	assert.Equal(t, val, foo)
-	assert.NoError(t, err)
-
-	val, err = newMock(keyVal(foo, foo), nil).RestrictedQueryParam(foo, "asdhjasod")
-	assert.NotEqual(t, val, foo)
-	assert.Error(t, err)
-}
-
 func Test_notJsonApi(t *testing.T) {
 	assert.True(t, notJsonApi(errorlib.ErrorString("not a jsonapi")))
 	assert.True(t, notJsonApi(errorlib.ErrorString("EOF")))
