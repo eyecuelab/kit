@@ -76,9 +76,9 @@ func body(req *http.Request) interface{} {
 		return string(b)
 	}
 
-	if !json.Valid(b) {
-		return fmt.Sprintf("body is not valid JSON: %s", b)
-	}
+	// if !json.Valid(b) {
+	// 	return fmt.Sprintf("body is not valid JSON: %s", b)
+	// }
 
 	formatted := make(map[string]interface{})
 	json.Unmarshal(b, &formatted)
