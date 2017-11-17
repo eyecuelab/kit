@@ -220,5 +220,18 @@ func Test_ContainsAny(t *testing.T) {
 	assert.True(t, ContainsAny(s, "foo", x, z))
 	assert.False(t, ContainsAny(s, x, z))
 	assert.True(t, ContainsAny(s, "bar"))
+	assert.False(t, ContainsAny(s))
 
+}
+
+func Test_ContainsAll(t *testing.T) {
+	const (
+		s = "asdasdmansdasd_foo_bar_klasmcdlaksmdasd"
+		x = "XXX"
+		z = "ZZZ"
+	)
+
+	assert.True(t, ContainsAll(s, "foo", "bar"))
+	assert.False(t, ContainsAll(s, "foo", "bar", "baz"))
+	assert.True(t, ContainsAll(s))
 }

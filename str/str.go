@@ -100,11 +100,22 @@ func Map(f func(string) string, a []string) []string {
 	return mapped
 }
 
-func ContainsAny(str string, subStrs ...string) bool {
+//ContainsAny returns true if strings.Contains(s, sub) is true for any sub in subStrs. ContainsAny(s) is false.
+func ContainsAny(s string, subStrs ...string) bool {
 	for _, sub := range subStrs {
-		if strings.Contains(str, sub) {
+		if strings.Contains(s, sub) {
 			return true
 		}
 	}
 	return false
+}
+
+//ContainsAll returns true if strings.Contains(s, sub) is true for all sub in subStrs. ContainsAll(s) is true.
+func ContainsAll(s string, subStrs ...string) bool {
+	for _, sub := range subStrs {
+		if !strings.Contains(s, sub) {
+			return false
+		}
+	}
+	return true
 }
