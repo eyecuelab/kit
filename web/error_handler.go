@@ -15,7 +15,7 @@ import (
 	"github.com/lib/pq"
 )
 
-//errorHandlerCode is for internal testing
+//testCode is for internal testing
 type testCode byte
 
 const (
@@ -24,7 +24,7 @@ const (
 	noContent
 	problemRendering
 	statusOver500
-	handledError
+	ignoredErr
 	nilErr
 )
 
@@ -61,7 +61,7 @@ func ErrorHandler(err error, c echo.Context) testCode {
 		logErr(err, c)
 		return statusOver500
 	}
-	return handledError
+	return ignoredErr
 }
 
 func logErr(err error, c echo.Context) {

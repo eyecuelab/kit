@@ -58,7 +58,7 @@ func TestErrorHandler(t *testing.T) {
 
 	ctx = newContext("GET")
 	httpErr = echo.HTTPError{Code: 200, Message: "OK", Inner: someErr}
-	assert.Equal(t, handledError, ErrorHandler(&httpErr, ctx))
+	assert.Equal(t, ignoredErr, ErrorHandler(&httpErr, ctx))
 
 	ctx = newContext("GET")
 	err = &jsonapi.ErrorObject{Title: "hey", Status: "deliberately not an integer"}
