@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+
 	"github.com/labstack/echo"
 )
 
@@ -52,9 +53,8 @@ func init() {
 func AddRoute(path string) *Route {
 	return Routing.AddRoute(path)
 }
-
-func RouteByName(name string) (*Route, error) {
-	for _, r := range Routing.Routes {
+func routeByName(cfg *RouteConfig, name string) (*Route, error) {
+	for _, r := range cfg.Routes {
 		if r.Name == name {
 			return r, nil
 		}
@@ -62,12 +62,15 @@ func RouteByName(name string) (*Route, error) {
 	return nil, fmt.Errorf("Could not find route with name %v", name)
 }
 
+func RouteByName(name string) (*Route, error) {
+	return routeByName(Routing, name)
+}
+
 type HandlerFunc func(ApiContext) error
 
 func wrapApiRoute(f HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ac := c.(ApiContext)
-		return f(ac)
+		return f(c.(ApiContext))
 	}
 }
 

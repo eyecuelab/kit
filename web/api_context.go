@@ -195,7 +195,10 @@ func (c *apiContext) RequiredQueryParams(required ...string) (map[string]string,
 }
 
 func (c *apiContext) QParams(required ...string) (map[string]string, error) {
+	return QParams(c, required...)
+}
 
+func QParams(c echo.Context, required ...string) (map[string]string, error) {
 	missing := make([]string, 0, len(required))
 	params := make(map[string]string)
 
