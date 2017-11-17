@@ -9,6 +9,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/eyecuelab/kit/brake"
+	"github.com/eyecuelab/kit/functools"
 	"github.com/eyecuelab/kit/log"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
@@ -30,6 +31,12 @@ const (
 
 var pq500s = map[string]bool{
 	"undefined_function": true,
+}
+
+var criticalKeywords = []string{
+	"reflect",
+	"dereference",
+	"runtime",
 }
 
 //ErrorHandler handles errors. The testCode returned is for internal testing;
@@ -69,7 +76,7 @@ func ErrorHandler(err error, c echo.Context) {
 		return
 	}
 	if err == nil {
-		logErr(errors.New("nil error sent into ErrorHandler"), c)
+		trackErr(errors.New("nil error sent into ErrorHandler"), c, 0)
 		return
 	}
 
@@ -77,23 +84,16 @@ func ErrorHandler(err error, c echo.Context) {
 
 	if c.Request().Method == "HEAD" {
 		if err := c.NoContent(status); err != nil {
-			logErr(err, c)
+			trackErr(err, c, status)
 		}
 		return
 	}
-	if errRendering := renderApiErrors(c, apiError); errRendering != nil {
-		logErr(errRendering, c)
-		logErr(err, c)
-		return
-	}
-	if status >= 500 {
-		logErr(err, c)
-	}
-}
 
-func logErr(err error, c echo.Context) {
-	brake.Notify(err, c.Request())
-	log.ErrorWrap(err, "Uncaught Error")
+	if errRendering := renderApiErrors(c, apiError); errRendering != nil {
+		trackErr(errRendering, c, 0)
+	}
+
+	trackErr(err, c, status)
 }
 
 func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
@@ -170,4 +170,37 @@ func errorObj(status int, title, detail, code string) *jsonapi.ErrorObject {
 		Detail: detail,
 		Code:   code,
 	}
+}
+
+func trackErr(err error, c echo.Context, status int) {
+	notifyErr(err, c, status)
+	if status == 0 || status >= 500 {
+		logErr(err)
+	}
+}
+
+func logErr(err error) {
+	log.ErrorWrap(err, "Uncaught Error")
+}
+
+func notifyErr(err error, c echo.Context, status int) {
+	if status == http.StatusUnauthorized {
+		return
+	}
+
+	sev := brake.SeverityError
+
+	if status > 0 && status < 500 {
+		sev = brake.SeverityWarn
+	}
+
+	if isCritical(err) {
+		sev = brake.SeverityCritical
+	}
+
+	brake.Notify(err, c.Request(), sev)
+}
+
+func isCritical(err error) bool {
+	return functools.StringContainsAny(err.Error(), criticalKeywords...)
 }
