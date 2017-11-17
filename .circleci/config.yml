@@ -6,7 +6,7 @@ jobs:
   build:
     docker:
       - image: circleci/golang:1.8
-    working_directory: /go/src/github.com/eyecuelab/inergy-api
+    working_directory: /go/src/github.com/eyecuelab/kit
     steps:
       - checkout
       - run: go get -v -t -d ./...
