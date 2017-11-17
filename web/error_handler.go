@@ -34,13 +34,43 @@ var pq500s = map[string]bool{
 
 //ErrorHandler handles errors. The testCode returned is for internal testing;
 //don't use the result in production code.
-func ErrorHandler(err error, c echo.Context) testCode {
+//func ErrorHandler(err error, c echo.Context) testCode {
+//	if c.Response().Committed {
+//		return alreadyCommited
+//	}
+//	if err == nil {
+//		logErr(errors.New("nil error sent into ErrorHandler"), c)
+//		return nilErr
+//	}
+//
+//	status, apiError := toApiError(err)
+//
+//	if c.Request().Method == "HEAD" {
+//		if err := c.NoContent(status); err != nil {
+//			logErr(err, c)
+//			return noContent
+//		}
+//		return methodIsHead
+//	}
+//	if errRendering := renderApiErrors(c, apiError); errRendering != nil {
+//		logErr(errRendering, c)
+//		logErr(err, c)
+//		return problemRendering
+//	}
+//	if status >= 500 {
+//		logErr(err, c)
+//		return statusOver500
+//	}
+//	return handledError
+//}
+
+func ErrorHandler(err error, c echo.Context) {
 	if c.Response().Committed {
-		return alreadyCommited
+		return
 	}
 	if err == nil {
 		logErr(errors.New("nil error sent into ErrorHandler"), c)
-		return nilErr
+		return
 	}
 
 	status, apiError := toApiError(err)
@@ -48,20 +78,17 @@ func ErrorHandler(err error, c echo.Context) testCode {
 	if c.Request().Method == "HEAD" {
 		if err := c.NoContent(status); err != nil {
 			logErr(err, c)
-			return noContent
 		}
-		return methodIsHead
+		return
 	}
 	if errRendering := renderApiErrors(c, apiError); errRendering != nil {
 		logErr(errRendering, c)
 		logErr(err, c)
-		return problemRendering
+		return
 	}
 	if status >= 500 {
 		logErr(err, c)
-		return statusOver500
 	}
-	return handledError
 }
 
 func logErr(err error, c echo.Context) {
