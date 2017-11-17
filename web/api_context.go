@@ -83,9 +83,9 @@ func (c *apiContext) Bind(i interface{}) error {
 }
 
 func (c *apiContext) readRestoreBody() ([]byte, error) {
-	b := ioutil.ReadAll(c.Request().Body)
+	b, err := ioutil.ReadAll(c.Request().Body)
 	c.restoreBody(b)
-	return b
+	return b, err
 }
 
 func (c *apiContext) restoreBody(b []byte) {

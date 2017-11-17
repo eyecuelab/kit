@@ -37,33 +37,32 @@ func newContext(method string) echo.Context {
 	return echo.New().NewContext(req, rec)
 }
 
-func TestErrorHandler(t *testing.T) {
+func Test_errorHandler(t *testing.T) {
 	ctx := newContext("GET")
 	ctx.Response().Committed = true
-	assert.Equal(t, alreadyCommited, ErrorHandler(someErr, ctx))
+	assert.Equal(t, alreadyCommited, errorHandler(someErr, ctx))
 
 	noContentCtx := noContentContext{newContext("HEAD")}
-	assert.Equal(t, noContent, ErrorHandler(someErr, noContentCtx))
+	assert.Equal(t, noContent, errorHandler(someErr, noContentCtx))
 
 	ctx = newContext("HEAD")
 	var err error = &echo.HTTPError{Code: 1222, Message: "magic error"}
-	assert.Equal(t, methodIsHead, ErrorHandler(err, ctx))
+	assert.Equal(t, methodIsHead, errorHandler(err, ctx))
 
 	ctx = newContext("GET")
-	assert.Equal(t, nilErr, ErrorHandler(nil, ctx))
-
-	ctx = newContext("GET")
-	httpErr := echo.HTTPError{Code: 500, Message: "magic error", Inner: someErr}
-	assert.Equal(t, statusOver500, ErrorHandler(&httpErr, ctx))
-
-	ctx = newContext("GET")
-	httpErr = echo.HTTPError{Code: 200, Message: "OK", Inner: someErr}
-	assert.Equal(t, ignoredErr, ErrorHandler(&httpErr, ctx))
+	assert.Equal(t, nilErr, errorHandler(nil, ctx))
 
 	ctx = newContext("GET")
 	err = &jsonapi.ErrorObject{Title: "hey", Status: "deliberately not an integer"}
-	assert.Equal(t, problemRendering, ErrorHandler(err, ctx))
+	assert.Equal(t, problemRendering, errorHandler(err, ctx))
 
+	ctx = newContext("GET")
+	assert.Equal(t, normal, errorHandler(someErr, ctx))
+}
+
+func Test_ErrorHandler(t *testing.T) {
+	ctx := newContext("GET")
+	ErrorHandler(someErr, ctx)
 }
 
 func Test_logErr(t *testing.T) {
@@ -139,8 +138,4 @@ func Test_renderApiErrors(t *testing.T) {
 	assert.Error(t, renderApiErrors(ctx, nil))
 
 	assert.NoError(t, renderApiErrors(ctx, &jsonapi.ErrorObject{ID: "ok", Status: "404", Code: "hey"}))
-}
-
-func Test_valuesToApiError(t *testing.T) {
-
 }

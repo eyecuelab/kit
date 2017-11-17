@@ -24,9 +24,8 @@ const (
 	methodIsHead
 	noContent
 	problemRendering
-	statusOver500
-	ignoredErr
 	nilErr
+	normal
 )
 
 var pq500s = map[string]bool{
@@ -39,45 +38,15 @@ var criticalKeywords = []string{
 	"runtime",
 }
 
-//ErrorHandler handles errors. The testCode returned is for internal testing;
-//don't use the result in production code.
-//func ErrorHandler(err error, c echo.Context) testCode {
-//	if c.Response().Committed {
-//		return alreadyCommited
-//	}
-//	if err == nil {
-//		logErr(errors.New("nil error sent into ErrorHandler"), c)
-//		return nilErr
-//	}
-//
-//	status, apiError := toApiError(err)
-//
-//	if c.Request().Method == "HEAD" {
-//		if err := c.NoContent(status); err != nil {
-//			logErr(err, c)
-//			return noContent
-//		}
-//		return methodIsHead
-//	}
-//	if errRendering := renderApiErrors(c, apiError); errRendering != nil {
-//		logErr(errRendering, c)
-//		logErr(err, c)
-//		return problemRendering
-//	}
-//	if status >= 500 {
-//		logErr(err, c)
-//		return statusOver500
-//	}
-//	return handledError
-//}
-
-func ErrorHandler(err error, c echo.Context) {
+//errorHandler is the internal implementation of ErrorHandler. It returns a testCode,
+//which does not fufill the interface expected by echo. Thus, it is wrapped by the function ErrorHandler.
+func errorHandler(err error, c echo.Context) testCode {
 	if c.Response().Committed {
-		return
+		return alreadyCommited
 	}
 	if err == nil {
 		trackErr(errors.New("nil error sent into ErrorHandler"), c, 0)
-		return
+		return nilErr
 	}
 
 	status, apiError := toApiError(err)
@@ -85,15 +54,24 @@ func ErrorHandler(err error, c echo.Context) {
 	if c.Request().Method == "HEAD" {
 		if err := c.NoContent(status); err != nil {
 			trackErr(err, c, status)
+			return noContent
 		}
-		return
+		return methodIsHead
 	}
 
 	if errRendering := renderApiErrors(c, apiError); errRendering != nil {
 		trackErr(errRendering, c, 0)
+		trackErr(err, c, status)
+		return problemRendering
 	}
 
 	trackErr(err, c, status)
+	return normal
+}
+
+//ErrorHandler handles errors
+func ErrorHandler(err error, c echo.Context) {
+	errorHandler(err, c)
 }
 
 func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
@@ -141,7 +119,7 @@ func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
 func renderApiErrors(c echo.Context, errors ...*jsonapi.ErrorObject) (err error) {
 	var b bytes.Buffer
 	if emptyOrAllNil(errors) {
-		return fmt.Errorf("no errors to render!")
+		return fmt.Errorf("no errors to render")
 	}
 
 	if err = jsonapi.MarshalErrors(&b, errors); err != nil {
@@ -189,13 +167,10 @@ func notifyErr(err error, c echo.Context, status int) {
 	}
 
 	sev := brake.SeverityError
-
-	if status > 0 && status < 500 {
-		sev = brake.SeverityWarn
-	}
-
 	if isCritical(err) {
 		sev = brake.SeverityCritical
+	} else if status > 0 && status < 500 {
+		sev = brake.SeverityWarn
 	}
 
 	brake.Notify(err, c.Request(), sev)
