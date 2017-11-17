@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -61,13 +62,34 @@ func (c *apiContext) AttrKeys() []string {
 	return maputil.Keys(c.Attrs())
 }
 
+//Before binding we make a copy of the req body and restore it after binding.
+//This allows the body to be used again later
 func (c *apiContext) Bind(i interface{}) error {
-	ctype := c.Request().Header.Get(echo.HeaderContentType)
-
-	if isJSONAPI(ctype) {
-		return jsonAPIBind(c, i)
+	body, err := c.readRestoreBody()
+	if err != nil {
+		return err
 	}
-	return c.defaultBind(i)
+
+	ctype := c.Request().Header.Get(echo.HeaderContentType)
+	if isJSONAPI(ctype) {
+		err = jsonAPIBind(c, i)
+	} else {
+		err = c.defaultBind(i)
+	}
+
+	c.restoreBody(body)
+
+	return err
+}
+
+func (c *apiContext) readRestoreBody() ([]byte, error) {
+	b := ioutil.ReadAll(c.Request().Body)
+	c.restoreBody(b)
+	return b
+}
+
+func (c *apiContext) restoreBody(b []byte) {
+	c.Request().Body = ioutil.NopCloser(bytes.NewBuffer(b))
 }
 
 func (c *apiContext) defaultBind(i interface{}) error {
