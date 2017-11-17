@@ -25,3 +25,11 @@ func TestVals(t *testing.T) {
 	sort.Strings(got)
 	assert.Equal(t, want, got)
 }
+
+func TestCopy(t *testing.T) {
+	want := Copy(m)
+	got := Copy(want)
+	assert.Equal(t, want, got)
+	got["d"] = "d"
+	assert.NotEqual(t, want, got) //no leak
+}
