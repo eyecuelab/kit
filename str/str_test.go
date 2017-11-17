@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/eyecuelab/kit/pretty"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRemoveRunes(t *testing.T) {
@@ -208,4 +209,16 @@ func TestMap(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_ContainsAny(t *testing.T) {
+	const (
+		s = "asdasdmansdasd_foo_bar_klasmcdlaksmdasd"
+		x = "XXX"
+		z = "ZZZ"
+	)
+	assert.True(t, ContainsAny(s, "foo", x, z))
+	assert.False(t, ContainsAny(s, x, z))
+	assert.True(t, ContainsAny(s, "bar"))
+
 }

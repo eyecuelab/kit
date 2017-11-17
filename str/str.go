@@ -99,3 +99,12 @@ func Map(f func(string) string, a []string) []string {
 	}
 	return mapped
 }
+
+func ContainsAny(str string, subStrs ...string) bool {
+	for _, sub := range subStrs {
+		if strings.Contains(str, sub) {
+			return true
+		}
+	}
+	return false
+}

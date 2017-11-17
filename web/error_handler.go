@@ -9,8 +9,8 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/eyecuelab/kit/brake"
-	"github.com/eyecuelab/kit/functools"
 	"github.com/eyecuelab/kit/log"
+	"github.com/eyecuelab/kit/str"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
 	"github.com/lib/pq"
@@ -177,5 +177,5 @@ func notifyErr(err error, c echo.Context, status int) {
 }
 
 func isCritical(err error) bool {
-	return functools.StringContainsAny(err.Error(), criticalKeywords...)
+	return str.ContainsAny(err.Error(), criticalKeywords...)
 }
