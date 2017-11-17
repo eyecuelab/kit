@@ -9,6 +9,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/eyecuelab/kit/brake"
+	"github.com/eyecuelab/kit/functools"
 	"github.com/eyecuelab/kit/log"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
@@ -32,41 +33,67 @@ var pq500s = map[string]bool{
 	"undefined_function": true,
 }
 
+var criticalKeywords = []string{
+	"reflect",
+	"dereference",
+	"runtime",
+}
+
 //ErrorHandler handles errors. The testCode returned is for internal testing;
 //don't use the result in production code.
-func ErrorHandler(err error, c echo.Context) testCode {
+//func ErrorHandler(err error, c echo.Context) testCode {
+//	if c.Response().Committed {
+//		return alreadyCommited
+//	}
+//	if err == nil {
+//		logErr(errors.New("nil error sent into ErrorHandler"), c)
+//		return nilErr
+//	}
+//
+//	status, apiError := toApiError(err)
+//
+//	if c.Request().Method == "HEAD" {
+//		if err := c.NoContent(status); err != nil {
+//			logErr(err, c)
+//			return noContent
+//		}
+//		return methodIsHead
+//	}
+//	if errRendering := renderApiErrors(c, apiError); errRendering != nil {
+//		logErr(errRendering, c)
+//		logErr(err, c)
+//		return problemRendering
+//	}
+//	if status >= 500 {
+//		logErr(err, c)
+//		return statusOver500
+//	}
+//	return handledError
+//}
+
+func ErrorHandler(err error, c echo.Context) {
 	if c.Response().Committed {
-		return alreadyCommited
+		return
 	}
 	if err == nil {
-		logErr(errors.New("nil error sent into ErrorHandler"), c)
-		return nilErr
+		trackErr(errors.New("nil error sent into ErrorHandler"), c, 0)
+		return
 	}
 
 	status, apiError := toApiError(err)
 
 	if c.Request().Method == "HEAD" {
 		if err := c.NoContent(status); err != nil {
-			logErr(err, c)
-			return noContent
+			trackErr(err, c, status)
 		}
-		return methodIsHead
+		return
 	}
-	if errRendering := renderApiErrors(c, apiError); errRendering != nil {
-		logErr(errRendering, c)
-		logErr(err, c)
-		return problemRendering
-	}
-	if status >= 500 {
-		logErr(err, c)
-		return statusOver500
-	}
-	return ignoredErr
-}
 
-func logErr(err error, c echo.Context) {
-	brake.Notify(err, c.Request())
-	log.ErrorWrap(err, "Uncaught Error")
+	if errRendering := renderApiErrors(c, apiError); errRendering != nil {
+		trackErr(errRendering, c, 0)
+	}
+
+	trackErr(err, c, status)
 }
 
 func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
@@ -143,4 +170,37 @@ func errorObj(status int, title, detail, code string) *jsonapi.ErrorObject {
 		Detail: detail,
 		Code:   code,
 	}
+}
+
+func trackErr(err error, c echo.Context, status int) {
+	notifyErr(err, c, status)
+	if status == 0 || status >= 500 {
+		logErr(err)
+	}
+}
+
+func logErr(err error) {
+	log.ErrorWrap(err, "Uncaught Error")
+}
+
+func notifyErr(err error, c echo.Context, status int) {
+	if status == http.StatusUnauthorized {
+		return
+	}
+
+	sev := brake.SeverityError
+
+	if status > 0 && status < 500 {
+		sev = brake.SeverityWarn
+	}
+
+	if isCritical(err) {
+		sev = brake.SeverityCritical
+	}
+
+	brake.Notify(err, c.Request(), sev)
+}
+
+func isCritical(err error) bool {
+	return functools.StringContainsAny(err.Error(), criticalKeywords...)
 }

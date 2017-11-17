@@ -18,7 +18,15 @@ var (
 	Env      string
 )
 
-const traceDepth = 5
+type severity string
+
+const (
+	traceDepth = 5
+
+	SeverityError    severity = "error"
+	SeverityWarn     severity = "warning"
+	SeverityCritical severity = "critical"
+)
 
 func init() {
 	cobra.OnInitialize(setup)
@@ -38,16 +46,17 @@ func IsSetup() bool {
 	return Airbrake != nil
 }
 
-func Notify(e error, req *http.Request) {
+func Notify(e error, req *http.Request, sev severity) {
 	if IsSetup() {
 		notice := gobrake.NewNotice(e, req, traceDepth)
-		setNoticeVars(notice, req)
+		setNoticeVars(notice, req, sev)
 		Airbrake.SendNotice(notice)
 	}
 }
 
-func setNoticeVars(n *gobrake.Notice, req *http.Request) {
+func setNoticeVars(n *gobrake.Notice, req *http.Request, sev severity) {
 	n.Context["environment"] = Env
+	n.Context["severity"] = sev
 	if expectBody(req) {
 		n.Params["body"] = body(req)
 	}
