@@ -2,7 +2,6 @@ package web
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/eyecuelab/kit/pretty"
@@ -46,26 +45,6 @@ func TestRouteConfig_AddRoute(t *testing.T) {
 	assert.Equal(t, cfg.Routes, []*Route{rt})
 }
 
-func TestAddRoute(t *testing.T) {
-	type args struct {
-		path string
-	}
-	tests := []struct {
-		name string
-		args args
-		want *Route
-	}{
-	// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := AddRoute(tt.args.path); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("AddRoute() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_routeByName(t *testing.T) {
 	const name = "foo"
 	cfg := new(RouteConfig)
@@ -85,38 +64,27 @@ func Test_routeByName(t *testing.T) {
 }
 
 func Test_wrapApiRoute(t *testing.T) {
-	type args struct {
-		f HandlerFunc
-	}
-	tests := []struct {
-		name string
-		args args
-		want echo.HandlerFunc
-	}{
-	// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := wrapApiRoute(tt.args.f); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("wrapApiRoute() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+
 }
 
-func TestInitRoutes(t *testing.T) {
-	type args struct {
-		e *echo.Echo
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-	// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			InitRoutes(tt.args.e)
-		})
-	}
+func Test_initRoutes(t *testing.T) {
+	const (
+		path   = "http://localpath.com/foo"
+		name   = "foo"
+		method = "m"
+	)
+	hf := func(ApiContext) error { return nil }
+	e := echo.New()
+	cfg := new(RouteConfig)
+	rt := cfg.AddRoute(path).SetName(name).Handle(method, hf)
+	initRoutes(e, cfg)
+
+	wantRoutes := []*Route{rt}
+	assert.Equal(t, cfg.Routes, wantRoutes)
+	assert.Equal(t, cfg.Routes[0].ERoute.Name, rt.Name)
+
+	wantEchoRoute := echo.Route{Method: method, Path: path, Name: name}
+	assert.Len(t, e.Routes(), 1)
+	assert.Equal(t, wantEchoRoute, *e.Routes()[0])
+
 }

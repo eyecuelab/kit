@@ -44,6 +44,10 @@ func (config *RouteConfig) AddRoute(path string) *Route {
 	return route
 }
 
+func newRouteConfig() *RouteConfig {
+	return &RouteConfig{[]*Route{}, []echo.MiddlewareFunc{}}
+}
+
 var Routing *RouteConfig
 
 func init() {
@@ -75,11 +79,18 @@ func wrapApiRoute(f HandlerFunc) echo.HandlerFunc {
 }
 
 func InitRoutes(e *echo.Echo) {
-	for _, route := range Routing.Routes {
-		for _, handler := range route.Handlers {
-			er := e.Add(handler.Method, route.Path, handler.Handler, handler.MiddleWare...)
-			er.Name = route.Name
-			route.ERoute = er
-		}
+	initRoutes(e, Routing)
+}
+
+func initRoutes(e *echo.Echo, cfg *RouteConfig) {
+	for _, route := range cfg.Routes {
+		initRoute(e, route)
+	}
+}
+func initRoute(e *echo.Echo, route *Route) {
+	for _, handler := range route.Handlers {
+		er := e.Add(handler.Method, route.Path, handler.Handler, handler.MiddleWare...)
+		er.Name = route.Name
+		route.ERoute = er
 	}
 }
