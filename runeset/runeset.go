@@ -3,7 +3,7 @@ package runeset
 //RuneSet is a map[rune]bool with the methods you would expect from a set type.
 //Eg, Contains, Union, Intersection, and Difference.
 //I will make code generation for further set types in the future.
-type Signal interface{}
+type Signal struct{}
 
 var yes Signal
 
