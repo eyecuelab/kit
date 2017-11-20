@@ -2,6 +2,7 @@ package counter
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -20,28 +21,84 @@ func (counter String) Add(items ...string) {
 
 func (counter String) String() string {
 	formatted := make([]string, len(counter))
-	i := 0
+	var i int
 	for key, val := range counter {
 		formatted[i] = fmt.Sprintf("%s:%d", key, val)
 		i++
 	}
-	return strings.Join(formatted, ", ") + "\n"
+	return "{" + strings.Join(formatted, ", ") + "}"
 
 }
 
-func CombineStringCounters(counters ...String) String {
-	counter := make(String)
+func (counter String) Keys() []string {
+	keys := make([]string, len(counter))
+	var i int
+	for k := range counter {
+		keys[i] = k
+		i++
+	}
+	return keys
+}
+
+func (counter String) Sorted() ([]string, []int) {
+	keys := counter.Keys()
+	sort.Slice(keys, func(i, j int) bool {
+		return counter[keys[i]] < counter[keys[j]]
+	})
+	vals := make([]int, len(keys))
+	for i, k := range keys {
+		vals[i] = counter[k]
+	}
+	return keys, vals
+
+}
+
+func (counter String) Combine(counters ...String) String {
+	combined := counter.Copy()
 	for _, c := range counters {
 		for key, val := range c {
 			if _, ok := counter[key]; ok {
-				counter[key] += val
+				combined[key] += val
 			} else {
-				counter[key] = val
+				combined[key] = val
 			}
 		}
 	}
-	return counter
+	return combined
 }
+
+func (counter String) Equal(other String) bool {
+	if len(counter) != len(other) {
+		return false
+	}
+	for k, v := range counter {
+		if b, ok := other[k]; !ok || b != v {
+			return false
+		}
+
+	}
+	return true
+}
+
+//PositiveElements returns a copy of counter containing all the elements where the count of counter
+func (counter String) PositiveElements() String {
+	copy := make(String)
+	for k, v := range counter {
+		if v > 0 {
+			copy[k] = v
+		}
+	}
+	return copy
+}
+
+func (counter String) Copy() String {
+	copy := make(String)
+	for k, v := range counter {
+		copy[k] = v
+	}
+	return copy
+}
+
 func Min(counters ...String) String {
 	min := make(String)
 	for _, c := range counters {
@@ -51,12 +108,13 @@ func Min(counters ...String) String {
 					min[key] = val
 				}
 			} else {
-				min[key] = 0
+				min[key] = val
 			}
 		}
 	}
 	return min
 }
+
 func Max(counters ...String) String {
 	max := make(String)
 	for _, c := range counters {
@@ -66,7 +124,7 @@ func Max(counters ...String) String {
 					max[key] = val
 				}
 			} else {
-				max[key] = 0
+				max[key] = val
 			}
 		}
 	}
@@ -75,8 +133,6 @@ func Max(counters ...String) String {
 
 func FromStrings(strings ...string) String {
 	counter := make(String)
-	for _, str := range strings {
-		counter.Add(str)
-	}
+	counter.Add(strings...)
 	return counter
 }
