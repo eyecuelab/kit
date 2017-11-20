@@ -1,5 +1,5 @@
 package set
 
-type signal interface{}
+type signal struct{}
 
 var yes signal
