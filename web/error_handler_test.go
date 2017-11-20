@@ -37,33 +37,33 @@ func newContext(method string) echo.Context {
 	return echo.New().NewContext(req, rec)
 }
 
-// func Test_errorHandler(t *testing.T) {
-// 	ctx := newContext("GET")
-// 	ctx.Response().Committed = true
-// 	assert.Equal(t, alreadyCommited, errorHandler(someErr, ctx))
-//
-// 	noContentCtx := noContentContext{newContext("HEAD")}
-// 	assert.Equal(t, noContent, errorHandler(someErr, noContentCtx))
-//
-// 	ctx = newContext("HEAD")
-// 	var err error = &echo.HTTPError{Code: 1222, Message: "magic error"}
-// 	assert.Equal(t, methodIsHead, errorHandler(err, ctx))
-//
-// 	ctx = newContext("GET")
-// 	assert.Equal(t, nilErr, errorHandler(nil, ctx))
-//
-// 	ctx = newContext("GET")
-// 	err = &jsonapi.ErrorObject{Title: "hey", Status: "deliberately not an integer"}
-// 	assert.Equal(t, problemRendering, errorHandler(err, ctx))
-//
-// 	ctx = newContext("GET")
-// 	assert.Equal(t, normal, errorHandler(someErr, ctx))
-// }
-//
-// func Test_ErrorHandler(t *testing.T) {
-// 	ctx := newContext("GET")
-// 	ErrorHandler(someErr, ctx)
-// }
+func Test_errorHandler(t *testing.T) {
+	ctx := newContext("GET")
+	ctx.Response().Committed = true
+	assert.Equal(t, alreadyCommited, errorHandler(someErr, ctx))
+
+	noContentCtx := noContentContext{newContext("HEAD")}
+	assert.Equal(t, noContent, errorHandler(someErr, noContentCtx))
+
+	ctx = newContext("HEAD")
+	var err error = &echo.HTTPError{Code: 1222, Message: "magic error"}
+	assert.Equal(t, methodIsHead, errorHandler(err, ctx))
+
+	ctx = newContext("GET")
+	assert.Equal(t, nilErr, errorHandler(nil, ctx))
+
+	ctx = newContext("GET")
+	err = &jsonapi.ErrorObject{Title: "hey", Status: "deliberately not an integer"}
+	assert.Equal(t, problemRendering, errorHandler(err, ctx))
+
+	ctx = newContext("GET")
+	assert.Equal(t, normal, errorHandler(someErr, ctx))
+}
+
+func Test_ErrorHandler(t *testing.T) {
+	ctx := newContext("GET")
+	ErrorHandler(someErr, ctx)
+}
 
 func Test_logErr(t *testing.T) {
 }
