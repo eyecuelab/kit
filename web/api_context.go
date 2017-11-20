@@ -27,15 +27,13 @@ type (
 		echo.Context
 
 		Payload() *jsonapi.OnePayload
-		Attrs() map[string]interface{}
+		Attrs(permitted ...string) map[string]interface{}
 		AttrKeys() []string
 		BindAndValidate(interface{}) error
 		BindIdParam(*int, ...string) error
 		JsonApi(interface{}, int) error
 		JsonApiOK(interface{}) error
 		ApiError(string, ...int) *echo.HTTPError
-		RestrictedParam(string, ...string) (string, error)
-		RestrictedQueryParam(string, ...string) (string, error)
 		QueryParamTrue(string) (bool, bool)
 
 		RequiredQueryParams(...string) (map[string]string, error)
@@ -54,8 +52,17 @@ func (c *apiContext) Payload() *jsonapi.OnePayload {
 	return c.payload
 }
 
-func (c *apiContext) Attrs() map[string]interface{} {
-	return c.payload.Data.Attributes
+func (c *apiContext) Attrs(permitted ...string) map[string]interface{} {
+	//TODO: remove this once all refactoring is complete
+	if len(permitted) == 0 {
+		return c.payload.Data.Attributes
+	}
+
+	permittedAttrs := make(map[string]interface{})
+	for _, p := range permitted {
+		permittedAttrs[p] = c.payload.Data.Attributes[p]
+	}
+	return permittedAttrs
 }
 
 func (c *apiContext) AttrKeys() []string {
@@ -166,13 +173,7 @@ func (c *apiContext) ApiError(msg string, codes ...int) *echo.HTTPError {
 	return echo.NewHTTPError(http.StatusBadRequest, msg)
 }
 
-func (c *apiContext) RestrictedParam(paramName string, allowedValues ...string) (string, error) {
-	return restrictedValue(c.Param(paramName), allowedValues, "Param value %v not allowed")
-}
 
-func (c *apiContext) RestrictedQueryParam(paramName string, allowedValues ...string) (string, error) {
-	return restrictedValue(c.QueryParam(paramName), allowedValues, "Query param value %v not allowed")
-}
 
 func (c *apiContext) RequiredQueryParams(required ...string) (map[string]string, error) {
 	missing := make([]string, 0, len(required))
