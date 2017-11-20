@@ -19,6 +19,8 @@ var (
 	DBError error
 )
 
+const nullDataValue = "null"
+
 func init() {
 	cobra.OnInitialize(ConnectDB)
 }
@@ -47,6 +49,10 @@ func (j *JsonB) Scan(src interface{}) error {
 		return errors.New("Type assertion .([]byte) failed.")
 	}
 
+	if sourceIsNull(source) {
+		return nil
+	}
+
 	var i interface{}
 	err := json.Unmarshal(source, &i)
 	if err != nil {
@@ -55,7 +61,7 @@ func (j *JsonB) Scan(src interface{}) error {
 
 	*j, ok = i.(map[string]interface{})
 	if !ok {
-		return errors.New("Type assertion .(map[string]interface{}) failed.")
+		return fmt.Errorf("type assertion .(map[string]interface{}) failed. got %s", source)
 	}
 
 	return nil
@@ -142,3 +148,6 @@ func DbWithError(e error) *gorm.DB {
 	return db
 }
 
+func sourceIsNull(b []byte) bool {
+	return string(b) == nullDataValue
+}
