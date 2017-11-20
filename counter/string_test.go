@@ -27,10 +27,10 @@ func TestString_String(t *testing.T) {
 }
 
 func TestString_Sorted(t *testing.T) {
-	c := String{foo: 1, bar: 3, baz: 2}
+	c := String{"c": 1, "b": 2, "a": 2}
 	gotKeys, gotCounts := c.Sorted()
-	assert.Equal(t, []string{foo, baz, bar}, gotKeys)
-	assert.Equal(t, []int{1, 2, 3}, gotCounts)
+	assert.Equal(t, []string{"c", "a", "b"}, gotKeys)
+	assert.Equal(t, []int{1, 2, 2}, gotCounts)
 }
 
 func TestString_Combine(t *testing.T) {

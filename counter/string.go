@@ -9,6 +9,7 @@ import (
 //String counts the occurence of strings.
 type String map[string]int
 
+//Add the the following strings to the counter.
 func (counter String) Add(items ...string) {
 	for _, item := range items {
 		if _, ok := counter[item]; ok {
@@ -30,6 +31,7 @@ func (counter String) String() string {
 
 }
 
+//Keys returns the keys of the counter. Order is not guaranteed.
 func (counter String) Keys() []string {
 	keys := make([]string, len(counter))
 	var i int
@@ -40,11 +42,15 @@ func (counter String) Keys() []string {
 	return keys
 }
 
+//Sorted returns the keys and coutns of the strings in the counter. They are sorted by the count, and then by the key.
+//i.e, given {"c": 1, "b": 3, "a":3}, returns {1, 1, 3}, {c, a, b}
 func (counter String) Sorted() ([]string, []int) {
 	keys := counter.Keys()
 	sort.Slice(keys, func(i, j int) bool {
-		return counter[keys[i]] < counter[keys[j]]
+		return counter[keys[i]] < counter[keys[j]] ||
+			(counter[keys[i]] == counter[keys[j]] && keys[i] < keys[j])
 	})
+
 	vals := make([]int, len(keys))
 	for i, k := range keys {
 		vals[i] = counter[k]
