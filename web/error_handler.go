@@ -75,10 +75,7 @@ func ErrorHandler(err error, c echo.Context) {
 }
 
 func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
-	var (
-		detail string
-		code   string
-	)
+	var detail, code string
 	status = http.StatusInternalServerError
 	switch err := err.(type) {
 	case nil:
@@ -125,8 +122,8 @@ func renderApiErrors(c echo.Context, errors ...*jsonapi.ErrorObject) (err error)
 	if err = jsonapi.MarshalErrors(&b, errors); err != nil {
 		return err
 	}
-	var code int
-	if code, err = strconv.Atoi(errors[0].Status); err != nil {
+	code, err := strconv.Atoi(errors[0].Status)
+	if err != nil {
 		return err
 	}
 	return c.Blob(code, jsonapi.MediaType, b.Bytes())

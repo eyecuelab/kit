@@ -26,6 +26,12 @@ func TestVals(t *testing.T) {
 	assert.Equal(t, want, got)
 }
 
+func TestSortedVals(t *testing.T) {
+	want := []string{"a", "b", "c"}
+	got := SortedVals(m)
+	assert.Equal(t, want, got)
+}
+
 func TestCopy(t *testing.T) {
 	want := Copy(m)
 	got := Copy(want)
