@@ -18,3 +18,8 @@
 
 #ide
 .idea
+.vscode
+
+#os-specific
+.DS_Store
+desktop.ini
