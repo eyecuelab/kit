@@ -42,6 +42,36 @@ func (counter String) Keys() []string {
 	return keys
 }
 
+func (counter String) MostCommon() (string, int) {
+	mostCommon, max := "", 0
+	for k, v := range counter {
+		if v > max {
+			mostCommon, max = k, v
+		}
+	}
+	return mostCommon, max
+}
+
+//MostCommonN returns the N most common keys. In the case of a tie, it prioritizes the lexigraphically lowest,
+//so that the keys contained in counter.MostCommonN(n) will be identical for two equivalent counters.
+func (counter String) MostCommonN(n int) (keys []string, counts []int, ok bool) {
+	if len(counter) < n {
+		return nil, nil, false
+	}
+	keys, counts = make([]string, n), make([]int, n)
+	for k, v := range counter {
+		for i, c := range counts {
+			if v > c || v == c && k < keys[i] {
+				copy(counts[i+1:], counts[i:n-1])
+				copy(keys[i+1:], keys[i:n-1])
+				keys[i], counts[i] = k, v
+				break
+			}
+		}
+	}
+	return keys, counts, true
+}
+
 //Sorted returns the keys and coutns of the strings in the counter. They are sorted by the count, and then by the key.
 //i.e, given {"c": 1, "b": 3, "a":3}, returns {1, 1, 3}, {c, a, b}
 func (counter String) Sorted() ([]string, []int) {

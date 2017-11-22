@@ -88,3 +88,19 @@ func Test_StringPositiveElements(t *testing.T) {
 	want := String{foo: 3}
 	assert.Equal(t, want, a.PositiveElements())
 }
+
+func TestString_MostCommonN(t *testing.T) {
+	wantKeys, wantVals := []string{foo, bar}, []int{3, 2}
+	counter := String{foo: 3, bar: 2, baz: 2, "a": 1}
+	gotKeys, gotVals, _ := counter.MostCommonN(2)
+	assert.Equal(t, wantKeys, gotKeys)
+	assert.Equal(t, wantVals, gotVals)
+}
+
+func TestString_MostCommon(t *testing.T) {
+	wantKey, wantVal := foo, 3
+	counter := String{foo: 3, bar: 2, baz: -1}
+	gotKey, gotVal := counter.MostCommon()
+	assert.Equal(t, wantKey, gotKey)
+	assert.Equal(t, wantVal, gotVal)
+}
