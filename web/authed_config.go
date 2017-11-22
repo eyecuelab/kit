@@ -50,6 +50,10 @@ func AuthedSkipper() func(echo.Context) bool {
 			return false
 		}
 
+		if hasAuthHeader(c) {
+			return false
+		}
+
 		return re.MatchString(c.Request().URL.Path)
 	}
 }
@@ -73,4 +77,8 @@ func AuthedWithConfig(config AuthedConfig, cl AuthedContextLookup) echo.Middlewa
 			return next(ac)
 		}
 	}
+}
+
+func hasAuthHeader(c echo.Context) bool {
+	return c.Request().Header.Get("authorization") != ""
 }
