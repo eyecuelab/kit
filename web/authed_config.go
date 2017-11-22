@@ -80,5 +80,5 @@ func AuthedWithConfig(config AuthedConfig, cl AuthedContextLookup) echo.Middlewa
 }
 
 func hasAuthHeader(c echo.Context) bool {
-	return c.Request().Header.Get("authorization") != ""
+	return c.Request().Header.Get(echo.HeaderAuthorization) != ""
 }
