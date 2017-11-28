@@ -15,16 +15,18 @@ import (
 type JSONApiAction struct {
 	Method string         `json:"method"`
 	Name   string         `json:"name"`
+	ID     string         `json:"id"`
+	Type   string         `json:"type"`
 	URL    string         `json:"url"`
 	Fields []JSONApiField `json:"fields"`
 }
 
 // JSONApiField jsonapi action field
 type JSONApiField struct {
-	Name      string `json:"name"`
-	InputType string `json:"type"`
-	Value     string `json:"value"`
-	Required  bool   `json:"required"`
+	Name      string      `json:"name"`
+	InputType string      `json:"type"`
+	Value     interface{} `json:"value"`
+	Required  bool        `json:"required"`
 }
 
 // APIURL full api url for the path
