@@ -29,6 +29,7 @@ type (
 		Payload() *jsonapi.OnePayload
 		Attrs(permitted ...string) map[string]interface{}
 		AttrKeys() []string
+		RequireAttrs(...string) error
 		BindAndValidate(interface{}) error
 		BindIdParam(*int, ...string) error
 		JsonApi(interface{}, int) error
@@ -67,6 +68,23 @@ func (c *apiContext) Attrs(permitted ...string) map[string]interface{} {
 
 func (c *apiContext) AttrKeys() []string {
 	return maputil.Keys(c.Attrs())
+}
+
+func (c *apiContext) RequireAttrs(required ...string) error {
+	missing := make([]string, 0, len(required))
+
+	for _, key := range required {
+		if c.payload.Data.Attributes[key] == nil {
+			missing = append(missing, key)
+			continue
+		}
+	}
+
+	if len(missing) > 0 {
+		return fmt.Errorf("missing required attributes: %v", missing)
+	}
+
+	return nil
 }
 
 //Before binding we make a copy of the req body and restore it after binding.
@@ -172,8 +190,6 @@ func (c *apiContext) ApiError(msg string, codes ...int) *echo.HTTPError {
 	// TODO: return jsonapi error instead
 	return echo.NewHTTPError(http.StatusBadRequest, msg)
 }
-
-
 
 func (c *apiContext) RequiredQueryParams(required ...string) (map[string]string, error) {
 	missing := make([]string, 0, len(required))
