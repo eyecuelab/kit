@@ -12,6 +12,7 @@ import (
 type (
 	AuthedContextLookup interface {
 		Lookup(echo.Context) (echo.Context, error)
+		Context(echo.Context) echo.Context
 	}
 	// AuthedConfig config for Authed middleware.
 	AuthedConfig struct {
@@ -67,7 +68,7 @@ func AuthedWithConfig(config AuthedConfig, cl AuthedContextLookup) echo.Middlewa
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			if config.Skipper(c) {
-				return next(c)
+				return next(cl.Context(c))
 			}
 			ac, err := cl.Lookup(c)
 			if err != nil {
