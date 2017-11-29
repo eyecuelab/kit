@@ -44,6 +44,12 @@ func TestAll(t *testing.T) {
 
 }
 
+func TestCombine(t *testing.T) {
+	a := []string{"foo", "bar"}
+	b := []string{}
+	c := []string{"baz"}
+	assert.Equal(t, []string{"foo", "bar", "baz"}, Combine(a, b, c))
+}
 func TestAny(t *testing.T) {
 	yes := []string{"", "c", ""}
 	no := []string{"", "", ""}

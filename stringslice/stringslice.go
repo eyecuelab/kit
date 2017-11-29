@@ -1,5 +1,7 @@
 package stringslice
 
+import "sort"
+
 type predicate func(string) bool
 
 //NonEmpty returns a slice containing the non-empty elements of a
@@ -64,6 +66,25 @@ func AppendIfNonEmpty(a []string, strings ...string) []string {
 			a = append(a, s)
 		}
 	}
+	return a
+}
+
+//Combine multiple slices into a single slice. This is equivalent to appending each slice in turn.
+func Combine(slices ...[]string) []string {
+	var L int
+	for _, a := range slices {
+		L += len(a)
+	}
+	combined := make([]string, 0, L)
+	for _, a := range slices {
+		combined = append(combined, a...)
+	}
+	return combined
+}
+
+//Sorted takes any number of input strings and returns a sorted stringslice.
+func Sorted(a ...string) []string {
+	sort.Strings(a)
 	return a
 }
 
