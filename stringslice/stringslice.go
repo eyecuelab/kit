@@ -1,3 +1,4 @@
+//Package stringslice contains various functions to work with slices of strings and the strings contained within.
 package stringslice
 
 import "sort"

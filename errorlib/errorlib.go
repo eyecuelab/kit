@@ -1,3 +1,4 @@
+//Package errorlib contains tools to deal with errors, including the heavily-used `ErrorString` type (for errors that are compile-time constants) and `LoggedChannel` function (to report non-fatal errors during concurrent execution)
 package errorlib
 
 import (
@@ -17,16 +18,16 @@ func (err ErrorString) Error() string {
 
 const someErr = ErrorString("")
 
-//LoggedChannel creates an error channel and starts LogErrors on that channel in it's own goroutine.
+//LoggedChannel creates an error channel that will automatically log errors sent to it to the logger specified in kit/log.
 func LoggedChannel() chan error {
 	errors := make(chan error)
-	go LogErrors(errors)
+	go logErrors(errors)
 	return errors
 }
 
-//LogErrors logs errors as they come in to os.stdout.
+//logErrors logs errors as they come in to os.stdout.
 //Goroutine. Do not run directly!
-func LogErrors(errors <-chan error) {
+func logErrors(errors <-chan error) {
 	for err := range errors {
 		log.Print(err)
 	}

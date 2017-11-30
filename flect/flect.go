@@ -1,3 +1,4 @@
+//Package flect is meant to work alongside go's `reflect` library, containing additional runtime reflection tools
 package flect
 
 import (

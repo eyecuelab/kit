@@ -1,3 +1,4 @@
+//Package tickertape provides an implenetation of a concurrency-safe 'ticker tape' of current information during  a running program - that is, repeatedly updating the same line with new information.
 package tickertape
 
 import (

@@ -1,3 +1,4 @@
+//Package geojson contains an interface and various structs for 2d and 3d geometry that correspond to the [geojson](http://geojson.org/) format.
 package geojson
 
 import (

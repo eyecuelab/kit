@@ -1,3 +1,4 @@
+//Package counter implements various counter types, analagous to Python's collections.Counter
 package counter
 
 import (

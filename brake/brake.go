@@ -1,3 +1,4 @@
+//Package brake contains tools for setting up and working with the [airbrake](https://airbrake.io/) error monitoring software.
 package brake
 
 import (

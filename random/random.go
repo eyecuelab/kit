@@ -1,3 +1,4 @@
+//Package random provides tools for generating cryptographically secure random elements. it uses golang's built in `crypto/rand` for it's RNG.
 package random
 
 import (

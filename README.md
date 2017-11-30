@@ -87,8 +87,7 @@ go test ./... -cover
 
 ## imath
 
-`imath` is a contains tools for signed integer math. it largely corresponds with go's built in `math` library for float64s
-
+`imath` is contains tools for signed integer math. it largely corresponds with go's built in `math` library for float64s
 
 ### imath/operator
 
@@ -97,7 +96,6 @@ go test ./... -cover
 ## log
 
 `log` is an extension of the [logrus]("github.com/sirupsen/logrus") package. It contains various tools for logging information and errors during runtime.
-
 
 ## mailman
 

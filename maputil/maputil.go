@@ -1,3 +1,4 @@
+//Package maputil contains utility functions for working with map[string]interface{}
 package maputil
 
 import "sort"

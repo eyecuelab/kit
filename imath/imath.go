@@ -1,4 +1,4 @@
-//Package imath is a contains helper functions for integer math.
+//Package imath contains tools for signed integer math. It largely corresponds with go's built in `math` library for float64s
 package imath
 
 import "math/rand"

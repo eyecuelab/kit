@@ -1,3 +1,4 @@
+//Package str contains various tools for manipulation of strings beyond those available in golang's `strings` library. it also conatains a wide variety of string constants.
 package str
 
 import (
@@ -8,7 +9,7 @@ import (
 	"github.com/eyecuelab/kit/runeset"
 )
 
-//Runes removes any runes listed from the string.
+//RemoveRunes removes any runes listed from the string.
 //Note that this converts to runes and back to UTF-8, so RemoveRunes(s) == s
 //does not necessarially hold, since the code points may differ.
 func RemoveRunes(s string, toRemove ...rune) string {
@@ -25,6 +26,7 @@ func RemoveRunes(s string, toRemove ...rune) string {
 //RemoveWhiteSpace is an alias for RemoveASCIIWhiteSpace.
 var RemoveWhiteSpace = RemoveASCIIWhiteSpace
 
+//RuneDiff represents a difference in runes between two []rune.
 type RuneDiff struct {
 	a, b     rune
 	position int

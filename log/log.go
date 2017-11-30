@@ -1,3 +1,4 @@
+//Package log contains various tools for logging information and errors during runtime. It is an extension of the github.com/sirupsen/logrus package.
 package log
 
 import (
