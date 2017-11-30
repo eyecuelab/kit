@@ -4,7 +4,7 @@ EyeCueLab's `kit` is a repository of open-source golang libraries developed by E
 
 ## philosophy / notes
 
-EyeCueLab tries to follow the philosphy of twelve-factor apps: [twelve-factor app](https://12factor.net).  All non-business logic should be open & accessible to the public, and configuration details should be in the environment.
+EyeCueLab tries to follow the philosphy of the [twelve-factor app](https://12factor.net).  All non-business logic should be open & accessible to the public, and configuration details should be in the environment.
 
 Accordingly, EyeCueLab uses the [cobra command-line interface](github.com/spf13/cobra) and the [viper configuration library](https://github.com/spf13/viper). Many parts of `kit` either rely on these libraries for configuration or hook into them during init() so that cobra/viper can access them.
 
