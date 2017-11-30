@@ -31,10 +31,12 @@ var (
 	Warnf = log.Warnf
 )
 
+//FatalWrap wraps the error using errors.wrap, then calls log.fatalf
 func FatalWrap(err error, msg string) {
 	log.Fatalf("%+v", errors.Wrap(err, msg))
 }
 
+//Infof calls spew.Sprintf on the arguments, then logs it at the info level
 func Infof(format string, args ...interface{}) {
 	s := spew.Sprintf(format, args...)
 	log.Infof(s)

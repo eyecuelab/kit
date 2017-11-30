@@ -24,6 +24,7 @@ func RandomString(n int) (string, error) {
 	return base64.URLEncoding.EncodeToString(b), err
 }
 
+//Int64s returns a slice containing n random int64s
 func Int64s(n int) ([]int64, error) {
 	bytes, err := RandomBytes(8 * n)
 	if err != nil {
@@ -42,6 +43,7 @@ func Int64s(n int) ([]int64, error) {
 	return ints, nil
 }
 
+//Uint64s returns a slice containing n random uint64s
 func Uint64s(n int) ([]uint64, error) {
 	bytes, err := RandomBytes(8 * n)
 	if err != nil {
@@ -59,6 +61,7 @@ func Uint64s(n int) ([]uint64, error) {
 	return uints, nil
 }
 
+//Float64s returns a slice containing n random float64s
 func Float64s(n int) ([]float64, error) {
 	bytes, err := RandomBytes(8 * n)
 	if err != nil {

@@ -16,12 +16,15 @@ const (
 	//ASCIIPrintable is a list of all ASCII printable characters, identical to string.printable in python 3.6
 	ASCIIPrintable = `0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_{|}~ \t\n\r\x0b\x0c` + "`"
 
+	//ASCIILowercase is all lowercase letters in the latin alphabet. (code points in [97, 122])
 	ASCIILowercase = `abcdefghijklmnopqrstuvwxyz`
 
+	//ASCIIUpperCase is all uppercase letters in the latin alphabet (code points in [65, 90])
 	ASCIIUpperCase = `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
 
 	ASCIILetters = ASCIILowercase + ASCIIUpperCase
 
+	//ASCIINumerics are the numerals 0-9 (code points in [30, 39])
 	ASCIINumerics = "0123456789"
 
 	ASCIIAlphaNumeric = ASCIILowercase + ASCIIUpperCase + ASCIINumerics
@@ -47,6 +50,7 @@ func RemoveASCIIPunctuation(s string) string {
 	return removeRunesInSet(s, ASCIIPunctSet)
 }
 
+//RemoveASCIIWhiteSpace returns a copy of the string with the ASCII whitespace (" \t\n\r\x0b\x0c") removed.
 func RemoveASCIIWhiteSpace(s string) string {
 	buf := bytes.Buffer{}
 	for _, r := range s {
@@ -57,6 +61,13 @@ func RemoveASCIIWhiteSpace(s string) string {
 	return buf.String()
 }
 
+//RemoveNonASCII returns a copy of the string with all non-ASCII runes removed.
 func RemoveNonASCII(s string) string {
-	return removeRunesNotInSet(s, ASCIISet)
+	ascii := make([]byte, 0, len(s))
+	for _, r := range s {
+		if r < 128 {
+			ascii = append(ascii, byte(r))
+		}
+	}
+	return string(ascii)
 }

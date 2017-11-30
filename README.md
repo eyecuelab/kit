@@ -76,7 +76,6 @@ go test ./... -cover
 
 `flect` is meant to work alongside go's `reflect` library, containing additional runtime reflection tools
 
-
 ## geojson
 
 `geojson` contains an interface and various structs for 2d and 3d geometry that correspond to the [geojson](http://geojson.org/) format.
@@ -143,10 +142,9 @@ the maputil package itself covers `map[string]interface{}`
 
 `set` implements various set types and associated methods; union, intersection, containment, etc. see `runeset` for a set of runes (this will be folded into set.)
 
-
 ## str
 
-`str` contains various tools for manipulation of strings beyond those available in golang's `strings` library. it also conatains a wide variety of string constants.
+`str` contains various tools for manipulation of strings beyond those available in golang's `strings` library. it also contains a wide variety of string constants.
 
 ## stringslice
 

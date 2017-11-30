@@ -93,6 +93,7 @@ func FromString(s string) (set RuneSet) {
 	return set
 }
 
+//Copy returns a copy of the RuneSet.
 func (rs RuneSet) Copy() RuneSet {
 	copy := make(RuneSet)
 	for k, v := range rs {

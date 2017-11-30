@@ -1,5 +1,6 @@
 package imath
 
+//Map (f, a) returns a slice containing f(n) for every n in a
 func Map(f func(int) int, a []int) []int {
 	mapped := make([]int, len(a))
 	for i, n := range a {
@@ -8,6 +9,7 @@ func Map(f func(int) int, a []int) []int {
 	return mapped
 }
 
+//Filter (f, a) returns a slice containing n for all n where f(n) == true
 func Filter(f func(int) bool, a []int) []int {
 	filtered := make([]int, 0, len(a))
 	for _, n := range a {
@@ -26,6 +28,7 @@ func Reduce(f func(int, int) int, start int, a ...int) int {
 	return reduced
 }
 
+//Accumulate returns a slice B where B[i] = Reduce(f, a[:i+1]).
 func Accumulate(f func(int, int) int, a []int) []int {
 	accumulated := make([]int, len(a))
 	if len(a) == 0 {
