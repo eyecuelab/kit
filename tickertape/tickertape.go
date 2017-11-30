@@ -3,14 +3,21 @@ package tickertape
 
 import (
 	"fmt"
+	"io"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/eyecuelab/kit/errorlib"
 )
 
 const (
 	bufSize              = 30
 	defaultPollingPeriod = 300 * time.Millisecond
 	defaultSignalPeriod  = 1000 * time.Millisecond
+
+	ErrNotListening  errorlib.ErrorString = "tickertape is not listening"
+	ErrAlreadyClosed errorlib.ErrorString = "cannot print to a closed tickertape"
 )
 
 type _signal struct{}
@@ -18,11 +25,18 @@ type _signal struct{}
 var signal _signal
 var internalTicker TickerTape
 
+var _ io.WriteCloser = &TickerTape{}
+
 //TickerTape is a struct for printing progress information one at a time, on the same line.
 type TickerTape struct {
-	listening                   bool
-	events                      chan string
-	signals                     chan _signal
+	mux       sync.Mutex //guards listening and closed
+	listening bool
+	closed    bool
+
+	done    chan _signal
+	events  chan string
+	signals chan _signal
+
 	signalPeriod, pollingPeriod time.Duration
 }
 
@@ -36,18 +50,35 @@ func (ticker *TickerTape) startListening() {
 	ticker.listening = true
 	ticker.events = make(chan string, bufSize)
 	ticker.signals = make(chan _signal, bufSize)
+	ticker.done = make(chan _signal, 2)
 	go ticker.listen()
 	go ticker.repeatSignal()
 }
 
 func (ticker *TickerTape) repeatSignal() {
-
+	defer close(ticker.signals)
 	for {
-		ticker.signals <- signal
-		time.Sleep(ticker.signalPeriod)
+		select {
+		case <-ticker.done:
+			return
+
+		default:
+			ticker.signals <- signal
+			time.Sleep(ticker.signalPeriod)
+		}
 	}
 }
+
+//Close the tickertape.
+func (ticker *TickerTape) Close() error {
+	defer close(ticker.done)
+	ticker.done <- signal // stop repeatSignal
+	ticker.done <- signal // stop listen
+	return nil
+}
+
 func (ticker *TickerTape) listen() {
+	defer close(ticker.events)
 	for {
 		select {
 		case event := <-ticker.events:
@@ -57,32 +88,46 @@ func (ticker *TickerTape) listen() {
 			// we want to be able to see each message as it comes up.
 		case <-ticker.signals:
 			fmt.Print(".")
+		case <-ticker.done:
+			close(ticker.events)
+			return
 		}
 	}
 
 }
 
 //Printf prints to a ticker
-func (ticker *TickerTape) Printf(format string, args ...interface{}) {
+func (ticker *TickerTape) Printf(format string, args ...interface{}) bool {
+	return ticker.print(fmt.Sprintf(format, args...))
+}
+
+func (ticker *TickerTape) print(s string) bool {
+	ticker.mux.Lock()
+	if ticker.closed {
+		return false
+	}
+
 	if !ticker.listening {
 		ticker.startListening()
 	}
-	ticker.events <- fmt.Sprintf(format, args...)
+	ticker.mux.Unlock()
+	ticker.events <- s
+	return true
 }
 
 //Print a line through the ticker like fmt.Print
-func (ticker *TickerTape) Print(args ...interface{}) {
-	if !ticker.listening {
-		ticker.startListening()
-	}
-	ticker.events <- fmt.Sprint(args...)
+func (ticker *TickerTape) Print(args ...interface{}) bool {
+	return ticker.print(fmt.Sprint(args...))
 }
 
 func (ticker *TickerTape) Write(b []byte) (n int, err error) {
 	if !ticker.listening {
-		return 0, fmt.Errorf("tickertape is not listening")
+		return 0, ErrNotListening
 	}
-	ticker.events <- string(b)
+	ok := ticker.print(string(b))
+	if !ok {
+		return 0, ErrAlreadyClosed
+	}
 	return len(b), nil
 }
 
