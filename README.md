@@ -34,7 +34,7 @@ go test ./... -cover
 
 ## cmd
 
-`cmd` contains helper fucntions for the [cobra command-line interface](github.com/spf13/cobra)
+`cmd` contains helper fucntions for the [cobra command-line interface](https://github.com/spf13/cobra)
 
 ## coerce
 
@@ -94,7 +94,7 @@ go test ./... -cover
 
 ## log
 
-`log` is an extension of the [logrus]("github.com/sirupsen/logrus") package. It contains various tools for logging information and errors during runtime.
+`log` is an extension of the [logrus](https://github.com/sirupsen/logrus) package. It contains various tools for logging information and errors during runtime.
 
 ## mailman
 
@@ -176,7 +176,7 @@ the maputil package itself covers `map[string]interface{}`
 
 ## web
 
-`web` is the bones of our web framework, built on top of google's [jsonapi framework](github.com/google/jsonapi) and labstack's [echo framework](github.com/labstack/echo).
+`web` is the bones of our web framework, built on top of google's [jsonapi framework](https://github.com/google/jsonapi) and labstack's [echo framework](https://github.com/labstack/echo).
 
 ### web/middleware
 
