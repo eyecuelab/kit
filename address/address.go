@@ -56,11 +56,36 @@ func (a *Address) StringSliceFromNonempty() []string {
 		a.Street, a.Extension, a.POBox, a.Locality, a.Region, a.PostalCode, a.Country)
 }
 
-func (a *Address) StringSlice() []string {
-	return []string{}
+//Array turns an address into a [7]string
+func (a *Address) Array() [7]string {
+	return [7]string{0: a.Street, 1: a.Extension, 2: a.POBox,
+		3: a.Locality, 4: a.Region, 5: a.PostalCode, 6: a.Country}
 }
 
-//Returns true if all components of the address are ""
+//NonEmptyComponents is the number of nonempty components of a; that is, an address with only a steet has 1,
+//street and locality is 2, ...
+func (a *Address) NonEmptyComponents() int {
+	return countNonEmpty(a.Street, a.Extension, a.POBox,
+		a.Locality, a.Region, a.PostalCode, a.Country)
+}
+
+func countNonEmpty(a ...string) int {
+	n := 0
+	for _, s := range a {
+		if s != "" {
+			n++
+		}
+	}
+	return n
+}
+
+//StringSlice turns an address into a []string
+func (a *Address) StringSlice() []string {
+	return []string{0: a.Street, 1: a.Extension, 2: a.POBox,
+		3: a.Locality, 4: a.Region, 5: a.PostalCode, 6: a.Country}
+}
+
+//Empty returns true if all components of the address are ""
 func (a *Address) Empty() bool {
 	isEmpty := func(s string) bool {
 		return s == ""
@@ -69,33 +94,9 @@ func (a *Address) Empty() bool {
 
 }
 func (a *Address) String() string {
-	//PO BOX deliberately ignored for now; 9/7/2017
 	components := []string{
 		a.Street, a.Extension, a.POBox,
 		a.Locality, a.Region, a.PostalCode, a.Country,
 	}
 	return strings.Join(stringslice.NonEmpty(components), ", ")
-}
-
-//NonEmptyComponents is the number of nonempty components of a; that is, an address with only a steet has 1,
-//street and locality is 2, ...
-func (a *Address) NonEmptyComponents() int {
-	return sumBools(
-		a.Street != "",
-		a.Extension != "",
-		a.POBox != "",
-		a.Locality != "",
-		a.Region != "",
-		a.PostalCode != "",
-		a.Country != "")
-}
-
-func sumBools(bools ...bool) int {
-	sum := 0
-	for _, b := range bools {
-		if b {
-			sum++
-		}
-	}
-	return sum
 }
