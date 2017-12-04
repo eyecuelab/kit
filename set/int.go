@@ -170,7 +170,7 @@ func (s Int) Filter(f func(int) bool) Int {
 	return filtered
 }
 
-//IsSubset returns true if every key in s is also in other
+//IsSubset returns true if s⊆other; every key in s is also in other
 func (s Int) IsSubset(other Int) bool {
 	if len(s) > len(other) {
 		return false
@@ -192,7 +192,7 @@ func (s Int) Remove(key int) bool {
 	return ok
 }
 
-//Pop a random elements from the set. Returns 0, false if no more elements remain.
+//Pop an arbitrary element from the set. Returns 0, false if no more elements remain. No order (or lack of order) is guaranteed.
 func (s Int) Pop() (k int, more bool) {
 	for k := range s {
 		delete(s, k)
@@ -201,7 +201,7 @@ func (s Int) Pop() (k int, more bool) {
 	return 0, false
 }
 
-//IsDisjoint returns true if s shared no elements with other. Note that the empty set is disjoint with everything.
+//IsDisjoint returns true if s∩other == Ø; that is, s shares no elements with other. Note that the empty set is disjoint with everything.
 func (s Int) IsDisjoint(other Int) bool {
 	for k := range s {
 		if _, ok := other[k]; ok {
@@ -211,17 +211,17 @@ func (s Int) IsDisjoint(other Int) bool {
 	return true
 }
 
-//IsProperSubset returns true if every key in s is also in other and s != other
+//IsProperSubset returns true if every s ⊂ other: every key in s is also in other and s != other
 func (s Int) IsProperSubset(other Int) bool {
 	return len(s) < len(other) && s.IsSubset(other)
 }
 
-//IsSuperset returns true if every key in other is also in s
+//IsSuperset returns true if other ⊆ s; every key in other is also in s
 func (s Int) IsSuperset(other Int) bool {
 	return other.IsSubset(s)
 }
 
-//IsProperSuperset returns true if every key in other is also in s and s != other
+//IsProperSuperset returns true if other ⊂ s; every key in other is also in s and s != other
 func (s Int) IsProperSuperset(other Int) bool {
 	return len(s) > len(other) && other.IsSuperset(s)
 }

@@ -105,13 +105,6 @@ func (s String) Add(keys ...string) {
 	}
 }
 
-//Remove a key from the set, in-place.
-func (s String) Remove(keys ...string) {
-	for _, key := range keys {
-		delete(s, key)
-	}
-}
-
 //ToSlice returns a slice containing the keys of a set. No order is guaranteed.
 func (s String) ToSlice() []string {
 	slice := make([]string, len(s))
@@ -168,4 +161,61 @@ func (s String) Filter(f func(string) bool) String {
 		}
 	}
 	return filtered
+}
+
+//IsSubset returns true if every key in s is also in other
+func (s String) IsSubset(other String) bool {
+	if len(s) > len(other) {
+		return false
+	}
+
+	for k := range s {
+		if _, ok := other[k]; !ok {
+			return false
+		}
+
+	}
+	return true
+}
+
+//Remove removes a key from the set, returning the presence of the key.
+func (s String) Remove(key string) bool {
+	_, ok := s[key]
+	delete(s, key)
+	return ok
+}
+
+//Pop an arbitrary element from the set. Returns "", false if no more elements remain. No order, or lack of order, is guaranteed.
+func (s String) Pop() (k string, more bool) {
+	for k := range s {
+		//iterate
+		delete(s, k)
+		return k, true
+	}
+	return "", false
+}
+
+//IsDisjoint returns true if s shared no elements with other. Note that the empty set is disjoint with everything.
+func (s String) IsDisjoint(other String) bool {
+	for k := range s {
+		if _, ok := other[k]; ok {
+			return false
+		}
+	}
+	return true
+}
+
+//IsProperSubset returns true if every key in s is also in other and s != other
+func (s String) IsProperSubset(other String) bool {
+	return len(s) < len(other) && s.IsSubset(other)
+}
+
+//IsSuperset returns true if every key in other is also in s
+func (s String) IsSuperset(other String) bool {
+	return other.IsSubset(s)
+}
+
+//IsProperSuperset returns true if every key in other is also in s and s != other
+func (s String) IsProperSuperset(other String) bool {
+	return len(s) > len(other) && other.IsSuperset(s)
 }

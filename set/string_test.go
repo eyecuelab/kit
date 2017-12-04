@@ -159,15 +159,6 @@ func TestString_Intersection(t *testing.T) {
 		})
 	}
 }
-func TestString_Remove(t *testing.T) {
-	var set = make(String)
-	set.Add(_str_foo, _str_bar, _str_baz)
-	assert.Equal(t, 3, len(set))
-	set.Remove(_str_foo, _str_bar)
-	assert.Equal(t, 1, len(set))
-	set.Remove(_str_foo)
-	assert.Equal(t, 1, len(set))
-}
 
 func TestString_Equal(t *testing.T) {
 	type args struct {
