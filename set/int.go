@@ -105,8 +105,8 @@ func (s Int) Add(keys ...int) {
 	}
 }
 
-//Remove a key from the set, in-place.
-func (s Int) Remove(keys ...int) {
+//Delete a key or keys from the set, in-place.
+func (s Int) Delete(keys ...int) {
 	for _, key := range keys {
 		delete(s, key)
 	}
@@ -168,4 +168,60 @@ func (s Int) Filter(f func(int) bool) Int {
 		}
 	}
 	return filtered
+}
+
+//IsSubset returns true if every key in s is also in other
+func (s Int) IsSubset(other Int) bool {
+	if len(s) > len(other) {
+		return false
+	}
+
+	for k := range s {
+		if _, ok := other[k]; !ok {
+			return false
+		}
+
+	}
+	return true
+}
+
+//Remove removes a key from the set, returning the presence of the key.
+func (s Int) Remove(key int) bool {
+	_, ok := s[key]
+	delete(s, key)
+	return ok
+}
+
+//Pop a random elements from the set. Returns 0, false if no more elements remain.
+func (s Int) Pop() (k int, more bool) {
+	for k := range s {
+		delete(s, k)
+		return k, true
+	}
+	return 0, false
+}
+
+//IsDisjoint returns true if s shared no elements with other. Note that the empty set is disjoint with everything.
+func (s Int) IsDisjoint(other Int) bool {
+	for k := range s {
+		if _, ok := other[k]; ok {
+			return false
+		}
+	}
+	return true
+}
+
+//IsProperSubset returns true if every key in s is also in other and s != other
+func (s Int) IsProperSubset(other Int) bool {
+	return len(s) < len(other) && s.IsSubset(other)
+}
+
+//IsSuperset returns true if every key in other is also in s
+func (s Int) IsSuperset(other Int) bool {
+	return other.IsSubset(s)
+}
+
+//IsProperSuperset returns true if every key in other is also in s and s != other
+func (s Int) IsProperSuperset(other Int) bool {
+	return len(s) > len(other) && other.IsSuperset(s)
 }

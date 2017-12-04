@@ -2,6 +2,7 @@ package set
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -156,13 +157,13 @@ func TestInt_Intersection(t *testing.T) {
 		})
 	}
 }
-func TestInt_Remove(t *testing.T) {
+func TestInt_Delete(t *testing.T) {
 	var set = make(Int)
 	set.Add(_int_foo, _int_bar, _int_baz)
 	assert.Equal(t, 3, len(set))
-	set.Remove(_int_foo, _int_bar)
+	set.Delete(_int_foo, _int_bar)
 	assert.Equal(t, 1, len(set))
-	set.Remove(_int_foo)
+	set.Delete(_int_foo)
 	assert.Equal(t, 1, len(set))
 }
 
@@ -281,4 +282,123 @@ func TestInt_Filter(t *testing.T) {
 	if !want.Equal(got) {
 		t.Errorf("should get %v, but got %v", want, got)
 	}
+}
+
+func TestInt_Contains(t *testing.T) {
+	type args struct {
+		key int
+	}
+	tests := []struct {
+		name string
+		s    Int
+		args args
+		want bool
+	}{
+	// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.s.Contains(tt.args.key); got != tt.want {
+				t.Errorf("Int.Contains() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestInt_Copy(t *testing.T) {
+	tests := []struct {
+		name string
+		s    Int
+		want Int
+	}{
+	// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.s.Copy(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Int.Copy() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFromInts(t *testing.T) {
+	type args struct {
+		ints []int
+	}
+	tests := []struct {
+		name string
+		args args
+		want Int
+	}{
+	// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := FromInts(tt.args.ints...); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FromInts() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestInt_Sorted(t *testing.T) {
+	tests := []struct {
+		name string
+		s    Int
+		want []int
+	}{
+	// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.s.Sorted(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Int.Sorted() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestInt_IsSubset(t *testing.T) {
+	var (
+		s = FromInts(2, 3)
+		q = FromInts(2, 5)
+		r = FromInts(2)
+		w = FromInts(2, 5, 8, 9)
+	)
+
+	assert.True(t, r.IsSubset(s))
+	assert.False(t, s.IsSubset(q))
+	assert.False(t, w.IsSubset(s))
+}
+
+func TestInt_Pop(t *testing.T) {
+	s := FromInts(5, 2, 3)
+	b, _ := s.Pop()
+	c, _ := s.Pop()
+	d, _ := s.Pop()
+	got := []int{b, c, d}
+	sort.Ints(got)
+	assert.Equal(t, []int{2, 3, 5}, got)
+}
+
+func TestInt_IsDisjoint(t *testing.T) {
+	s, q := FromInts(2, 8), FromInts(3, 7)
+	assert.True(t, s.IsDisjoint(q))
+	r := FromInts(2)
+	assert.False(t, s.IsDisjoint(r))
+}
+
+func TestInt_IsProperSubset(t *testing.T) {
+	s, q := FromInts(2, 3), FromInts(2, 3, 5)
+	assert.True(t, s.IsProperSubset(q))
+	assert.False(t, s.IsProperSubset(s))
+}
+
+func TestInt_IsSuperset(t *testing.T) {
+
+}
+
+func TestInt_IsProperSuperset(t *testing.T) {
+
 }
