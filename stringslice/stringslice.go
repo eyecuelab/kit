@@ -21,6 +21,13 @@ func All(a []string, f predicate) bool {
 	return true
 }
 
+//Copy makes a copy of the []string.
+func Copy(src []string) []string {
+	dst := make([]string, len(src))
+	copy(dst, src)
+	return dst
+}
+
 //Any (returns true if f(s) is true for any s in a. Any([], f) is false.
 func Any(a []string, f func(string) bool) bool {
 	for _, s := range a {

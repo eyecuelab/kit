@@ -3,12 +3,11 @@ package errorlib
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/eyecuelab/kit/log"
 )
 
-//ErrorString is a string with an Error() method. This lets you declare errors as compile-time constants,
+//ErrorString is a string with an Error() method. This lets you declare errors as visible compile-time constants,
 //which facilitates various IDE tools.
 type ErrorString string
 
@@ -16,7 +15,9 @@ func (err ErrorString) Error() string {
 	return string(err)
 }
 
-const someErr = ErrorString("")
+const someErr ErrorString = "foo"
+
+var _ error = someErr //satisfies interface
 
 //LoggedChannel creates an error channel that will automatically log errors sent to it to the logger specified in kit/log.
 func LoggedChannel() chan error {
@@ -38,12 +39,16 @@ var Errors = make(chan error)
 
 //Flatten a slice of errors into a single error
 func Flatten(errs []error) error {
-	if len(errs) == 0 {
+	switch len(errs) {
+	case 0:
 		return nil
+	case 1:
+		return errs[0]
+	default:
+		errmsg := "multiple errors:"
+		for _, err := range errs {
+			errmsg += err.Error()
+		}
+		return errors.New(errmsg)
 	}
-	errmsg := "one or more errors: "
-	for _, err := range errs {
-		errmsg += fmt.Sprintf("%v; ", err)
-	}
-	return errors.New(errmsg)
 }

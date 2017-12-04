@@ -8,22 +8,12 @@ const (
 	is64bit = uint64(^uint(0)) == ^uint64(0)
 )
 
-//Min returns the smallest integer argument.
-func Min(n int, a ...int) int {
-	min := n
-	for _, m := range a {
-		if m < min {
-			min = m
-		}
-	}
-	return min
-}
-
 //Sum returns the sum of it's arguments. Sum() is 0
 func Sum(a ...int) int {
 	return Reduce(operator.Add, 0, a...)
 }
 
+//Range returns the slice of integers in [start, stop) obtained by repeatedly adding step to start.
 func Range(start, stop, step int) []int {
 	if (start > stop && step > 0) ||
 		(start < stop && step < 0) || step == 0 {
@@ -49,15 +39,30 @@ func Product(a ...int) int {
 	return Reduce(operator.Mul, 1, a...)
 }
 
-//Max returns the largest integer argument.
+//Max returns it's largest integer argument.
 func Max(n int, a ...int) int {
-	max := n
-	for _, m := range a {
-		if m > max {
-			max = m
-		}
+	return Reduce(Max2, n, a...)
+}
+
+//Max2 returns the largest of two integer arguments.
+func Max2(a, b int) int {
+	if a > b {
+		return a
 	}
-	return max
+	return b
+}
+
+//Min returns it's smallest integer argument.
+func Min(n int, a ...int) int {
+	return Reduce(Min2, n, a...)
+}
+
+//Min2 returns the smallest of two integer arguments.
+func Min2(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 //Abs returns the absolute value of n
@@ -68,7 +73,7 @@ func Abs(n int) int {
 	return -n
 }
 
-//RandSign returns -1 or 1 at random, using the default Source of math/rand This is NOT crypto-safe, at all.
+//RandSign returns -1 or 1 at random, using the default Source of math/rand. This is NOT crypto-safe, at all.
 func RandSign() int {
 	if rand.Intn(2) > 0 {
 		return 1

@@ -32,6 +32,12 @@ func (counter String) String() string {
 
 }
 
+//Count returns counter[string] if it exists, or 0 otherwise.
+func (counter String) Count(k string) int {
+	n, _ := counter[k]
+	return n
+}
+
 //Keys returns the keys of the counter. Order is not guaranteed.
 func (counter String) Keys() []string {
 	keys := make([]string, len(counter))
@@ -90,6 +96,7 @@ func (counter String) Sorted() ([]string, []int) {
 
 }
 
+//Combine one or more counters, where the count of each element is the sum of the count of each
 func (counter String) Combine(counters ...String) String {
 	combined := counter.Copy()
 	for _, c := range counters {
@@ -104,12 +111,17 @@ func (counter String) Combine(counters ...String) String {
 	return combined
 }
 
+//Equal returns true if two counters are equal. Two counters are equal if they have the same length and share all keys and values.
 func (counter String) Equal(other String) bool {
 	if len(counter) != len(other) {
 		return false
 	}
 	for k, v := range counter {
-		if b, ok := other[k]; !ok || b != v {
+		if v == 0 {
+			if b, _ := other[k]; b != v {
+				return false
+			}
+		} else if b, ok := other[k]; !ok || b != v {
 			return false
 		}
 
@@ -117,7 +129,18 @@ func (counter String) Equal(other String) bool {
 	return true
 }
 
-//PositiveElements returns a copy of counter containing all the elements where the count of counter
+//NonZeroElements returns a copy of the counter with all dummy elements(count zero) removed.
+func (counter String) NonZeroElements(other String) String {
+	copy := make(String)
+	for k, v := range counter {
+		if v != 0 {
+			copy[k] = v
+		}
+	}
+	return copy
+}
+
+//PositiveElements returns a copy of counter containing all the elements where the counter[x] > 0
 func (counter String) PositiveElements() String {
 	copy := make(String)
 	for k, v := range counter {
@@ -128,6 +151,7 @@ func (counter String) PositiveElements() String {
 	return copy
 }
 
+//Copy the counter
 func (counter String) Copy() String {
 	copy := make(String)
 	for k, v := range counter {
@@ -136,6 +160,7 @@ func (counter String) Copy() String {
 	return copy
 }
 
+//Min returns a counter minC where minC[x] = min(max(c[x], 0) for c in counters)
 func Min(counters ...String) String {
 	min := make(String)
 	for _, c := range counters {
@@ -152,6 +177,7 @@ func Min(counters ...String) String {
 	return min
 }
 
+//Max returns a counter maxC where maxC[x] = max(c[x] for c in counters)
 func Max(counters ...String) String {
 	max := make(String)
 	for _, c := range counters {
@@ -168,6 +194,7 @@ func Max(counters ...String) String {
 	return max
 }
 
+//FromStrings creates a counter of strings from a slice, counting each member once.
 func FromStrings(strings ...string) String {
 	counter := make(String)
 	counter.Add(strings...)

@@ -102,6 +102,15 @@ func Map(f func(string) string, a []string) []string {
 	return mapped
 }
 
+//Trim a string to n runes, adding a filler (if any) to show that it has been trimmed.
+func Trim(s string, n int, filler string) string {
+	r := []rune(s)
+	if len(r) <= n {
+		return s
+	}
+	return string(r[:n]) + filler
+}
+
 //ContainsAny returns true if strings.Contains(s, sub) is true for any sub in subStrs. ContainsAny(s) is false.
 func ContainsAny(s string, subStrs ...string) bool {
 	for _, sub := range subStrs {

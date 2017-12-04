@@ -235,3 +235,14 @@ func Test_ContainsAll(t *testing.T) {
 	assert.False(t, ContainsAll(s, "foo", "bar", "baz"))
 	assert.True(t, ContainsAll(s))
 }
+
+func TestTrim(t *testing.T) {
+
+	const (
+		quickbrown = "the quick brown fox jumps over the lazy dog"
+		trimmed    = "the quick brown"
+		filler     = "..."
+		want       = trimmed + filler
+	)
+	assert.Equal(t, want, Trim(quickbrown, len(trimmed), filler))
+}
