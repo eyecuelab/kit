@@ -29,3 +29,27 @@ func TestRune(t *testing.T) {
 	b[0] = 3
 	assert.NotEqual(t, a, b)
 }
+
+func TestByte(t *testing.T) {
+	a := []byte{'2', '5'}
+	b := Byte(a)
+	assert.Equal(t, a, b)
+	b[0] = '3'
+	assert.NotEqual(t, a, b)
+}
+
+func TestInt64(t *testing.T) {
+	a := []int64{2, 5}
+	b := Int64(a)
+	assert.Equal(t, a, b)
+	b[0] = 3
+	assert.NotEqual(t, a, b)
+}
+
+func TestFloat64(t *testing.T) {
+	a := []float64{2, 5}
+	b := Float64(a)
+	assert.Equal(t, a, b)
+	b[0] = 3
+	assert.NotEqual(t, a, b)
+}
