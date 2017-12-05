@@ -9,7 +9,7 @@ import (
 	"github.com/eyecuelab/kit/copyslice"
 )
 
-//return an int64 in the half-open interval [0, n)
+//rint returns an int64 in the half-open interval [0, n)
 func rint(n int) (int64, error) {
 	big, err := rand.Int(rand.Reader, big.NewInt(int64(n)))
 	if err != nil {

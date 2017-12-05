@@ -33,11 +33,7 @@ func Int64s(n int) ([]int64, error) {
 
 	ints := make([]int64, 0, n)
 	for i := 0; i < len(bytes); i += 8 {
-		var out uint64
-		for i, b := range bytes[i : i+8] {
-			out |= uint64(b) << uint64(i)
-		}
-		ints = append(ints, int64(out))
+		ints = append(ints, int64(_uint64(bytes[i:i+8])))
 	}
 
 	return ints, nil
@@ -51,14 +47,19 @@ func Uint64s(n int) ([]uint64, error) {
 	}
 	uints := make([]uint64, 0, n)
 	for i := 0; i < len(bytes); i += 8 {
-		var out uint64
-		for i, b := range bytes[i : i+8] {
-			out |= uint64(b) << uint64(i)
-		}
-		uints = append(uints, out)
+		uints = append(uints, _uint64(bytes[i:i+8]))
 	}
 
 	return uints, nil
+}
+
+//_uint64 converts a slice of 8 bytes into a uint64. this is NOT safe and will panic given a
+//slice of the wrong range.
+func _uint64(a []byte) (u uint64) {
+	for i := uint64(0); i < 8; i++ {
+		u |= uint64(a[i]) << (i * 8)
+	}
+	return u
 }
 
 //Float64s returns a slice containing n random float64s
@@ -69,11 +70,8 @@ func Float64s(n int) ([]float64, error) {
 	}
 	floats := make([]float64, 0, n)
 	for i := 0; i < len(bytes); i += 8 {
-		var out uint64
-		for i, b := range bytes[i : i+8] {
-			out |= uint64(b) << uint64(i)
-		}
-		floats = append(floats, math.Float64frombits(out))
+		u := _uint64(bytes[i : i+8])
+		floats = append(floats, math.Float64frombits(u))
 	}
 	return floats, nil
 }
