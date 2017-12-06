@@ -53,8 +53,8 @@ func Uint64s(n int) ([]uint64, error) {
 	return uints, nil
 }
 
-//_uint64 converts a slice of 8 bytes into a uint64. this is NOT safe and will panic given a
-//slice of the wrong range.
+//_uint64 converts the first 8 bytes in the slice into a uint64 (bigendian)
+//this is NOT safe and will panic given a slice of too little length.
 func _uint64(a []byte) (u uint64) {
 	for i := uint64(0); i < 8; i++ {
 		u |= uint64(a[i]) << (i * 8)
