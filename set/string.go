@@ -2,7 +2,7 @@ package set
 
 import "sort"
 
-//String is a set of strings
+//String is a set of strings. Remember to initialize with make or String{}
 type String map[string]signal
 
 //Contains returns true if the given key is in the set.

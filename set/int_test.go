@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	_int_foo = 0
-	_int_bar = 1
-	_int_baz = 2
-	_int_moo = 3
+	_int_foo = iota
+	_int_bar
+	_int_baz
+	_int_moo
 )
 
 var (

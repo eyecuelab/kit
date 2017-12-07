@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	_str_foo = "a"
-	_str_bar = "b"
-	_str_baz = "c"
-	_str_moo = "d"
+	_str_foo string = string('a' + iota)
+	_str_bar
+	_str_baz
+	_str_moo
 )
 
 var (

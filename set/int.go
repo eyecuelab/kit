@@ -2,7 +2,7 @@ package set
 
 import "sort"
 
-//Int is a set of ints
+//Int is a set of ints. Remember to initialize with make(Int) or Int{}
 type Int map[int]signal
 
 //Contains shows whether a given key is in the Int.
