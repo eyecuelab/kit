@@ -11,22 +11,65 @@ import (
 	"github.com/spf13/viper"
 )
 
-// JSONApiAction jsonapi action
-type JSONApiAction struct {
-	Method string         `json:"method"`
-	Name   string         `json:"name"`
-	ID     string         `json:"id"`
-	Type   string         `json:"type"`
-	URL    string         `json:"url"`
-	Fields []JSONApiField `json:"fields"`
+type (
+	method       string
+	inputType    string
+	actionHolder []*jsonApiAction
+
+	// jsonapi action
+	jsonApiAction struct {
+		Method string         `json:"method"`
+		Name   string         `json:"name"`
+		Url    string         `json:"url"`
+		Fields []jsonApiField `json:"fields"`
+	}
+
+	// jsonapi action field
+	jsonApiField struct {
+		Name      string `json:"name"`
+		InputType string `json:"type"`
+		Value     string `json:"value,omitempty"`
+		Required  bool   `json:"required"`
+	}
+)
+
+const (
+	DELETE method = "DELETE"
+	GET    method = "GET"
+	POST   method = "POST"
+
+	InputText inputType = "text"
+	InputPass inputType = "password"
+)
+
+var ah actionHolder
+
+func AddAction(m method, name, urlHelper string) *jsonApiAction {
+	a := jsonApiAction{
+		Method: string(m),
+		Name:   name,
+		Url:    APIURL(urlHelper),
+		Fields: make([]jsonApiField, 0),
+	}
+	ah = append(ah, &a)
+	return &a
 }
 
-// JSONApiField jsonapi action field
-type JSONApiField struct {
-	Name      string      `json:"name"`
-	InputType string      `json:"type"`
-	Value     interface{} `json:"value"`
-	Required  bool        `json:"required"`
+func (a *jsonApiAction) Field(name string, inputType inputType, value string, requred bool) *jsonApiAction {
+	f := jsonApiField{
+		Name: name,
+		InputType: string(inputType),
+		Value: value,
+		Required: requred,
+	}
+	a.Fields = append(a.Fields, f)
+	return a
+}
+
+func RenderActions() *jsonapi.Meta {
+	clone := ah
+	ah = []*jsonApiAction{}
+	return &jsonapi.Meta{"actions": clone}
 }
 
 // APIURL full api url for the path
