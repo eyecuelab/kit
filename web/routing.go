@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jinzhu/inflection"
 	"github.com/labstack/echo"
 )
 
@@ -24,10 +25,10 @@ type Route struct {
 }
 
 type RouteConfig struct {
-	Routes      []*Route
-	MiddleWare  []echo.MiddlewareFunc
-	RPrefix     routePrefix
-	NPrefix     namePrefix
+	Routes     []*Route
+	MiddleWare []echo.MiddlewareFunc
+	RPrefix    routePrefix
+	NPrefix    namePrefix
 }
 
 func (config *RouteConfig) AddNameLevel(level string) string {
@@ -46,9 +47,24 @@ func (config *RouteConfig) AddRouteLevel(level string) string {
 	return string(config.RPrefix)
 }
 
+func (config *RouteConfig) AddRouteCollectionLevel(level string) string {
+	lvl := "/" + routePrefix(level) + "/" + routePrefix(generateId(level))
+	config.RPrefix = config.RPrefix + lvl
+	return string(config.RPrefix)
+}
+
+func (config *RouteConfig) RemoveRouteCollectionLevel(level string) string {
+	p := strings.Replace(string(config.RPrefix), "/"+level+"/" + generateId(level), "", -1)
+	config.RPrefix = routePrefix(p)
+	return p
+}
+
 func (config *RouteConfig) RemoveLastNameLevel() string {
 	p := string(config.NPrefix)
 	lastDotIndex := strings.LastIndex(p, ".")
+	if lastDotIndex == -1 {
+		return p
+	}
 	p = p[:lastDotIndex]
 	config.NPrefix = namePrefix(p)
 	return p
@@ -62,11 +78,14 @@ func (p routePrefix) with(path string) string {
 	return string(p) + fullPath
 }
 
-
 func (p routePrefix) RemoveLastLevel() *routePrefix {
 	lastDotIndex := strings.LastIndex(string(p), "/")
 	p = p[:lastDotIndex]
 	return &p
+}
+
+func generateId(name string) string {
+	return ":" + inflection.Singular(name) + "_id"
 }
 
 func (route *Route) Handle(m string, hf HandlerFunc, mw ...echo.MiddlewareFunc) *Route {
@@ -137,7 +156,7 @@ func initRoute(e *echo.Echo, route *Route) {
 	for _, handler := range route.Handlers {
 		er := e.Add(handler.Method, route.Path, handler.Handler, handler.MiddleWare...)
 		er.Name = route.Name
-		fmt.Println(route.Name+" " + route.Path)
+		fmt.Println(route.Name + " " + route.Path)
 		route.ERoute = er
 	}
 }
