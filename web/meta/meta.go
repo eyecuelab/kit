@@ -1,4 +1,4 @@
-package web
+package meta
 
 import (
 	"fmt"
@@ -14,22 +14,20 @@ import (
 type (
 	method       string
 	inputType    string
-	actionHolder []*jsonApiAction
+	actionHolder []*jsonAPIAction
 
-	// jsonapi action
-	jsonApiAction struct {
+	jsonAPIAction struct {
 		Method string         `json:"method"`
 		Name   string         `json:"name"`
-		Url    string         `json:"url"`
-		Fields []jsonApiField `json:"fields"`
+		URL    string         `json:"url"`
+		Fields []jsonAPIField `json:"fields"`
 	}
 
-	// jsonapi action field
-	jsonApiField struct {
-		Name      string `json:"name"`
-		InputType string `json:"type"`
-		Value     string `json:"value,omitempty"`
-		Required  bool   `json:"required"`
+	jsonAPIField struct {
+		Name      string      `json:"name"`
+		InputType string      `json:"type"`
+		Value     interface{} `json:"value,omitempty"`
+		Required  bool        `json:"required"`
 	}
 )
 
@@ -37,30 +35,34 @@ const (
 	DELETE method = "DELETE"
 	GET    method = "GET"
 	POST   method = "POST"
+	PATCH  method = "PATCH"
+	PUT    method = "PUT"
 
-	InputText inputType = "text"
-	InputPass inputType = "password"
+	InputText   inputType = "text"
+	InputPass   inputType = "password"
+	InputBool   inputType = "bool"
+	InputNumber inputType = "number"
 )
 
 var ah actionHolder
 
-func AddAction(m method, name, urlHelper string) *jsonApiAction {
-	a := jsonApiAction{
+func AddAction(m method, name, urlHelper string) *jsonAPIAction {
+	a := jsonAPIAction{
 		Method: string(m),
 		Name:   name,
-		Url:    APIURL(urlHelper),
-		Fields: make([]jsonApiField, 0),
+		URL:    APIURL(urlHelper),
+		Fields: make([]jsonAPIField, 0),
 	}
 	ah = append(ah, &a)
 	return &a
 }
 
-func (a *jsonApiAction) Field(name string, inputType inputType, value string, requred bool) *jsonApiAction {
-	f := jsonApiField{
-		Name: name,
+func (a *jsonAPIAction) Field(name string, inputType inputType, value interface{}, requred bool) *jsonAPIAction {
+	f := jsonAPIField{
+		Name:      name,
 		InputType: string(inputType),
-		Value: value,
-		Required: requred,
+		Value:     value,
+		Required:  requred,
 	}
 	a.Fields = append(a.Fields, f)
 	return a
@@ -68,7 +70,7 @@ func (a *jsonApiAction) Field(name string, inputType inputType, value string, re
 
 func RenderActions() *jsonapi.Meta {
 	clone := ah
-	ah = []*jsonApiAction{}
+	ah = []*jsonAPIAction{}
 	return &jsonapi.Meta{"actions": clone}
 }
 
