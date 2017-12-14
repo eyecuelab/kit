@@ -2,9 +2,13 @@ package web
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/labstack/echo"
 )
+
+type namePrefix string
+type routePrefix string
 
 type MethodHandler struct {
 	Method     string
@@ -20,8 +24,49 @@ type Route struct {
 }
 
 type RouteConfig struct {
-	Routes     []*Route
-	MiddleWare []echo.MiddlewareFunc
+	Routes      []*Route
+	MiddleWare  []echo.MiddlewareFunc
+	RPrefix     routePrefix
+	NPrefix     namePrefix
+}
+
+func (config *RouteConfig) AddNameLevel(level string) string {
+	lvl := namePrefix(level)
+	if config.NPrefix == "" {
+		config.NPrefix = lvl
+	} else {
+		config.NPrefix = config.NPrefix + "." + lvl
+	}
+	return string(config.NPrefix)
+}
+
+func (config *RouteConfig) AddRouteLevel(level string) string {
+	lvl := "/" + routePrefix(level)
+	config.RPrefix = config.RPrefix + lvl
+	return string(config.RPrefix)
+}
+
+func (config *RouteConfig) RemoveLastNameLevel() string {
+	p := string(config.NPrefix)
+	lastDotIndex := strings.LastIndex(p, ".")
+	p = p[:lastDotIndex]
+	config.NPrefix = namePrefix(p)
+	return p
+}
+
+func (p routePrefix) with(path string) string {
+	fullPath := "/" + path
+	if p == "" {
+		return fullPath
+	}
+	return string(p) + fullPath
+}
+
+
+func (p routePrefix) RemoveLastLevel() *routePrefix {
+	lastDotIndex := strings.LastIndex(string(p), "/")
+	p = p[:lastDotIndex]
+	return &p
 }
 
 func (route *Route) Handle(m string, hf HandlerFunc, mw ...echo.MiddlewareFunc) *Route {
@@ -37,7 +82,7 @@ func (route *Route) SetName(n string) *Route {
 
 func (config *RouteConfig) AddRoute(path string) *Route {
 	route := &Route{
-		Path:     path,
+		Path:     config.RPrefix.with(path),
 		Handlers: []*MethodHandler{},
 	}
 	config.Routes = append(config.Routes, route)
@@ -45,13 +90,13 @@ func (config *RouteConfig) AddRoute(path string) *Route {
 }
 
 func newRouteConfig() *RouteConfig {
-	return &RouteConfig{[]*Route{}, []echo.MiddlewareFunc{}}
+	return &RouteConfig{[]*Route{}, []echo.MiddlewareFunc{}, "", ""}
 }
 
 var Routing *RouteConfig
 
 func init() {
-	Routing = &RouteConfig{[]*Route{}, []echo.MiddlewareFunc{}}
+	Routing = &RouteConfig{[]*Route{}, []echo.MiddlewareFunc{}, "", ""}
 }
 
 func AddRoute(path string) *Route {
@@ -87,10 +132,12 @@ func initRoutes(e *echo.Echo, cfg *RouteConfig) {
 		initRoute(e, route)
 	}
 }
+
 func initRoute(e *echo.Echo, route *Route) {
 	for _, handler := range route.Handlers {
 		er := e.Add(handler.Method, route.Path, handler.Handler, handler.MiddleWare...)
 		er.Name = route.Name
+		fmt.Println(route.Name+" " + route.Path)
 		route.ERoute = er
 	}
 }
