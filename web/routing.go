@@ -63,7 +63,8 @@ func (config *RouteConfig) RemoveLastNameLevel() string {
 	p := string(config.NPrefix)
 	lastDotIndex := strings.LastIndex(p, ".")
 	if lastDotIndex == -1 {
-		return p
+		config.NPrefix = ""
+		return ""
 	}
 	p = p[:lastDotIndex]
 	config.NPrefix = namePrefix(p)
