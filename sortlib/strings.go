@@ -41,7 +41,7 @@ func ByBytes(s string) string {
 }
 
 //Runes returns a sorted copy of the string, in ascending order (by runes).
-func Runes(s string) string {
+func ByRunes(s string) string {
 	r := RuneSlice(s)
 	sort.Sort(r)
 	return string(r)
