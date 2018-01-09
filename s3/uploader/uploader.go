@@ -53,7 +53,11 @@ func Signature(policy string) string {
 
 // Key s3 file key
 func Key(pref string) string {
-	return fmt.Sprintf("%s/%s/", pref, uuid.NewV4())
+	key, err := uuid.NewV4()
+	if err != nil {
+		panic(err)
+	}
+	return fmt.Sprintf("%s/%s/", pref, key)
 }
 
 // GetPolicy generate policy for the file
