@@ -28,9 +28,9 @@ func TestString_String(t *testing.T) {
 
 func TestString_Sorted(t *testing.T) {
 	c := String{"c": 1, "b": 2, "a": 2}
-	gotKeys, gotCounts := c.Sorted()
-	assert.Equal(t, []string{"c", "a", "b"}, gotKeys)
-	assert.Equal(t, []int{1, 2, 2}, gotCounts)
+	pairs := c.Sorted()
+	assert.Equal(t, []string{"c", "a", "b"}, pairs.Keys(), "should sort by count")
+	assert.Equal(t, []int{1, 2, 2}, pairs.Counts())
 }
 
 func TestString_Combine(t *testing.T) {
@@ -92,9 +92,15 @@ func Test_StringPositiveElements(t *testing.T) {
 func TestString_MostCommonN(t *testing.T) {
 	wantKeys, wantVals := []string{foo, bar}, []int{3, 2}
 	counter := String{foo: 3, bar: 2, baz: 2, "a": 1}
-	gotKeys, gotVals, _ := counter.MostCommonN(2)
-	assert.Equal(t, wantKeys, gotKeys)
-	assert.Equal(t, wantVals, gotVals)
+	_, err := counter.MostCommonN(5)
+	assert.Error(t, err)
+	_, err = counter.MostCommonN(-1)
+	assert.Error(t, err)
+
+	gotPairs, err := counter.MostCommonN(2)
+	assert.NoError(t, err)
+	assert.Equal(t, wantKeys, gotPairs.Keys())
+	assert.Equal(t, wantVals, gotPairs.Counts())
 }
 
 func TestString_MostCommon(t *testing.T) {
