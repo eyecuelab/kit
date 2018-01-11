@@ -20,9 +20,20 @@ func TestString_Add(t *testing.T) {
 	assert.Equal(t, want, c)
 }
 
+func TestString_Neg(t *testing.T) {
+	want := String{foo: -2, bar: -1}
+	c := FromStrings(foo, foo, bar)
+	assert.Equal(t, want, c.Neg())
+}
+
+func TestString_NonzeroElements(t *testing.T) {
+	want := String{foo: 2, bar: -1}
+	c := String{foo: 2, bar: -1, baz: 0}
+	assert.Equal(t, want, c.NonZeroElements())
+}
 func TestString_String(t *testing.T) {
 	a := String{foo: 2, bar: 3}
-	want := `{foo:2, bar:3}`
+	want := `{bar:3, foo:2}`
 	assert.Equal(t, want, a.String())
 }
 

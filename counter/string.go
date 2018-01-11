@@ -23,10 +23,11 @@ func (counter String) Add(items ...string) {
 
 func (counter String) String() string {
 	formatted := make([]string, len(counter))
-	var i int
-	for key, val := range counter {
-		formatted[i] = fmt.Sprintf("%s:%d", key, val)
-		i++
+	keys := counter.Keys()
+	sort.Strings(keys)
+	for i, k := range keys {
+		v := counter[k]
+		formatted[i] = fmt.Sprintf("%s:%d", k, v)
 	}
 	return "{" + strings.Join(formatted, ", ") + "}"
 
@@ -132,8 +133,17 @@ func (counter String) Equal(other String) bool {
 	return true
 }
 
+//Neg returns a copy of the counter with inverted counts: i.e, {k: -v for k, v in counter}
+func (counter String) Neg() String {
+	negated := make(String)
+	for k, v := range counter {
+		negated[k] = -v
+	}
+	return negated
+}
+
 //NonZeroElements returns a copy of the counter with all dummy elements(count zero) removed.
-func (counter String) NonZeroElements(other String) String {
+func (counter String) NonZeroElements() String {
 	copy := make(String)
 	for k, v := range counter {
 		if v != 0 {
