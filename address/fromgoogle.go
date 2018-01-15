@@ -3,18 +3,15 @@ package address
 import "googlemaps.github.io/maps"
 
 func FromGoogleAddressComponents(components []maps.AddressComponent) (address Address) {
-	type routeparts struct {
-		name, number string
-	}
-	var street routeparts
+	var street struct{ name, number string }
 	for _, component := range components {
 		val := component.ShortName
 		for _, label := range component.Types {
 			switch label {
 			case "street_number":
-				street.name = val
-			case "route":
 				street.number = val
+			case "route":
+				street.name = val
 			case "subpremise":
 				address.Extension = val
 			case "administrative_area_level_1":
