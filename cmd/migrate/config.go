@@ -1,46 +1,49 @@
 package migrate
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"syscall"
 	"text/template"
 
 	"github.com/eyecuelab/kit/goenv"
-	"github.com/eyecuelab/kit/log"
 	"github.com/spf13/viper"
 )
 
 const configPath = "./dbconfig.yml"
 
-func writeConfig() {
+type configData struct {
+	Env         string
+	DatabaseUrl string
+}
+
+func writeConfig() error {
 	f, err := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666)
 	if err != nil {
 		if e, ok := err.(*os.PathError); ok && e.Err == syscall.EEXIST {
-			return
+			return nil
 		}
-		log.Fatalf("writeConfig: os.OpenFile: %v", err)
+		return fmt.Errorf("writeConfig: os.OpenFile: %v", err)
 	}
 	defer f.Close()
-
-	templateToFile(f)
+	if err := templateToFile(f); err != nil {
+		return fmt.Errorf("writeConfig: templateToFile: %v", err)
+	}
+	return nil
 }
 
-func templateToFile(wr io.Writer) {
+func templateToFile(wr io.Writer) error {
 	tmpl, err := template.New("config").Parse(configTemplate)
-	log.Check(err)
+	if err != nil {
+		return err
+	}
 
-	err = tmpl.Execute(wr, getConfig())
-	log.Check(err)
+	return tmpl.Execute(wr, getConfig())
 }
 
 func getConfig() configData {
 	return configData{goenv.Env, viper.GetString("database_url")}
-}
-
-type configData struct {
-	Env         string
-	DatabaseUrl string
 }
 
 var configTemplate = `

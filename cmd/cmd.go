@@ -5,6 +5,7 @@ import (
 	"github.com/eyecuelab/kit/cmd/api"
 	"github.com/eyecuelab/kit/cmd/migrate"
 	"github.com/eyecuelab/kit/config"
+	"github.com/eyecuelab/kit/log"
 	"github.com/spf13/cobra"
 )
 
@@ -17,20 +18,25 @@ var (
 	NoDb              bool
 )
 
+//Add a child command to the root
 func Add(command *cobra.Command) {
 	childCommands = append(childCommands, command)
 }
 
+//Use the commands with the names specified
 func Use(cmds ...string) {
 	for _, key := range cmds {
 		Add(availableCommands[key])
 	}
 }
 
-func Init(appName string, rootCmd *cobra.Command, assetGet assets.AssetGet, assetDir assets.AssetDir) error {
-	assets.Manager = &assets.AssetManager{assetGet, assetDir}
+//Init initalizes the cobra CLI for the specified command, if any
+func Init(appName string, rootCmd *cobra.Command, get assets.AssetGet, dir assets.AssetDir) error {
+	assets.Manager = &assets.AssetManager{Get: get, Dir: dir}
 
-	if rootCmd != nil {
+	if rootCmd == nil {
+		log.Info("cmd.Init: rootCmd is nil")
+	} else {
 		addRoot(rootCmd)
 	}
 

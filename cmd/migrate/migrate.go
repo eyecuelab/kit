@@ -33,7 +33,7 @@ func init() {
 
 func run(cmd *cobra.Command, args []string) {
 	if len(args) == 1 && args[0] == "config" {
-		writeConfig()
+		log.Check(writeConfig())
 		return
 	}
 

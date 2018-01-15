@@ -3,6 +3,11 @@ package request
 import "time"
 import "github.com/eyecuelab/kit/brewerydb/structs"
 
+const (
+	errMustSetLocation BadRequestError = "must set one of the following attributes: locality, postalCode, region"
+	errBadPage         BadRequestError = "page must be and int >=0"
+)
+
 type Location struct {
 	structs.Address
 
@@ -18,15 +23,6 @@ type Location struct {
 	Status         string                 `json:"status,omitempty"`
 }
 
-type BadRequestError string
-
-func (err BadRequestError) Error() string { return string(err) }
-
-const (
-	errMustSetLocation BadRequestError = "must set one of the following attributes: locality, postalCode, region"
-	errBadPage         BadRequestError = "page must be and int >=0"
-)
-
 func (loc Location) Valid() error {
 	if loc.Locality == "" && loc.Region == "" && loc.PostalCode == "" {
 		return errMustSetLocation
@@ -35,3 +31,7 @@ func (loc Location) Valid() error {
 	}
 	return nil
 }
+
+type BadRequestError string
+
+func (err BadRequestError) Error() string { return string(err) }

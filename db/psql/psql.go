@@ -14,12 +14,15 @@ import (
 	"github.com/spf13/viper"
 )
 
+type Scope func(db *gorm.DB) *gorm.DB
+type JsonB map[string]interface{}
+
+const nullDataValue = "null"
+
 var (
 	DB      *gorm.DB
 	DBError error
 )
-
-const nullDataValue = "null"
 
 func init() {
 	cobra.OnInitialize(ConnectDB)
@@ -37,8 +40,6 @@ func ConnectDB() {
 		// DB.LogMode(true)
 	}
 }
-
-type JsonB map[string]interface{}
 
 func (j JsonB) Value() (driver.Value, error) {
 	return json.Marshal(j)

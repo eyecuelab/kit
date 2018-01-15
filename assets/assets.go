@@ -2,13 +2,14 @@ package assets
 
 import "errors"
 
-type AssetGet func(string) ([]byte, error)
-type AssetDir func(string) ([]string, error)
-
-type AssetManager struct {
-	Get AssetGet
-	Dir AssetDir
-}
+type (
+	AssetGet     func(string) ([]byte, error)
+	AssetDir     func(string) ([]string, error)
+	AssetManager struct {
+		Get AssetGet
+		Dir AssetDir
+	}
+)
 
 var Manager *AssetManager
 

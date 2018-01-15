@@ -9,21 +9,21 @@ import (
 	"github.com/spf13/viper"
 )
 
-var apiArgs = []string{"port", "secret"}
+var (
+	apiArgs = []string{"port", "secret"}
 
-//ApiCmd represents the api command
+	//ApiCmd represents the api command
+	Port      int
+	Host      string
+	checkMigs bool
+)
+
 var ApiCmd = &cobra.Command{
 	Use:   "api",
 	Short: "Run the API server",
 	Long:  ``,
 	Run:   run,
 }
-
-var (
-	Port      int
-	Host      string
-	checkMigs bool
-)
 
 func init() {
 	ApiCmd.PersistentFlags().IntVar(&Port, "port", 3000, "port to attach server")
