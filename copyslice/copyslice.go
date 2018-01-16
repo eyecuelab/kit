@@ -8,6 +8,13 @@ func Int(src []int) []int {
 	return dst
 }
 
+//Uint copies  a []uint
+func Uint(src []uint) []uint {
+	dst := make([]uint, len(src))
+	copy(dst, src)
+	return dst
+}
+
 //String copies a []string
 func String(src []string) []string {
 	dst := make([]string, len(src))
@@ -39,6 +46,13 @@ func Int64(src []int64) []int64 {
 //Float64 copies a []Float64
 func Float64(src []float64) []float64 {
 	dst := make([]float64, len(src))
+	copy(dst, src)
+	return dst
+}
+
+//Uint64 copies a []Uint64
+func Uint64(src []uint64) []uint64 {
+	dst := make([]uint64, len(src))
 	copy(dst, src)
 	return dst
 }
