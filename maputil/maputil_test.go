@@ -7,11 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var m = map[string]interface{}{
-	"a": 1,
-	"b": 2,
-	"c": "bar",
-}
+var m = map[string]interface{}{"a": 1, "b": 2, "c": "bar"}
 
 func TestSortedKeys(t *testing.T) {
 	want := []string{"a", "b", "c"}
@@ -44,14 +40,8 @@ func (s sorter) Less(i, j int) bool {
 	}
 	panic("this shouldn't happen")
 }
-
-func (s sorter) Len() int {
-	return len(s)
-}
-
-func (s sorter) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
+func (s sorter) Len() int      { return len(s) }
+func (s sorter) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
 func TestCopy(t *testing.T) {
 	start := map[string]interface{}{"1": 1}
