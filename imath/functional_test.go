@@ -9,7 +9,7 @@ import (
 
 func TestAccumulate(t *testing.T) {
 	a := []int{1, 2, 3, 4}
-	want := []int{1, 3, 6, 10}
+	want := []int{1, (1 + 2), (1 + 2 + 3), (1 + 2 + 3 + 4)}
 	assert.Equal(t, want, Accumulate(operator.Add, a))
 	assert.Empty(t, Accumulate(operator.Mul, []int(nil)))
 }
