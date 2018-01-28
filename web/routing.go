@@ -59,6 +59,18 @@ func (config *RouteConfig) RemoveRouteCollectionLevel(level string) string {
 	return p
 }
 
+func (config *RouteConfig) AddRouteSingleLevel(level string) string {
+	lvl := "/" + routePrefix(level)
+	config.RPrefix = config.RPrefix + lvl
+	return string(config.RPrefix)
+}
+
+func (config *RouteConfig) RemoveRouteSingleLevel(level string) string {
+	p := strings.Replace(string(config.RPrefix), "/"+level, "", -1)
+	config.RPrefix = routePrefix(p)
+	return p
+}
+
 func (config *RouteConfig) RemoveLastNameLevel() string {
 	p := string(config.NPrefix)
 	lastDotIndex := strings.LastIndex(p, ".")
