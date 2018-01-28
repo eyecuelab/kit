@@ -11,7 +11,7 @@ func TestInt(t *testing.T) {
 	b := Int(a)
 	assert.Equal(t, a, b)
 	b[0] = 3
-	assert.NotEqual(t, a, b)
+	assert.NotEqual(t, a, b, "slices should not point to the same array")
 }
 
 func TestString(t *testing.T) {
@@ -19,7 +19,7 @@ func TestString(t *testing.T) {
 	b := String(a)
 	assert.Equal(t, a, b)
 	b[0] = "3"
-	assert.NotEqual(t, a, b)
+	assert.NotEqual(t, a, b, "slices should not point to the same array")
 }
 
 func TestRune(t *testing.T) {
@@ -27,7 +27,7 @@ func TestRune(t *testing.T) {
 	b := Rune(a)
 	assert.Equal(t, a, b)
 	b[0] = 3
-	assert.NotEqual(t, a, b)
+	assert.NotEqual(t, a, b, "slices should not point to the same array")
 }
 
 func TestByte(t *testing.T) {
@@ -35,7 +35,7 @@ func TestByte(t *testing.T) {
 	b := Byte(a)
 	assert.Equal(t, a, b)
 	b[0] = '3'
-	assert.NotEqual(t, a, b)
+	assert.NotEqual(t, a, b, "slices should not point to the same array")
 }
 
 func TestInt64(t *testing.T) {
@@ -43,7 +43,7 @@ func TestInt64(t *testing.T) {
 	b := Int64(a)
 	assert.Equal(t, a, b)
 	b[0] = 3
-	assert.NotEqual(t, a, b)
+	assert.NotEqual(t, a, b, "slices should not point to the same array")
 }
 
 func TestFloat64(t *testing.T) {
@@ -51,5 +51,5 @@ func TestFloat64(t *testing.T) {
 	b := Float64(a)
 	assert.Equal(t, a, b)
 	b[0] = 3
-	assert.NotEqual(t, a, b)
+	assert.NotEqual(t, a, b, "slices should not point to the same array")
 }

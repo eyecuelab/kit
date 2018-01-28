@@ -99,7 +99,6 @@ func TestAbs(t *testing.T) {
 }
 
 func TestPow(t *testing.T) {
-
 	t.Run("random small pairs", func(t *testing.T) {
 		for i := 0; i < 50; i++ {
 			base := rand.Intn(2<<20) * RandSign()
@@ -109,7 +108,6 @@ func TestPow(t *testing.T) {
 			}
 		}
 	})
-
 }
 
 //TODO - test is broken

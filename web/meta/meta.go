@@ -24,10 +24,16 @@ type (
 	}
 
 	jsonAPIField struct {
-		Name      string      `json:"name"`
-		InputType string      `json:"type"`
-		Value     interface{} `json:"value,omitempty"`
-		Required  bool        `json:"required"`
+		Name      string        `json:"name"`
+		InputType string        `json:"type"`
+		Value     interface{}   `json:"value,omitempty"`
+		Required  bool          `json:"required"`
+		Options   []FieldOption `json:"options,omitempty"`
+	}
+
+	FieldOption struct {
+		Label string      `json:"label"`
+		Value interface{} `json:"value"`
 	}
 )
 
@@ -42,6 +48,7 @@ const (
 	InputPass   inputType = "password"
 	InputBool   inputType = "bool"
 	InputNumber inputType = "number"
+	InputSelect inputType = "select"
 )
 
 var ah actionHolder
@@ -63,6 +70,18 @@ func (a *jsonAPIAction) Field(name string, inputType inputType, value interface{
 		InputType: string(inputType),
 		Value:     value,
 		Required:  requred,
+	}
+	a.Fields = append(a.Fields, f)
+	return a
+}
+
+func (a *jsonAPIAction) FieldWithOpts(name string, inputType inputType, value interface{}, requred bool, options []FieldOption) *jsonAPIAction {
+	f := jsonAPIField{
+		Name:      name,
+		InputType: string(inputType),
+		Value:     value,
+		Required:  requred,
+		Options:   options,
 	}
 	a.Fields = append(a.Fields, f)
 	return a

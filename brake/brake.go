@@ -14,19 +14,19 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	Airbrake *gobrake.Notifier
-	Env      string
-)
-
-type severity string
-
 const (
 	traceDepth = 5
 
 	SeverityError    severity = "error"
 	SeverityWarn     severity = "warning"
 	SeverityCritical severity = "critical"
+)
+
+type severity string
+
+var (
+	Airbrake *gobrake.Notifier
+	Env      string
 )
 
 func init() {

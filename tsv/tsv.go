@@ -18,30 +18,21 @@ import (
 )
 
 //Record represents a single line of a TSV
-type Record map[string]string
-type labels []string
-
-func (l labels) ParseLine(line string) (Record, bool) {
-	return parseLine(line, l)
-}
-
-type Error struct {
-	msg string
-}
-
-func (err Error) Error() string {
-	return err.msg
-}
-
-func errorF(format string, a ...interface{}) Error {
-	return Error{fmt.Sprintf(format, a...)}
-}
-
-var (
-	errKeyDoesNotExist   = Error{"key does not exist"}
-	errCannotConvertKey  = Error{"cannot convert key"}
-	errWrongElementCount = Error{"line has different number of elements than record has fields"}
+type (
+	Record map[string]string
+	labels []string
+	Error  string
 )
+
+const (
+	errKeyDoesNotExist   Error = "key does not exist"
+	errCannotConvertKey  Error = "cannot convert key"
+	errWrongElementCount Error = "line has different number of elements than record has fields"
+)
+
+func (l labels) ParseLine(line string) (Record, bool) { return parseLine(line, l) }
+func (err Error) Error() string                       { return string(err) }
+func errorF(format string, a ...interface{}) Error    { return Error(fmt.Sprintf(format, a...)) }
 
 //FromPath parses a path to see whether it is a URL or local path,
 //downloads the file if necessary, then parses it and returns the records
@@ -74,7 +65,7 @@ func StreamFromBindataPaths(out chan Record, paths ...string) error {
 		rc, err := asBinReadCloser(path)
 		if err != nil {
 			close(out)
-			return err
+			return errorF("StreamFromBinDataPaths: %v", err)
 		}
 		readClosers[i] = rc
 	}
@@ -154,14 +145,14 @@ func parseStream(out chan<- Record, readCloser io.ReadCloser) error {
 func parseStreams(out chan<- Record, readClosers ...io.ReadCloser) {
 	defer close(out)
 	wg := &sync.WaitGroup{}
-	for _, readCloser := range readClosers {
+	for _, rc := range readClosers {
 		wg.Add(1)
 		go func(r io.ReadCloser) {
 			defer wg.Done()
 			if err := parseStream(out, r); err != nil {
 				log.Println(err)
 			}
-		}(readCloser)
+		}(rc)
 	}
 	wg.Wait()
 }

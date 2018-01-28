@@ -3,52 +3,50 @@ package branch
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
+
 	"github.com/eyecuelab/kit/config"
 	"github.com/parnurzeal/gorequest"
-	"net/url"
 )
 
 const branchApiUrl = "https://api.branch.io/v1/url"
 
-type branchRequest struct {
-	BranchKey string `json:"branch_key"`
-	Data      Data   `json:"data"`
-}
+type (
+	request struct {
+		BranchKey string `json:"branch_key"`
+		Data      Data   `json:"data"`
+	}
 
-type Data struct {
-	CanonicalUrl string `json:"$canonical_url"`
-}
+	Data struct {
+		CanonicalUrl string `json:"$canonical_url"`
+	}
 
-type CanonicalUrlData struct {
-	Url    string
-	Params map[string]string
-}
+	CanonicalUrlData struct {
+		Url    string
+		Params map[string]string
+	}
+	Response struct {
+		Url   string
+		Error branchError
+	}
 
-type BranchResponse struct {
-	Url   string
-	Error branchError
-}
+	branchError struct {
+		Code    int
+		Message string
+	}
+)
 
-type branchError struct {
-	Code    int
-	Message string
-}
-
-func GetUrl(cud CanonicalUrlData) (BranchResponse, error) {
-	cUrl, err := generateFullUrl(cud)
+func GetUrl(cud CanonicalUrlData) (Response, error) {
+	cURL, err := generateFullUrl(cud)
 	if err != nil {
-		return BranchResponse{}, err
+		return Response{}, err
 	}
 
-	req := branchRequest{
-		Data: Data{cUrl},
-	}
-
-	return send(req)
+	return send(request{Data: Data{cURL}})
 }
 
 func generateFullUrl(cud CanonicalUrlData) (string, error) {
-	baseUrl, err := url.Parse(cud.Url)
+	baseURL, err := url.Parse(cud.Url)
 	if err != nil {
 		return "", err
 	}
@@ -58,24 +56,23 @@ func generateFullUrl(cud CanonicalUrlData) (string, error) {
 		params.Add(k, v)
 	}
 
-	baseUrl.RawQuery = params.Encode()
+	baseURL.RawQuery = params.Encode()
 
-	return baseUrl.String(), nil
+	return baseURL.String(), nil
 }
 
-func send(req branchRequest) (BranchResponse, error) {
+func send(req request) (resp Response, err error) {
 	req.BranchKey = config.RequiredString("BRANCH_KEY")
 
 	request := gorequest.New()
 	_, body, _ := request.Post(branchApiUrl).Send(req).End()
 
-	var bResp BranchResponse
-	if err := json.Unmarshal([]byte(body), &bResp); err != nil {
-		return bResp, err
+	if err := json.Unmarshal([]byte(body), &resp); err != nil {
+		return resp, err
 	}
 
-	if bResp.Error.Code > 299 {
-		return bResp, fmt.Errorf("Branch.io error: %v - %v", bResp.Error.Code, bResp.Error.Message)
+	if resp.Error.Code > 299 {
+		return resp, fmt.Errorf("Branch.io error: %v - %v", resp.Error.Code, resp.Error.Message)
 	}
-	return bResp, nil
+	return resp, nil
 }

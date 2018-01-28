@@ -23,10 +23,11 @@ func (counter String) Add(items ...string) {
 
 func (counter String) String() string {
 	formatted := make([]string, len(counter))
-	var i int
-	for key, val := range counter {
-		formatted[i] = fmt.Sprintf("%s:%d", key, val)
-		i++
+	keys := counter.Keys()
+	sort.Strings(keys)
+	for i, k := range keys {
+		v := counter[k]
+		formatted[i] = fmt.Sprintf("%s:%d", k, v)
 	}
 	return "{" + strings.Join(formatted, ", ") + "}"
 
@@ -61,39 +62,42 @@ func (counter String) MostCommon() (string, int) {
 
 //MostCommonN returns the N most common keys. In the case of a tie, it prioritizes the lexigraphically lowest,
 //so that the keys contained in counter.MostCommonN(n) will be identical for two equivalent counters.
-func (counter String) MostCommonN(n int) (keys []string, counts []int, ok bool) {
-	if len(counter) < n {
-		return nil, nil, false
+func (counter String) MostCommonN(n int) (pairs Pairs, err error) {
+	if L := len(counter); L < n {
+		return nil, fmt.Errorf("cannot get %d elemments from a counter with %d elements", L, n)
+	} else if n <= 0 {
+		return nil, fmt.Errorf("must take a positive integer, but had %d", n)
 	}
-	keys, counts = make([]string, n), make([]int, n)
+	pairs = make(Pairs, n)
 	for k, v := range counter {
-		for i, c := range counts {
-			if v > c || v == c && k < keys[i] {
-				copy(counts[i+1:], counts[i:n-1])
-				copy(keys[i+1:], keys[i:n-1])
-				keys[i], counts[i] = k, v
+		for i, p := range pairs {
+			if c := p.Count; v > c || v == c && k < p.Key {
+				copy(pairs[i+1:], pairs[i:n-1])
+				pairs[i] = Pair{k, v}
 				break
 			}
 		}
 	}
-	return keys, counts, true
+	return pairs, nil
+}
+
+//Pairs returns a slice containing each key-value pair
+func (counter String) Pairs() Pairs {
+	pairs := make(Pairs, len(counter))
+	var i int
+	for k, c := range counter {
+		pairs[i] = Pair{k, c}
+		i++
+	}
+	return pairs
 }
 
 //Sorted returns the keys and coutns of the strings in the counter. They are sorted by the count, and then by the key.
 //i.e, given {"c": 1, "b": 3, "a":3}, returns {1, 1, 3}, {c, a, b}
-func (counter String) Sorted() ([]string, []int) {
-	keys := counter.Keys()
-	sort.Slice(keys, func(i, j int) bool {
-		return counter[keys[i]] < counter[keys[j]] ||
-			(counter[keys[i]] == counter[keys[j]] && keys[i] < keys[j])
-	})
-
-	vals := make([]int, len(keys))
-	for i, k := range keys {
-		vals[i] = counter[k]
-	}
-	return keys, vals
-
+func (counter String) Sorted() Pairs {
+	pairs := counter.Pairs()
+	sort.Sort(pairs)
+	return pairs
 }
 
 //Combine one or more counters, where the count of each element is the sum of the count of each
@@ -129,8 +133,17 @@ func (counter String) Equal(other String) bool {
 	return true
 }
 
+//Neg returns a copy of the counter with inverted counts: i.e, {k: -v for k, v in counter}
+func (counter String) Neg() String {
+	negated := make(String)
+	for k, v := range counter {
+		negated[k] = -v
+	}
+	return negated
+}
+
 //NonZeroElements returns a copy of the counter with all dummy elements(count zero) removed.
-func (counter String) NonZeroElements(other String) String {
+func (counter String) NonZeroElements() String {
 	copy := make(String)
 	for k, v := range counter {
 		if v != 0 {
