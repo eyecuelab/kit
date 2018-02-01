@@ -1,4 +1,4 @@
-//Package umath contains helper functions for math on unsigned integers.
+//Package umath contains helper functions for math on unsigned integers
 package umath
 
 import (

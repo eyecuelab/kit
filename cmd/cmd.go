@@ -1,3 +1,4 @@
+//Package cmd contains helper functions for working with the Cobra command-line interface: github.com/spf13/cobra
 package cmd
 
 import (

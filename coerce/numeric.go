@@ -23,17 +23,9 @@ var (
 	warnOnOverFlow            = true
 )
 
-func AllowOverflow(b bool) {
-	allowOverFlow = b
-}
-
-func AllowImpreciseConversion(b bool) {
-	allowImpreciseConversion = b
-}
-
-func WarnOnImpreciseConversion(b bool) {
-	warnOnImpreciseConversion = b
-}
+func AllowOverflow(b bool)             { allowOverFlow = b }
+func AllowImpreciseConversion(b bool)  { allowImpreciseConversion = b }
+func WarnOnImpreciseConversion(b bool) { warnOnImpreciseConversion = b }
 
 //Float64 converts a numeric type to a float64, if possible.
 //Note for very large integers, this may lose information!

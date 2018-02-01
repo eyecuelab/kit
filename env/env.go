@@ -1,6 +1,6 @@
+//Package env contains helper functions for setting and getting environment variables
 package env
 
-//kit.env contains tools to help with the assignment of environment variables
 import (
 	"fmt"
 	"log"

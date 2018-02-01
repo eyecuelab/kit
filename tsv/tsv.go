@@ -1,3 +1,4 @@
+//Package tsv contains helper functions for working with tab-separated data and getting it from a local path or URL.
 package tsv
 
 import (

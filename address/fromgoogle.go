@@ -2,6 +2,7 @@ package address
 
 import "googlemaps.github.io/maps"
 
+//FromGoogleAddressComponents creates an Addresss from a slice of components, using the AddressCompoment.Types to discriminate.
 func FromGoogleAddressComponents(components []maps.AddressComponent) (address Address) {
 	var street struct{ name, number string }
 	for _, component := range components {
@@ -20,10 +21,19 @@ func FromGoogleAddressComponents(components []maps.AddressComponent) (address Ad
 				address.Country = val
 			case "postal_code":
 				address.PostalCode = val
+			default: //pass
 			}
 			//note: PO box doesn't seem to be handled.
 		}
 	}
-	address.Street = street.number + " " + street.name
+
+	if street.name != "" {
+		if street.number != "" {
+			address.Street = street.number + " " + street.name
+		} else {
+			address.Street = street.name
+		}
+	}
+
 	return address
 }

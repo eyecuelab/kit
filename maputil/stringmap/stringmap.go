@@ -1,4 +1,4 @@
-//Package stringmap contains utility functions for working with map[string]string
+//Package stringmap contains utility functions for working with the map[string]string type
 package stringmap
 
 import "sort"

@@ -1,4 +1,5 @@
-//Package maputil contains utility functions for working with map[string]interface{}
+//Package maputil contains utility functions for working with the map[string]interface{} type.
+//The stringmap subpackage contains utility functions for working with the map[string]string type
 package maputil
 
 import "sort"

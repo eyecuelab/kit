@@ -1,4 +1,4 @@
-//Package address contains tools for working with and comparing street addreses.
+//Package address contains tools for working with and comparing street addresses.
 package address
 
 import (

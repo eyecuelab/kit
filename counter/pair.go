@@ -6,6 +6,9 @@ type Pair struct {
 	Count int
 }
 
+//Pairs is a slice of Pairs. It is sortable lexigraphically by count, then key.
+type Pairs []Pair
+
 func (p Pair) KeyVal() (string, int) { return p.Key, p.Count }
 
 func (pairs Pairs) Less(i, j int) bool {
@@ -14,9 +17,6 @@ func (pairs Pairs) Less(i, j int) bool {
 }
 func (pairs Pairs) Len() int      { return len(pairs) }
 func (pairs Pairs) Swap(i, j int) { pairs[i], pairs[j] = pairs[j], pairs[i] }
-
-//Pairs is a slice of Pairs. It is sortable lexigraphically by count, then key.
-type Pairs []Pair
 
 func (pairs Pairs) Keys() []string {
 	keys := make([]string, len(pairs))

@@ -60,6 +60,7 @@ func FilterFalse(a []string, f func(string) bool) []string {
 	return filtered
 }
 
+//Map maps a function across the slice, returning a new slice containing f(s) for s in a
 func Map(a []string, f func(string) string) []string {
 	mapped := make([]string, len(a))
 	for i, s := range a {
@@ -68,9 +69,10 @@ func Map(a []string, f func(string) string) []string {
 	return mapped
 }
 
+//AppendIfNonEmpty appends the given string(s) to the slice if they are not the empty string.
 func AppendIfNonEmpty(a []string, strings ...string) []string {
 	for _, s := range strings {
-		if len(s) > 0 {
+		if s != "" {
 			a = append(a, s)
 		}
 	}
