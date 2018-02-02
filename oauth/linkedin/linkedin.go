@@ -9,7 +9,7 @@ import (
 
 const (
 	// DataEndpoint linkedin profile data endpoint url
-	DataEndpoint = "https://api.linkedin.com/v1/people/~:(id,first-name,last-name,email-address)"
+	DataEndpoint = "https://api.linkedin.com/v1/people/~:(id,first-name,last-name,email-address,picture-url)"
 )
 
 var tokenTypes = map[string]string{
@@ -19,19 +19,20 @@ var tokenTypes = map[string]string{
 
 // User linkedin user data
 type User struct {
-	ID        string `json:"id"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Email     string `json:"emailAddress"`
-	Headline  string
-	ErrorCode int `json:"errorCode"`
-	Message   string
-	Status    int
+	ID         string `json:"id"`
+	FirstName  string `json:"firstName"`
+	LastName   string `json:"lastName"`
+	Email      string `json:"emailAddress"`
+	PictureURL string `json:"pictureUrl"`
+	Headline   string
+	ErrorCode  int `json:"errorCode"`
+	Message    string
+	Status     int
 }
 
 // UserInfo linkedin user info by the access token
-func UserInfo(tokenType string, accessToken string) (User, error) {
-	var user User
+func UserInfo(tokenType string, accessToken string) (*User, error) {
+	user := new(User)
 
 	request := gorequest.New().Get(DataEndpoint)
 	_, body, errs := request.
@@ -42,9 +43,13 @@ func UserInfo(tokenType string, accessToken string) (User, error) {
 		return user, errs[0]
 	}
 
-	err := json.Unmarshal([]byte(body), &user)
+	if err := json.Unmarshal([]byte(body), &user); err != nil {
+		return nil, err
+	}
+
 	if user.Message != "" {
 		return user, errors.New(user.Message)
 	}
-	return user, err
+
+	return user, nil
 }
