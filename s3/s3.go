@@ -2,8 +2,12 @@ package s3
 
 import (
 	"net/http"
+	"time"
 
 	"bytes"
+	"io"
+	"mime/multipart"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -12,8 +16,6 @@ import (
 	"github.com/eyecuelab/kit/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"io"
-	"mime/multipart"
 )
 
 var uploder *s3manager.Uploader
@@ -43,6 +45,16 @@ func Upload(b []byte, key string) (*s3manager.UploadOutput, error) {
 	}
 
 	return uploder.Upload(params)
+}
+
+// Presign presign s3 key fora given period of time
+func Presign(key string, duration time.Duration) (string, error) {
+	svc := newS3Client()
+	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(viper.GetString("aws_bucket_name")),
+		Key:    &key,
+	})
+	return req.Presign(duration)
 }
 
 func newS3Client() *s3.S3 {
