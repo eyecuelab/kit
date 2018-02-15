@@ -14,16 +14,16 @@ import (
 type (
 	method       string
 	inputType    string
-	actionHolder []*jsonAPIAction
+	actionHolder []*JsonAPIAction
 
-	jsonAPIAction struct {
+	JsonAPIAction struct {
 		Method string         `json:"method"`
 		Name   string         `json:"name"`
 		URL    string         `json:"url"`
-		Fields []jsonAPIField `json:"fields"`
+		Fields []JsonAPIField `json:"fields"`
 	}
 
-	jsonAPIField struct {
+	JsonAPIField struct {
 		Name      string        `json:"name"`
 		InputType string        `json:"type"`
 		Value     interface{}   `json:"value,omitempty"`
@@ -53,19 +53,19 @@ const (
 
 var ah actionHolder
 
-func AddAction(m method, name, urlHelper string) *jsonAPIAction {
-	a := jsonAPIAction{
+func AddAction(m method, name, urlHelper string) *JsonAPIAction {
+	a := JsonAPIAction{
 		Method: string(m),
 		Name:   name,
 		URL:    APIURL(urlHelper),
-		Fields: make([]jsonAPIField, 0),
+		Fields: make([]JsonAPIField, 0),
 	}
 	ah = append(ah, &a)
 	return &a
 }
 
-func (a *jsonAPIAction) Field(name string, inputType inputType, value interface{}, requred bool) *jsonAPIAction {
-	f := jsonAPIField{
+func (a *JsonAPIAction) Field(name string, inputType inputType, value interface{}, requred bool) *JsonAPIAction {
+	f := JsonAPIField{
 		Name:      name,
 		InputType: string(inputType),
 		Value:     value,
@@ -75,8 +75,8 @@ func (a *jsonAPIAction) Field(name string, inputType inputType, value interface{
 	return a
 }
 
-func (a *jsonAPIAction) FieldWithOpts(name string, inputType inputType, value interface{}, requred bool, options []FieldOption) *jsonAPIAction {
-	f := jsonAPIField{
+func (a *JsonAPIAction) FieldWithOpts(name string, inputType inputType, value interface{}, requred bool, options []FieldOption) *JsonAPIAction {
+	f := JsonAPIField{
 		Name:      name,
 		InputType: string(inputType),
 		Value:     value,
@@ -89,7 +89,7 @@ func (a *jsonAPIAction) FieldWithOpts(name string, inputType inputType, value in
 
 func RenderActions() *jsonapi.Meta {
 	clone := ah
-	ah = []*jsonAPIAction{}
+	ah = []*JsonAPIAction{}
 	return &jsonapi.Meta{"actions": clone}
 }
 
