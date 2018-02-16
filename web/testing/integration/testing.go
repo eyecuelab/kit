@@ -63,6 +63,14 @@ func Post(t *testing.T, path string, attrs map[string]interface{}, token string)
 	return resp, data, errs
 }
 
+// Patch jsonapi patch request
+func Patch(t *testing.T, path string, attrs map[string]interface{}, token string) (gorequest.Response, *JSONAPIOneResp, []error) {
+	resp, body, errs := Request("PATCH", path, token).Send(jsonAPIPayload(t, attrs)).End()
+	data := unmarshalOne(t, body)
+
+	return resp, data, errs
+}
+
 // AssertGetOK assert GET request is OK
 func AssertGetOK(t *testing.T, path string, token string) (resp gorequest.Response, body string, errs []error) {
 	resp, body, errs = Request("GET", path, token).End()
