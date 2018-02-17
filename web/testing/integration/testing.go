@@ -21,6 +21,7 @@ type (
 	}
 	// JSONAPIRespData ...
 	JSONAPIRespData struct {
+		ID         string
 		Attributes interface{}     `json:"attributes"`
 		Meta       JSONAPIRespMeta `json:"meta"`
 		Links      interface{}     `json:"links"`
@@ -76,6 +77,14 @@ func Delete(t *testing.T, path string, token string) (gorequest.Response, *JSONA
 	resp, body, errs := Request("DELETE", path, token).End()
 
 	return resp, unmarshalOne(t, body), errs
+}
+
+// GetList jsonapi get list request
+func GetList(t *testing.T, path string, token string) (gorequest.Response, *JSONAPIManyResp, []error) {
+	resp, body, errs := Request("GET", path, token).End()
+	data := unmarshalMany(t, body)
+
+	return resp, data, errs
 }
 
 // AssertGetOK assert GET request is OK
@@ -147,6 +156,16 @@ func unmarshalOne(t *testing.T, body string) *JSONAPIOneResp {
 	if body == "" {
 		return &data
 	}
+	err := json.Unmarshal([]byte(body), &data)
+	if err != nil {
+		t.Errorf("Error unmarshaling response %v", err)
+	}
+
+	return &data
+}
+
+func unmarshalMany(t *testing.T, body string) *JSONAPIManyResp {
+	var data JSONAPIManyResp
 	err := json.Unmarshal([]byte(body), &data)
 	if err != nil {
 		t.Errorf("Error unmarshaling response %v", err)
