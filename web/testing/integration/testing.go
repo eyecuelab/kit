@@ -71,6 +71,13 @@ func Patch(t *testing.T, path string, attrs map[string]interface{}, token string
 	return resp, data, errs
 }
 
+// Delete jsonapi delete request
+func Delete(t *testing.T, path string, token string) (gorequest.Response, *JSONAPIOneResp, []error) {
+	resp, body, errs := Request("DELETE", path, token).End()
+
+	return resp, unmarshalOne(t, body), errs
+}
+
 // AssertGetOK assert GET request is OK
 func AssertGetOK(t *testing.T, path string, token string) (resp gorequest.Response, body string, errs []error) {
 	resp, body, errs = Request("GET", path, token).End()
@@ -137,6 +144,9 @@ func jsonAPIPayload(t *testing.T, attrs map[string]interface{}) (payload string)
 
 func unmarshalOne(t *testing.T, body string) *JSONAPIOneResp {
 	var data JSONAPIOneResp
+	if body == "" {
+		return &data
+	}
 	err := json.Unmarshal([]byte(body), &data)
 	if err != nil {
 		t.Errorf("Error unmarshaling response %v", err)
