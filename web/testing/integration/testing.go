@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/eyecuelab/kit/web/meta"
+	"github.com/google/jsonapi"
 	"github.com/parnurzeal/gorequest"
 	"github.com/stretchr/testify/assert"
 )
@@ -28,12 +29,14 @@ type (
 	}
 	// JSONAPIOneResp ...
 	JSONAPIOneResp struct {
-		Data JSONAPIRespData `json:"data"`
+		Data   JSONAPIRespData        `json:"data"`
+		Errors []*jsonapi.ErrorObject `json:"errors"`
 	}
 	// JSONAPIManyResp ...
 	JSONAPIManyResp struct {
-		Data []JSONAPIRespData `json:"data"`
-		Meta JSONAPIRespMeta   `json:"meta"`
+		Data   []JSONAPIRespData      `json:"data"`
+		Meta   JSONAPIRespMeta        `json:"meta"`
+		Errors []*jsonapi.ErrorObject `json:"errors"`
 	}
 )
 
@@ -133,6 +136,14 @@ func AssertStatusOK(t *testing.T, resp gorequest.Response) {
 	ok := resp.StatusCode == 200 || resp.StatusCode == 201
 	if !ok {
 		t.Errorf("Expected status 200/201 but is %d", resp.StatusCode)
+	}
+}
+
+// AssertStatusUnauthorized assert response status code is 401
+func AssertStatusUnauthorized(t *testing.T, resp gorequest.Response) {
+	ok := resp.StatusCode == 401
+	if !ok {
+		t.Errorf("Expected status 401 but is %d", resp.StatusCode)
 	}
 }
 
