@@ -9,7 +9,7 @@ import (
 
 const (
 	// DataEndpoint linkedin profile data endpoint url
-	DataEndpoint = "https://api.linkedin.com/v1/people/~:(id,first-name,last-name,email-address,picture-url)"
+	DataEndpoint = "https://api.linkedin.com/v1/people/~:(id,first-name,last-name,email-address,picture-url,location,positions,headline)"
 )
 
 var tokenTypes = map[string]string{
@@ -19,15 +19,54 @@ var tokenTypes = map[string]string{
 
 // User linkedin user data
 type User struct {
-	ID         string `json:"id"`
+	ID         string
 	FirstName  string `json:"firstName"`
 	LastName   string `json:"lastName"`
 	Email      string `json:"emailAddress"`
 	PictureURL string `json:"pictureUrl"`
 	Headline   string
-	ErrorCode  int `json:"errorCode"`
-	Message    string
-	Status     int
+	Positions  UserPositions
+	Location   struct {
+		Country struct {
+			Code string
+		}
+		Name string
+	}
+	ErrorCode int `json:"errorCode"`
+	Message   string
+	Status    int
+}
+
+// UserPositions linkedin user postions data
+type UserPositions struct {
+	Values []UserPosition
+}
+
+// UserPosition linkedin user position data
+type UserPosition struct {
+	ID        int
+	Title     string
+	IsCurrent bool `json:"isCurrent"`
+	Company   Company
+	Location  struct {
+		Country struct {
+			Code string
+			Name string
+		}
+	}
+	StartDate struct {
+		Month int
+		Year  int
+	} `json:"startDate"`
+}
+
+// Company linkedin company data
+type Company struct {
+	ID       int
+	Name     string
+	Industry string
+	Size     string
+	Type     string
 }
 
 // UserInfo linkedin user info by the access token
