@@ -60,10 +60,8 @@ func (c *apiContext) Attrs(permitted ...string) map[string]interface{} {
 	}
 
 	permittedAttrs := make(map[string]interface{})
-	var val interface{}
 	for _, p := range permitted {
-		val = c.payload.Data.Attributes[p]
-		if val != nil {
+		if val, ok := c.payload.Data.Attributes[p]; ok {
 			permittedAttrs[p] = val
 		}
 	}
