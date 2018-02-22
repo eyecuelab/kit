@@ -44,6 +44,10 @@ func (m *Mailer) Send(to *mailman.Address, content *mailman.Content, vars *mailm
 	message.AddContent(html)
 	message.SetTemplateID(m.SGConfig.TemplateId)
 
+	mailSettings := mail.NewMailSettings()
+	mailSettings.SetSandboxMode(mail.NewSetting(viper.GetString("email_sandbox") == "1"))
+	message.SetMailSettings(mailSettings)
+
 	for key, value := range vars.BodyVars {
 		message.Personalizations[0].SetSubstitution(fmt.Sprintf("-%s-", key), value)
 	}
@@ -58,9 +62,9 @@ func (m *Mailer) Send(to *mailman.Address, content *mailman.Content, vars *mailm
 }
 
 func MinConfig(fromName string, fromEmail string, domain string) *SGConfig {
-	from := &mailman.Address{fromName, fromEmail}
+	from := &mailman.Address{Name: fromName, Email: fromEmail}
 	return &SGConfig{
-		Config: &mailman.Config{from, domain},
+		Config: &mailman.Config{From: from, Domain: domain},
 	}
 }
 
