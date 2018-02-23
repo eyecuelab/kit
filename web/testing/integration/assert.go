@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/parnurzeal/gorequest"
@@ -37,6 +38,10 @@ func AssertLink(t *testing.T, i interface{}, names ...string) {
 	links := i.(map[string]interface{})
 	var link string
 	for _, name := range names {
+		if links[name] == nil {
+			assert.True(t, false, fmt.Sprintf("Expected links to have '%s'", name))
+			return
+		}
 		link = links[name].(string)
 		assert.True(t, len([]rune(link)) > 0)
 	}
