@@ -29,11 +29,18 @@ type (
 		Value     interface{}   `json:"value,omitempty"`
 		Required  bool          `json:"required"`
 		Options   []FieldOption `json:"options,omitempty"`
+		Data      Pagination    `json:"data,omitempty"`
 	}
 
 	FieldOption struct {
 		Label string      `json:"label"`
 		Value interface{} `json:"value"`
+	}
+
+	Pagination struct {
+		Count int `json:"item_count"`
+		Max   int `json:"max"`
+		Page  int `json:"page"`
 	}
 )
 
@@ -82,6 +89,18 @@ func (a *JsonAPIAction) FieldWithOpts(name string, inputType inputType, value in
 		Value:     value,
 		Required:  requred,
 		Options:   options,
+	}
+	a.Fields = append(a.Fields, f)
+	return a
+}
+
+func (a *JsonAPIAction) Pagination(data Pagination) *JsonAPIAction {
+	f := JsonAPIField{
+		Name:      "page",
+		InputType: string(InputNumber),
+		Value:     data.Page,
+		Required:  false,
+		Data:      data,
 	}
 	a.Fields = append(a.Fields, f)
 	return a
