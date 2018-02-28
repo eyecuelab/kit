@@ -36,9 +36,10 @@ type (
 	}
 	// JSONAPIManyResp ...
 	JSONAPIManyResp struct {
-		Data   []JSONAPIRespData      `json:"data"`
-		Meta   JSONAPIRespMeta        `json:"meta"`
-		Errors []*jsonapi.ErrorObject `json:"errors"`
+		Data     []JSONAPIRespData      `json:"data"`
+		Meta     JSONAPIRespMeta        `json:"meta"`
+		Errors   []*jsonapi.ErrorObject `json:"errors"`
+		Included []JSONAPIRespData
 	}
 )
 
