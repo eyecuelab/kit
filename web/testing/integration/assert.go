@@ -47,6 +47,21 @@ func AssertLink(t *testing.T, i interface{}, names ...string) {
 	}
 }
 
+// AssertNoLink ...
+func AssertNoLink(t *testing.T, i interface{}, names ...string) {
+	if i == nil {
+		assert.True(t, false, "Expected links got nil")
+		return
+	}
+	links := i.(map[string]interface{})
+	for _, name := range names {
+		if links[name] != nil {
+			assert.True(t, false, fmt.Sprintf("Expected links not to have '%s'", name))
+			return
+		}
+	}
+}
+
 // AssertAction ...
 func AssertAction(t *testing.T, meta JSONAPIRespMeta, names ...string) {
 	var includes bool
