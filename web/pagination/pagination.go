@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo"
 )
 
-const resultsPerPage = 20
+const defaultPerPage = 20
 
 // Data pagination data for jsonapi
 var Data meta.Pagination
@@ -25,13 +25,13 @@ func Apply(c echo.Context, scope *gorm.DB, model interface{}, list interface{}, 
 	if err := scope.Offset(0).Model(model).Count(&count).Error; err != nil {
 		return err
 	}
-	setData(count, resultsPerPage, page)
+	setData(count, perPage, page)
 
 	strPerPage := c.QueryParam("per_page")
 	if strPerPage != "" {
 		perPage, _ = strconv.Atoi(strPerPage)
 	} else if perPage == 0 {
-		perPage = resultsPerPage
+		perPage = defaultPerPage
 	}
 
 	if err := scope.Offset(offset(page, perPage)).Limit(perPage).
@@ -49,6 +49,6 @@ func setData(count int, perPage int, page int) {
 	Data.Page = page
 }
 
-func offset(pageNumber int, resultsPerPage int) int {
-	return (pageNumber - 1) * resultsPerPage
+func offset(pageNumber int, perPage int) int {
+	return (pageNumber - 1) * perPage
 }
