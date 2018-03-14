@@ -2,6 +2,8 @@ package config
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 
 	"github.com/eyecuelab/kit/assets"
 	"github.com/spf13/viper"
@@ -29,6 +31,9 @@ func Load(envPrefix string, configPath string) error {
 	for _, envVar := range viper.GetStringSlice("env") {
 		if err := viper.BindEnv(envVar); err != nil {
 			return err
+		}
+		if !viper.IsSet(envVar) {
+			return errors.New(fmt.Sprintf("Env var is not set: %s", envVar))
 		}
 	}
 
