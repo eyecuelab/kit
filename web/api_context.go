@@ -35,6 +35,7 @@ type (
 		JsonApi(interface{}, int) error
 		JsonApiOK(interface{}) error
 		ApiError(string, ...int) *echo.HTTPError
+		JsonAPIError(string, int, string) *jsonapi.ErrorObject
 		QueryParamTrue(string) (bool, bool)
 
 		RequiredQueryParams(...string) (map[string]string, error)
@@ -191,6 +192,17 @@ func (c *apiContext) ApiError(msg string, codes ...int) *echo.HTTPError {
 	}
 	// TODO: return jsonapi error instead
 	return echo.NewHTTPError(http.StatusBadRequest, msg)
+}
+
+func (c *apiContext) JsonAPIError(msg string, code int, param string) *jsonapi.ErrorObject {
+	return &jsonapi.ErrorObject{
+		Status: fmt.Sprintf("%d", code),
+		Title:  http.StatusText(code),
+		Detail: msg,
+		Meta: &map[string]interface{}{
+			"parameter": param,
+		},
+	}
 }
 
 func (c *apiContext) RequiredQueryParams(required ...string) (map[string]string, error) {
