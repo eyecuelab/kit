@@ -33,8 +33,9 @@ type (
 	}
 
 	FieldOption struct {
-		Label string      `json:"label"`
-		Value interface{} `json:"value"`
+		Label string                 `json:"label"`
+		Value interface{}            `json:"value"`
+		Meta  map[string]interface{} `json:"meta"`
 	}
 
 	Pagination struct {
