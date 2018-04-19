@@ -93,7 +93,7 @@ func Test_toApiError(t *testing.T) {
 	}
 
 	wantStatus := 404
-	httpErr := echo.HTTPError{Code: 404, Message: "not found", Inner: someErr}
+	httpErr := echo.HTTPError{Code: 404, Message: "not found", Internal: someErr}
 	gotStatus, gotApiErr = toApiError(&httpErr)
 	assert.Equal(t, wantStatus, gotStatus)
 	assert.Equal(t, wantApiErr, *gotApiErr)
