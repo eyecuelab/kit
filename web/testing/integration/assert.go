@@ -90,6 +90,14 @@ func AssertNoAction(t *testing.T, meta JSONAPIRespMeta, names ...string) {
 	}
 }
 
+// AssertStatusSuccess assert response code is success
+func AssertStatusSuccess(t *testing.T, resp gorequest.Response) {
+	ok := resp.StatusCode >= 200 && resp.StatusCode <= 226
+	if !ok {
+		t.Errorf("Expected status 2xx but is %d\n%+v\n", resp.StatusCode, resp.Body)
+	}
+}
+
 // AssertStatusOK assert response status code is OK
 func AssertStatusOK(t *testing.T, resp gorequest.Response) {
 	ok := resp.StatusCode == 200 || resp.StatusCode == 201
