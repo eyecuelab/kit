@@ -69,7 +69,7 @@ func GetPolicy(key string) Policy {
 			map[string]string{"bucket": viper.GetString("aws_bucket_name")},
 			map[string]string{"acl": ACL()},
 			map[string]string{"success_action_status": "201"},
-			[]interface{}{"content-length-range", 1, 104857600}, // TODO: use max size based on the type of the resource
+			[]interface{}{"content-length-range", 1, 1073741824}, // TODO: use max size based on the type of the resource
 		},
 	}
 	// TODO: validate content type based on the resource
