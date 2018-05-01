@@ -14,7 +14,7 @@ import (
 type (
 	method       string
 	inputType    string
-	actionHolder []*JsonAPIAction
+	ActionHolder []*JsonAPIAction
 
 	JsonAPIAction struct {
 		Method string         `json:"method"`
@@ -59,19 +59,26 @@ const (
 	InputSelect inputType = "select"
 )
 
-var ah actionHolder
+var ah ActionHolder
 
-func AddAction(m method, name, urlHelper string) *JsonAPIAction {
+// AddAction ...
+func (ah *ActionHolder) AddAction(m method, name, urlHelper string) *JsonAPIAction {
 	a := JsonAPIAction{
 		Method: string(m),
 		Name:   name,
 		URL:    APIURL(urlHelper),
 		Fields: make([]JsonAPIField, 0),
 	}
-	ah = append(ah, &a)
+	*ah = append(*ah, &a)
 	return &a
 }
 
+// AddAction ...
+func AddAction(m method, name, urlHelper string) *JsonAPIAction {
+	return ah.AddAction(m, name, urlHelper)
+}
+
+// Field ...
 func (a *JsonAPIAction) Field(name string, inputType inputType, value interface{}, requred bool) *JsonAPIAction {
 	f := JsonAPIField{
 		Name:      name,
@@ -83,6 +90,7 @@ func (a *JsonAPIAction) Field(name string, inputType inputType, value interface{
 	return a
 }
 
+// FieldWithOpts add field with options to action
 func (a *JsonAPIAction) FieldWithOpts(name string, inputType inputType, value interface{}, requred bool, options []FieldOption) *JsonAPIAction {
 	f := JsonAPIField{
 		Name:      name,
@@ -95,6 +103,7 @@ func (a *JsonAPIAction) FieldWithOpts(name string, inputType inputType, value in
 	return a
 }
 
+// Pagination add pagination meta to action
 func (a *JsonAPIAction) Pagination(data Pagination) *JsonAPIAction {
 	f := JsonAPIField{
 		Name:      "page",
@@ -107,9 +116,15 @@ func (a *JsonAPIAction) Pagination(data Pagination) *JsonAPIAction {
 	return a
 }
 
+// RenderActions ...
+func (ah *ActionHolder) RenderActions() *jsonapi.Meta {
+	return &jsonapi.Meta{"actions": *ah}
+}
+
+// RenderActions ...
 func RenderActions() *jsonapi.Meta {
 	clone := ah
-	ah = []*JsonAPIAction{}
+	ah = ActionHolder{}
 	return &jsonapi.Meta{"actions": clone}
 }
 
