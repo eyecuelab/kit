@@ -10,6 +10,12 @@ import (
 
 type tagOpts []string
 
+type groupConfig int
+const (
+	WithZeros groupConfig = iota
+	WithoutZeros
+)
+
 func (opts tagOpts) HasOption(name string) bool {
 	return functools.StringSliceContains(opts, name)
 }
@@ -24,26 +30,6 @@ func TagValues(t reflect.StructTag, name string) (value string, opts tagOpts, ok
 		opts = tagOpts(splitValue[1:])
 	}
 	return splitValue[0], opts, true
-}
-
-func GroupValuesByTagOption(tag string, structs ...interface{}) map[string]map[string]interface{} {
-	optsMap := make(map[string]map[string]interface{})
-
-	for _, val := range Values(structs...) {
-		for i, field := range Fields(val) {
-			tagValue, tagOpts, ok := TagValues(field.Tag, tag)
-			if ok {
-				attrValue := val.Field(i).Interface()
-				for _, tagOpt := range tagOpts {
-					if optsMap[tagOpt] == nil {
-						optsMap[tagOpt] = make(map[string]interface{})
-					}
-					optsMap[tagOpt][tagValue] = attrValue
-				}
-			}
-		}
-	}
-	return optsMap
 }
 
 func Values(structs ...interface{}) []reflect.Value {
@@ -62,26 +48,23 @@ func Fields(val reflect.Value) []reflect.StructField {
 	return fields
 }
 
-func GroupNonEmptyValuesByTagOption(tag string, structs ...interface{}) map[string]map[string]interface{} {
-	optsMap := make(map[string]map[string]interface{})
-	for _, val := range Values(structs...) {
-		for i, field := range Fields(val) {
-			tagValue, tagOpts, ok := TagValues(field.Tag, tag)
-			if ok {
-				attrValue := val.Field(i).Interface()
-				if IsZeroOfType(attrValue) {
-					continue
-				}
-				for _, tagOpt := range tagOpts {
-					if optsMap[tagOpt] == nil {
-						optsMap[tagOpt] = make(map[string]interface{})
+func ValuesByTag(tag string, config groupConfig, structs ...interface{}) map[string]interface{} {
+	tagValues := make(map[string]interface{})
+	for _, data := range structs {
+		for _, val := range Values(data) {
+			for j, field := range Fields(val) {
+				tagValue, _, ok := TagValues(field.Tag, "attr")
+				if ok {
+					attrValue := val.Field(j).Interface()
+					if config == WithoutZeros && IsZeroOfType(attrValue) {
+						continue
 					}
-					optsMap[tagOpt][tagValue] = attrValue
+					tagValues[tagValue] = attrValue
 				}
 			}
 		}
 	}
-	return optsMap
+	return tagValues
 }
 
 func IsZeroOfType(x interface{}) bool {
