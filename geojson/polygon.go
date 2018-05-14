@@ -23,7 +23,7 @@ func (poly Polygon) GeoJSON() []byte {
 func (poly Polygon) GetBSON() (interface{}, error) {
 	coords := make([][2]float64, len(poly))
 	for i, p := range poly {
-		coords[i] = [2]float64{p.Lng, p.Lat}
+		coords[i] = [2]float64{p.Lng(), p.Lat()}
 	}
 	bdoc := map[string]interface{}{
 		"type":        poly.Type(),
