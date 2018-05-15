@@ -27,7 +27,7 @@ func TestPolygon_GeoJSON(t *testing.T) {
 	}
 }
 
-var wantCoords = `[[-1.000000, -1.000000], [-1.000000, 1.000000], [1.000000, 1.000000], [-1.000000, -1.000000]]`
+var wantCoords = `[[-1.000000, -1.000000], [1.000000, -1.000000], [1.000000, 1.000000], [-1.000000, -1.000000]]`
 
 func TestPolygon_Coordinates(t *testing.T) {
 	tests := []struct {

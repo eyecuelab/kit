@@ -31,7 +31,7 @@ func TestPoint_Coordinates(t *testing.T) {
 		p    *Point
 		want string
 	}{
-		{"unit", &Point{1, 0}, fmt.Sprintf(`[%f, %f]`, 1., 0.)},
+		{"unit", &Point{1, 0}, fmt.Sprintf(`[%f, %f]`, 0., 1.)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
