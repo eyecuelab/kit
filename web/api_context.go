@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/eyecuelab/kit/maputil"
+	"github.com/eyecuelab/kit/web/meta"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
 )
@@ -148,6 +149,13 @@ func (c *apiContext) JsonApi(i interface{}, status int) error {
 }
 
 func (c *apiContext) JsonApiOK(i interface{}) error {
+	h, ok := i.(meta.Extendable)
+	if ok {
+		if err := h.Extend(); err != nil {
+			return err
+		}
+		return c.JsonApi(h, http.StatusOK)
+	}
 	return c.JsonApi(i, http.StatusOK)
 }
 

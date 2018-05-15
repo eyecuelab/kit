@@ -11,10 +11,16 @@ import (
 	"github.com/spf13/viper"
 )
 
+
+
 type (
 	method       string
 	inputType    string
 	ActionHolder []*JsonAPIAction
+
+	Extendable interface {
+		Extend() error
+	}
 
 	JsonAPIAction struct {
 		Method string         `json:"method"`
