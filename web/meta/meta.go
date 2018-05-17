@@ -63,23 +63,16 @@ const (
 	InputSelect inputType = "select"
 )
 
-var ah ActionHolder
-
 // AddAction ...
-func (ah *ActionHolder) AddAction(m method, name, urlHelper string) *JsonAPIAction {
+func (ah *ActionHolder) AddAction(m method, name, urlHelper string, params ...interface{}) *JsonAPIAction {
 	a := JsonAPIAction{
 		Method: string(m),
 		Name:   name,
-		URL:    APIURL(urlHelper),
+		URL:    APIURL(fmt.Sprintf(urlHelper, params...)),
 		Fields: make([]JsonAPIField, 0),
 	}
 	*ah = append(*ah, &a)
 	return &a
-}
-
-// AddAction ...
-func AddAction(m method, name, urlHelper string, params ...interface{}) *JsonAPIAction {
-	return ah.AddAction(m, name, fmt.Sprintf(urlHelper, params...))
 }
 
 // Field ...
@@ -123,13 +116,6 @@ func (a *JsonAPIAction) Pagination(data *Pagination) *JsonAPIAction {
 // RenderActions ...
 func (ah *ActionHolder) RenderActions() *jsonapi.Meta {
 	return &jsonapi.Meta{"actions": *ah}
-}
-
-// RenderActions ...
-func RenderActions() *jsonapi.Meta {
-	clone := ah
-	ah = ActionHolder{}
-	return &jsonapi.Meta{"actions": clone}
 }
 
 // APIURL full api url for the path
