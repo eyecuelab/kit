@@ -11,8 +11,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-
-
 type (
 	method       string
 	inputType    string
@@ -35,7 +33,7 @@ type (
 		Value     interface{}   `json:"value,omitempty"`
 		Required  bool          `json:"required"`
 		Options   []FieldOption `json:"options,omitempty"`
-		Data      Pagination    `json:"data,omitempty"`
+		Data      *Pagination   `json:"data,omitempty"`
 	}
 
 	FieldOption struct {
@@ -110,7 +108,7 @@ func (a *JsonAPIAction) FieldWithOpts(name string, inputType inputType, value in
 }
 
 // Pagination add pagination meta to action
-func (a *JsonAPIAction) Pagination(data Pagination) *JsonAPIAction {
+func (a *JsonAPIAction) Pagination(data *Pagination) *JsonAPIAction {
 	f := JsonAPIField{
 		Name:      "page",
 		InputType: string(InputNumber),
