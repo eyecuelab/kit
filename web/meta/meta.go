@@ -78,8 +78,8 @@ func (ah *ActionHolder) AddAction(m method, name, urlHelper string) *JsonAPIActi
 }
 
 // AddAction ...
-func AddAction(m method, name, urlHelper string) *JsonAPIAction {
-	return ah.AddAction(m, name, urlHelper)
+func AddAction(m method, name, urlHelper string, params ...interface{}) *JsonAPIAction {
+	return ah.AddAction(m, name, fmt.Sprintf(urlHelper, params...))
 }
 
 // Field ...
