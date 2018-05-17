@@ -149,12 +149,11 @@ func (c *apiContext) JsonApi(i interface{}, status int) error {
 }
 
 func (c *apiContext) JsonApiOK(i interface{}) error {
-	h, ok := i.(meta.Extendable)
-	if ok {
-		if err := h.Extend(); err != nil {
+	if extendable, ok := i.(meta.Extendable); ok {
+		if err := extendable.Extend(); err != nil {
 			return err
 		}
-		return c.JsonApi(h, http.StatusOK)
+		return c.JsonApi(extendable, http.StatusOK)
 	}
 	return c.JsonApi(i, http.StatusOK)
 }
