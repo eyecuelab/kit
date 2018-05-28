@@ -7,12 +7,12 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/eyecuelab/kit/maputil"
-	"github.com/eyecuelab/kit/web/meta"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
 )
@@ -48,6 +48,19 @@ type (
 		echo.Context
 
 		payload *jsonapi.OnePayload
+	}
+
+	CommonExtendable interface {
+		CommonExtend() error
+	}
+
+	Extendable interface {
+		CommonExtendable
+		Extend() error
+	}
+
+	Innerable interface {
+		Inner() interface{}
 	}
 )
 
@@ -148,14 +161,41 @@ func (c *apiContext) JsonApi(i interface{}, status int) error {
 	return jsonapi.MarshalPayload(c.Response().Writer, i)
 }
 
-func (c *apiContext) JsonApiOK(i interface{}) error {
-	if extendable, ok := i.(meta.Extendable); ok {
-		if err := extendable.Extend(); err != nil {
-			return err
+func extendAndExtract(i interface{}) (data interface{}, err error) {
+	if innerable, ok := i.(Innerable); ok {
+		innerItems := innerable.Inner()
+		if reflect.TypeOf(innerItems).Kind() != reflect.Slice {
+			return nil, fmt.Errorf("Inner() must return a slice, got %T", innerItems)
 		}
-		return c.JsonApi(extendable, http.StatusOK)
+
+		s := reflect.ValueOf(innerItems)
+
+		for idx := 0; idx < s.Len(); idx++ {
+			if common, ok := s.Index(idx).Interface().(CommonExtendable); ok {
+				common.CommonExtend()
+			}
+		}
+		return innerItems, nil
 	}
-	return c.JsonApi(i, http.StatusOK)
+
+	if extendable, ok := i.(Extendable); ok {
+		if err := extendable.CommonExtend(); err != nil {
+			return nil, err
+		}
+
+		if err := extendable.Extend(); err != nil {
+			return nil, err
+		}
+	}
+	return i,nil
+}
+
+func (c *apiContext) JsonApiOK(i interface{}) error {
+	data, err := extendAndExtract(i)
+	if err != nil {
+		return err
+	}
+	return c.JsonApi(data, http.StatusOK)
 }
 
 func (c *apiContext) BindIdParam(idValue *int, named ...string) (err error) {
