@@ -162,20 +162,16 @@ func (c *apiContext) JsonApi(i interface{}, status int) error {
 }
 
 func extendAndExtract(i interface{}) (data interface{}, err error) {
-	if innerable, ok := i.(Innerable); ok {
-		innerItems := innerable.Inner()
-		if reflect.TypeOf(innerItems).Kind() != reflect.Slice {
-			return nil, fmt.Errorf("Inner() must return a slice, got %T", innerItems)
-		}
-
-		s := reflect.ValueOf(innerItems)
-
+	if reflect.TypeOf(i).Kind() == reflect.Slice {
+		s := reflect.ValueOf(i)
 		for idx := 0; idx < s.Len(); idx++ {
 			if common, ok := s.Index(idx).Interface().(CommonExtendable); ok {
-				common.CommonExtend()
+				if err := common.CommonExtend(); err != nil {
+					return err
+				}
 			}
 		}
-		return innerItems, nil
+		return i, nil
 	}
 
 	if extendable, ok := i.(Extendable); ok {
