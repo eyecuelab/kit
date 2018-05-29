@@ -170,6 +170,8 @@ func extendAndExtract(i interface{}) (data interface{}, err error) {
 				if err := common.CommonExtend(); err != nil {
 					return nil, err
 				}
+			} else {
+				break
 			}
 		}
 		return i, nil
