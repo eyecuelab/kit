@@ -15,6 +15,7 @@ import (
 	"github.com/eyecuelab/kit/maputil"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
+	"github.com/eyecuelab/kit/flect"
 )
 
 var reNotJsonApi = regexp.MustCompile("not a jsonapi|EOF")
@@ -162,12 +163,12 @@ func (c *apiContext) JsonApi(i interface{}, status int) error {
 }
 
 func extendAndExtract(i interface{}) (data interface{}, err error) {
-	if reflect.TypeOf(i).Kind() == reflect.Slice {
-		s := reflect.ValueOf(i)
-		for idx := 0; idx < s.Len(); idx++ {
-			if common, ok := s.Index(idx).Interface().(CommonExtendable); ok {
+	if flect.IsSlice(i) {
+		slice := reflect.ValueOf(i)
+		for idx := 0; idx < slice.Len(); idx++ {
+			if common, ok := slice.Index(idx).Interface().(CommonExtendable); ok {
 				if err := common.CommonExtend(); err != nil {
-					return err
+					return nil, err
 				}
 			}
 		}
