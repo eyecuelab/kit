@@ -5,6 +5,17 @@ import "sort"
 
 type predicate func(string) bool
 
+//IndexOf returns the index of the search string.  -1 if not found
+func IndexOf(a []string, search string) int {
+	for i, s := range a {
+		if s == search {
+			return i
+		}
+	}
+	return -1
+}
+
+
 //NonEmpty returns a slice containing the non-empty elements of a
 func NonEmpty(a []string) []string {
 	var filtered []string
