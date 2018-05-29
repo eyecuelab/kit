@@ -58,7 +58,7 @@ func ConnectDBx() {
 //Takes a map[string]struct, populates the stuct, and sets the map keys to the column specified by the mappable interface
 func (db IQSqlx) MapById(mappable Mappable, query string, params ...interface{}) error {
 	if flect.NotA(mappable, reflect.Map) {
-		return fmt.Errorf("MapById: mappable must be a map, %s is a %T", reflect.TypeOf(mappable).Name(), mappable)
+		return fmt.Errorf("MapById: mappable must be a map, %T is a %s", mappable, reflect.TypeOf(mappable).Kind())
 	}
 
 	rows, err := db.X.Queryx(query, params...)
@@ -71,7 +71,11 @@ func (db IQSqlx) MapById(mappable Mappable, query string, params ...interface{})
 		return err
 	}
 
-	idColIndex := stringslice.IndexOf(cols, mappable.IdColumn())
+	idColIndex, ok := stringslice.IndexOf(cols, mappable.IdColumn())
+
+	if !ok {
+		return fmt.Errorf("MapById: IdColumn() %s not in returned cols: %v", mappable.IdColumn(), cols)
+	}
 
 	valuePtrs := islice.StringPtrs(len(cols))
 
@@ -80,19 +84,19 @@ func (db IQSqlx) MapById(mappable Mappable, query string, params ...interface{})
 			return err
 		}
 
-		mapDeref := reflect.TypeOf(mappable).Elem()
+		structElem := reflect.TypeOf(mappable).Elem()
+		structInterface := reflect.New(structElem).Interface()
 
-		if mapDeref.Kind() == reflect.Map {
-			structInterface := reflect.New(mapDeref.Elem()).Interface()
-			if err := rows.StructScan(structInterface); err != nil {
-				return err
-			}
-
-			key := reflect.ValueOf(valuePtrs[idColIndex]).Elem()
-			value := reflect.ValueOf(structInterface).Elem()
-
-			reflect.ValueOf(mappable).Elem().SetMapIndex(key, value)
+		if err := rows.StructScan(structInterface); err != nil {
+			return err
 		}
+
+		idColValue := valuePtrs[idColIndex]
+
+		key := reflect.ValueOf(idColValue).Elem()
+		value := reflect.ValueOf(structInterface).Elem()
+
+		reflect.ValueOf(mappable).SetMapIndex(key, value)
 	}
 	return nil
 }
