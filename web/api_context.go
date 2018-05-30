@@ -56,12 +56,23 @@ type (
 	}
 
 	Extendable interface {
-		CommonExtendable
 		Extend() error
 	}
 
-	Innerable interface {
-		Inner() interface{}
+	CommonMetable interface {
+		CommonMeta() error
+	}
+
+	Metable interface {
+		Meta() error
+	}
+
+	CommonLinkable interface {
+		CommonLinks() error
+	}
+
+	Linkable interface {
+		Links() error
 	}
 )
 
@@ -162,29 +173,66 @@ func (c *apiContext) JsonApi(i interface{}, status int) error {
 	return jsonapi.MarshalPayload(c.Response().Writer, i)
 }
 
+func applyCommon(i interface{}) error {
+	if casted, ok := i.(CommonExtendable); ok {
+		if err := casted.CommonExtend(); err != nil {
+			return err
+		}
+	}
+
+	if casted, ok := i.(CommonMetable); ok {
+		if err := casted.CommonMeta(); err != nil {
+			return err
+		}
+	}
+
+	if casted, ok := i.(CommonLinkable); ok {
+		if err := casted.CommonLinks(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func apply(i interface{}) error {
+	if casted, ok := i.(Extendable); ok {
+		if err := casted.Extend(); err != nil {
+			return err
+		}
+	}
+
+	if casted, ok := i.(Metable); ok {
+		if err := casted.Meta(); err != nil {
+			return err
+		}
+	}
+
+	if casted, ok := i.(Linkable); ok {
+		if err := casted.Links(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func extendAndExtract(i interface{}) (data interface{}, err error) {
 	if flect.IsSlice(i) {
 		slice := reflect.ValueOf(i)
 		for idx := 0; idx < slice.Len(); idx++ {
-			if common, ok := slice.Index(idx).Interface().(CommonExtendable); ok {
-				if err := common.CommonExtend(); err != nil {
-					return nil, err
-				}
-			} else {
-				break
+			elementInterface := slice.Index(idx).Interface()
+			if err := applyCommon(elementInterface); err != nil {
+				return nil, err
 			}
 		}
 		return i, nil
 	}
 
-	if extendable, ok := i.(Extendable); ok {
-		if err := extendable.CommonExtend(); err != nil {
-			return nil, err
-		}
+	if err := applyCommon(i); err != nil {
+		return nil, err
+	}
 
-		if err := extendable.Extend(); err != nil {
-			return nil, err
-		}
+	if err := apply(i); err != nil {
+		return nil, err
 	}
 	return i,nil
 }
