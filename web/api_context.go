@@ -16,6 +16,7 @@ import (
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
 	"github.com/eyecuelab/kit/flect"
+	"errors"
 )
 
 var reNotJsonApi = regexp.MustCompile("not a jsonapi|EOF")
@@ -33,6 +34,7 @@ type (
 		AttrKeys() []string
 		RequireAttrs(...string) error
 		BindAndValidate(interface{}) error
+		BindMulti(interface{}) ([]interface{}, error)
 		BindIdParam(*int, ...string) error
 		JsonApi(interface{}, int) error
 		JsonApiOK(interface{}) error
@@ -48,7 +50,8 @@ type (
 	apiContext struct {
 		echo.Context
 
-		payload *jsonapi.OnePayload
+		payload     *jsonapi.OnePayload
+		manyPayload *jsonapi.ManyPayload
 	}
 
 	CommonExtendable interface {
@@ -134,6 +137,25 @@ func (c *apiContext) Bind(i interface{}) error {
 	c.restoreBody(body)
 
 	return err
+}
+
+func (c *apiContext) BindMulti(containedType interface{}) ([]interface{}, error) {
+	body, err := c.readRestoreBody()
+	if err != nil {
+		return nil, err
+	}
+
+	ctype := c.Request().Header.Get(echo.HeaderContentType)
+
+	if !isJSONAPI(ctype) {
+		return nil, errors.New("BindMulti only supports JSONApi, use Bind")
+	}
+
+	i, err := jsonAPIBindMulti(c, containedType)
+
+	c.restoreBody(body)
+
+	return i, err
 }
 
 func (c *apiContext) readRestoreBody() ([]byte, error) {
@@ -265,15 +287,40 @@ func (c *apiContext) QueryParamTrue(name string) (val, ok bool) {
 	}
 }
 
+func jsonAPIBindMulti(c *apiContext, elementType interface{}) ([]interface{}, error) {
+	buf := new(bytes.Buffer)
+	tee := io.TeeReader(c.Request().Body, buf)
+
+	unmarshaled, err := jsonapi.UnmarshalManyPayload(tee, reflect.TypeOf(elementType))
+	if err != nil {
+		return nil, err
+	}
+
+	c.manyPayload = new(jsonapi.ManyPayload)
+	return unmarshaled, json.Unmarshal(buf.Bytes(), c.manyPayload)
+}
+
 func jsonAPIBind(c *apiContext, i interface{}) error {
 	buf := new(bytes.Buffer)
 	tee := io.TeeReader(c.Request().Body, buf)
 
-	if err := jsonapi.UnmarshalPayload(tee, i); err != nil {
-		if notJsonApi(err) {
-			return c.ApiError("Request Body is not valid JsonAPI")
+	rType := reflect.TypeOf(i)
+
+	if rType.Kind() == reflect.Slice {
+		value := reflect.TypeOf(rType.Elem())
+
+		unmarshaled, err := jsonapi.UnmarshalManyPayload(tee, value)
+		if err != nil {
+			return err
 		}
-		return err
+		i = unmarshaled
+	} else {
+		if err := jsonapi.UnmarshalPayload(tee, i); err != nil {
+			if notJsonApi(err) {
+				return c.ApiError("Request Body is not valid JsonAPI")
+			}
+			return err
+		}
 	}
 
 	c.payload = new(jsonapi.OnePayload)
@@ -356,7 +403,7 @@ func (c *apiContext) OptionalQueryParams(optional ...string) map[string]string {
 func ApiContextMiddleWare() func(echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			return next(&apiContext{c, nil})
+			return next(&apiContext{c, nil, nil})
 		}
 	}
 }
