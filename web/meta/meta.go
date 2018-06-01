@@ -24,6 +24,7 @@ type (
 		Method string         `json:"method"`
 		Name   string         `json:"name"`
 		URL    string         `json:"url"`
+		Multi  bool           `json:"multi"`
 		Fields []JsonAPIField `json:"fields"`
 	}
 
@@ -39,7 +40,7 @@ type (
 	FieldOption struct {
 		Label string                 `json:"label"`
 		Value interface{}            `json:"value"`
-		Meta  map[string]interface{} `json:"meta"`
+		Meta  map[string]interface{} `json:"meta,omitempty"`
 	}
 
 	Pagination struct {
