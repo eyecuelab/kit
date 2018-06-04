@@ -2,8 +2,7 @@ package mongotest
 
 import (
 	"sync/atomic"
-
-	mgo "gopkg.in/mgo.v2"
+	"github.com/globalsign/mgo"
 )
 
 var namespacer int64
