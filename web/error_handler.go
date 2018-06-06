@@ -14,6 +14,7 @@ import (
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
 	"github.com/lib/pq"
+	"database/sql"
 )
 
 //testCode is for internal testing
@@ -107,10 +108,16 @@ func toApiError(err error) (status int, apiErr *jsonapi.ErrorObject) {
 		status, detail = http.StatusBadRequest, err.Error()
 		return status, errorObj(status, http.StatusText(status), detail, code)
 
-	default:
-		detail = err.Error()
-		return status, errorObj(status, http.StatusText(status), detail, code)
+	case error:
+		switch err {
+		case sql.ErrNoRows:
+			status, detail = http.StatusNotFound, err.Error()
+			return http.StatusNotFound, errorObj(status, http.StatusText(status), "", "")
+		}
 	}
+
+	detail = err.Error()
+	return status, errorObj(status, http.StatusText(status), detail, code)
 }
 
 func renderApiErrors(c echo.Context, errors ...*jsonapi.ErrorObject) (err error) {
