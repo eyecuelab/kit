@@ -7,8 +7,8 @@ type Customer struct {
 
 // Parent parent model interface
 type Parent interface {
-	StripeCustomerDescription() string
-	GetStripeCustomerID() string
+	StripeCustomerDescription() *string
+	GetStripeCustomerID() *string
 	SetStripeCustomerID(string) error
 }
 

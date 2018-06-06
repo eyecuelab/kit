@@ -41,10 +41,10 @@ func NewClient(parent Parent) (*Client, error) {
 // FetchCustomer find customer record
 func (i *Client) FetchCustomer() (*stripe.Customer, error) {
 	customerID := i.Parent.GetStripeCustomerID()
-	if customerID == "" {
+	if customerID == nil {
 		return nil, nil
 	}
-	c, err := customer.Get(customerID, nil)
+	c, err := customer.Get(*customerID, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (i *Client) EnsureCustomer() error {
 	}
 
 	params := &stripe.CustomerParams{
-		Desc: i.Parent.StripeCustomerDescription(),
+		Description: i.Parent.StripeCustomerDescription(),
 	}
 
 	c, err = customer.New(params)
@@ -74,14 +74,14 @@ func (i *Client) EnsureCustomer() error {
 // CreatePaymentSource create payment source
 func (i *Client) CreatePaymentSource(paymentType string, token string, ps PaymentSource) error {
 	if paymentType == "credit_card" {
-		return i.CreateCreditCard(token, ps)
+		return i.CreateCreditCard(&token, ps)
 	}
 
 	return fmt.Errorf("Payment type '%s' is not supported", paymentType)
 }
 
 // CreateCreditCard create credit card payment source
-func (i *Client) CreateCreditCard(token string, ps PaymentSource) error {
+func (i *Client) CreateCreditCard(token *string, ps PaymentSource) error {
 	c, err := card.New(&stripe.CardParams{
 		Customer: i.Parent.GetStripeCustomerID(),
 		Token:    token,
