@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 	stripe "github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/card"
+	"github.com/stripe/stripe-go/charge"
 	"github.com/stripe/stripe-go/customer"
 )
 
@@ -18,6 +19,14 @@ type Client struct {
 // PaymentSource payment source model interface
 type PaymentSource interface {
 	SetSource(string, interface{}) error
+}
+
+// ChargeData charge data structure
+type ChargeData struct {
+	SourceID    *string
+	Amount      float64
+	Description string
+	Currency    string
 }
 
 // Setup init stripe setup
@@ -67,8 +76,9 @@ func (i *Client) EnsureCustomer() error {
 	if err != nil {
 		return err
 	}
+	customerID := c.ID
 
-	return i.Parent.SetStripeCustomerID(c.ID)
+	return i.Parent.SetStripeCustomerID(&customerID)
 }
 
 // CreatePaymentSource create payment source
@@ -91,4 +101,28 @@ func (i *Client) CreateCreditCard(token *string, ps PaymentSource) error {
 	}
 
 	return ps.SetSource(c.ID, c)
+}
+
+// Charge charge provided source with charge params
+func (i *Client) Charge(data *ChargeData) (*stripe.Charge, error) {
+	customerID := i.Parent.GetStripeCustomerID()
+	if customerID == nil {
+		return nil, errors.New("Stripe customer ID is missing")
+	}
+	if data.SourceID == nil {
+		return nil, errors.New("Stripe source ID is missing")
+	}
+	chargeParams := &stripe.ChargeParams{
+		Customer:    customerID,
+		Amount:      stripe.Int64(int64(data.Amount * 100)), // has to be in cents
+		Description: stripe.String(data.Description),
+	}
+	if data.Currency == "" {
+		chargeParams.Currency = stripe.String(string(stripe.CurrencyUSD))
+	} else {
+		chargeParams.Currency = stripe.String(data.Currency)
+	}
+	chargeParams.SetSource(*(data.SourceID))
+
+	return charge.New(chargeParams)
 }
