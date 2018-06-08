@@ -73,7 +73,7 @@ func body(req *http.Request) interface{} {
 		return "no body"
 	}
 
-	if !isJsonContentType(req) {
+	if !isJSONContentType(req) {
 		return string(b)
 	}
 
@@ -87,13 +87,16 @@ func body(req *http.Request) interface{} {
 	return formatted
 }
 
-func isJsonContentType(req *http.Request) bool {
+func isJSONContentType(req *http.Request) bool {
 	cType := req.Header.Get("Content-Type")
 	cType = strings.ToLower(cType)
 	return strings.Contains(cType, "json")
 }
 
 func expectBody(req *http.Request) bool {
+	if req == nil {
+		return false
+	}
 	requestsWithBody := []string{http.MethodPost, http.MethodPatch, http.MethodPut}
 	return functools.StringSliceContains(requestsWithBody, req.Method)
 }
