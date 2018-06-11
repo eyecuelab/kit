@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	Fields        = "first_name, last_name, email, timezone, gender, picture"
+	Fields        = "first_name, last_name, email, timezone, gender, picture.height(800)"
 	GraphEndpoint = "https://graph.facebook.com/me"
 )
 
