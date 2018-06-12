@@ -7,6 +7,9 @@ func IsSlice(i interface{}) bool {
 }
 
 func IsA(i interface{}, kind reflect.Kind) bool {
+	if i == nil {
+		return false
+	}
 	return reflect.TypeOf(i).Kind() == kind
 }
 
