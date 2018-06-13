@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/airbrake/gobrake"
 	"github.com/eyecuelab/kit/functools"
@@ -53,6 +54,16 @@ func Notify(e error, req *http.Request, sev severity) {
 		setNoticeVars(notice, req, sev)
 		Airbrake.SendNotice(notice)
 	}
+}
+
+func NotifyFromChan(errs chan error, wg *sync.WaitGroup) {
+	wg.Add(1)
+	go func () {
+		for e := range errs {
+			Notify(e, nil, SeverityError)
+		}
+		wg.Done()
+	}()
 }
 
 func setNoticeVars(n *gobrake.Notice, req *http.Request, sev severity) {
