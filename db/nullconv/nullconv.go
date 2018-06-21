@@ -18,3 +18,10 @@ func NewString(s string) null.String {
 		Valid: s != "",
 	}
 }
+
+func NewInt(i int) null.Int {
+	return null.Int{
+		Int: i,
+		Valid: i != 0,
+	}
+}
