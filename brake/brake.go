@@ -11,6 +11,7 @@ import (
 
 	"github.com/airbrake/gobrake"
 	"github.com/eyecuelab/kit/functools"
+	"github.com/eyecuelab/kit/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -53,12 +54,14 @@ func Notify(e error, req *http.Request, sev severity) {
 		notice := gobrake.NewNotice(e, req, traceDepth)
 		setNoticeVars(notice, req, sev)
 		Airbrake.SendNotice(notice)
+		return
 	}
+	log.Warnf("Error (not reported): %v", e)
 }
 
 func NotifyFromChan(errs chan error, wg *sync.WaitGroup) {
 	wg.Add(1)
-	go func () {
+	go func() {
 		for e := range errs {
 			Notify(e, nil, SeverityError)
 		}
