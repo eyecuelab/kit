@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"github.com/spf13/viper"
 )
 
@@ -53,10 +53,7 @@ func Signature(policy string) string {
 
 // Key s3 file key
 func Key(pref string) string {
-	key, err := uuid.NewV4()
-	if err != nil {
-		panic(err)
-	}
+	key := uuid.New().String()
 	return fmt.Sprintf("%s/%s/", pref, key)
 }
 
