@@ -101,6 +101,14 @@ func (a *JsonAPIAction) FieldWithOpts(name string, inputType inputType, value in
 	return a
 }
 
+func FieldOptionsFromValues(values ...string) []FieldOption{
+	opts := make([]FieldOption, len(values))
+	for i, v := range values {
+		opts[i] = FieldOption{Value: v}
+	}
+	return opts
+}
+
 // Pagination add pagination meta to action
 func (a *JsonAPIAction) Pagination(data *Pagination) *JsonAPIAction {
 	f := JsonAPIField{
