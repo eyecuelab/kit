@@ -9,10 +9,12 @@ import (
 	"github.com/sideshow/apns2"
 	"github.com/sideshow/apns2/certificate"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 const (
 	alertTemplate = `{"aps":{"alert":"%v"}}`
+	defautFile    = `/etc/eyecue_keys/push.p12`
 )
 
 var (
@@ -21,13 +23,18 @@ var (
 )
 
 func init() {
-	cobra.OnInitialize(connectClient)
+	cobra.OnInitialize(setup, connectClient)
+}
+
+func setup() {
+	viper.SetDefault("push_key_file", defautFile)
 }
 
 func connectClient() {
 	topic = config.RequiredString("push_topic")
+	keyFile := viper.GetString("push_key_file")
 
-	cert, err := certificate.FromP12File("/etc/keys/push_key", "")
+	cert, err := certificate.FromP12File(keyFile, "")
 
 	if err != nil {
 		log.Fatal(err)
