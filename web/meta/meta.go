@@ -38,7 +38,7 @@ type (
 	}
 
 	FieldOption struct {
-		Label string                 `json:"label"`
+		Label string                 `json:"label,omitempty"`
 		Value interface{}            `json:"value"`
 		Meta  map[string]interface{} `json:"meta,omitempty"`
 	}
