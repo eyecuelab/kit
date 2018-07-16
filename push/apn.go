@@ -27,7 +27,7 @@ func init() {
 func connectClient() {
 	topic = config.RequiredString("push_topic")
 
-	cert, err := certificate.FromP12File("./lub_dev_push.p12", "")
+	cert, err := certificate.FromP12File("/etc/keys/push_key", "")
 
 	if err != nil {
 		log.Fatal(err)
