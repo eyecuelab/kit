@@ -39,7 +39,7 @@ func connectClient() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	client = apns2.NewClient(cert).Development()
+	client = apns2.NewClient(cert).Production()
 }
 func push(token string, payload string) error {
 	notification := &apns2.Notification{
