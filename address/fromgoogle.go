@@ -10,7 +10,7 @@ const (
 	StreetNumber             componentType = "street_number"
 	Route                    componentType = "route"                       //street
 	Subpremise               componentType = "subpremise"                  //unit number
-	Locality                 componentType = "Locality"                    //city
+	Locality                 componentType = "locality"                    //city
 	AdministrativeAreaLevel1 componentType = "administrative_area_level_1" //state
 	PostalCode               componentType = "postal_code"                 //zip
 	Country                  componentType = "country"
