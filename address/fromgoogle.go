@@ -25,20 +25,20 @@ func FromGoogleAddressComponents(addressComponents []maps.AddressComponent, whit
 			if !isWhitelisted(whitelist, label) {
 				continue
 			}
-			switch label {
-			case "street_number":
+			switch componentType(label) {
+			case StreetNumber:
 				street.number = val
-			case "route":
+			case Route:
 				street.name = val
-			case "subpremise":
+			case Subpremise:
 				address.Extension = val
-			case "locality":
+			case Locality:
 				address.Locality = val
-			case "administrative_area_level_1":
+			case AdministrativeAreaLevel1:
 				address.Region = val
-			case "country":
+			case Country:
 				address.Country = val
-			case "postal_code":
+			case PostalCode:
 				address.PostalCode = val
 			default: //pass
 			}
