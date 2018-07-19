@@ -9,11 +9,13 @@ import (
 
 //Address represents a physical location
 type Address struct {
-	Street, Extension, POBox string
-	Locality                 string //city
-	Region                   string //state
-	PostalCode               string //zip
-	Country                  string
+	Street     string `json:"street,omitempty"`
+	Extension  string `json:"extension,omitempty"`
+	POBox      string `json:"po_box,omitempty"`
+	Locality   string `json:"locality,omitempty"`
+	Region     string `json:"region,omitempty"`
+	PostalCode string `json:"post_code,omitempty"`
+	Country    string `json:"country,omitempty"`
 }
 
 //filterOutComponentsMissingFromReciever returns a copy of b, except that where a.component == "", b.component == ""
