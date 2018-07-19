@@ -8,11 +8,12 @@ type componentType string
 
 const (
 	StreetNumber             componentType = "street_number"
-	Route                    componentType = "route"
-	Subpremise               componentType = "subpremise"
-	AdministrativeAreaLevel1 componentType = "administrative_area_level_1"
+	Route                    componentType = "route"                       //street
+	Subpremise               componentType = "subpremise"                  //unit number
+	Locality                 componentType = "Locality"                    //city
+	AdministrativeAreaLevel1 componentType = "administrative_area_level_1" //state
+	PostalCode               componentType = "postal_code"                 //zip
 	Country                  componentType = "country"
-	PostalCode               componentType = "postal_code"
 )
 
 //FromGoogleAddressComponents creates an Addresss from a slice of components, using the AddressCompoment.Types to discriminate.
@@ -31,6 +32,8 @@ func FromGoogleAddressComponents(addressComponents []maps.AddressComponent, whit
 				street.name = val
 			case "subpremise":
 				address.Extension = val
+			case "locality":
+				address.Locality = val
 			case "administrative_area_level_1":
 				address.Region = val
 			case "country":
@@ -64,6 +67,6 @@ func isWhitelisted(whitelist []componentType, componentLabel string) bool {
 			return true
 		}
 	}
-	
+
 	return false
 }
