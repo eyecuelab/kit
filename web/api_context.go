@@ -37,7 +37,7 @@ type (
 		BindMulti(interface{}) ([]interface{}, error)
 		BindIdParam(*int, ...string) error
 		JsonApi(interface{}, int) error
-		JsonApiOK(interface{}) error
+		JsonApiOK(interface{}, ...interface{}) error
 		ApiError(string, ...int) *echo.HTTPError
 		JsonAPIError(string, int, string) *jsonapi.ErrorObject
 		QueryParamTrue(string) (bool, bool)
@@ -55,11 +55,11 @@ type (
 	}
 
 	CommonExtendable interface {
-		CommonExtend() error
+		CommonExtend(interface{}) error
 	}
 
 	Extendable interface {
-		Extend() error
+		Extend(interface{}) error
 	}
 
 	CommonMetable interface {
@@ -195,9 +195,9 @@ func (c *apiContext) JsonApi(i interface{}, status int) error {
 	return jsonapi.MarshalPayload(c.Response().Writer, i)
 }
 
-func applyCommon(i interface{}) error {
+func applyCommon(i interface{}, extendData interface{}) error {
 	if casted, ok := i.(CommonExtendable); ok {
-		if err := casted.CommonExtend(); err != nil {
+		if err := casted.CommonExtend(extendData); err != nil {
 			return err
 		}
 	}
@@ -216,9 +216,9 @@ func applyCommon(i interface{}) error {
 	return nil
 }
 
-func apply(i interface{}) error {
+func apply(i interface{}, extendData interface{}) error {
 	if casted, ok := i.(Extendable); ok {
-		if err := casted.Extend(); err != nil {
+		if err := casted.Extend(extendData); err != nil {
 			return err
 		}
 	}
@@ -237,30 +237,34 @@ func apply(i interface{}) error {
 	return nil
 }
 
-func extendAndExtract(i interface{}) (data interface{}, err error) {
+func extendAndExtract(i interface{}, extendData interface{}) (data interface{}, err error) {
 	if flect.IsSlice(i) {
 		slice := reflect.ValueOf(i)
 		for idx := 0; idx < slice.Len(); idx++ {
 			elementInterface := slice.Index(idx).Interface()
-			if err := applyCommon(elementInterface); err != nil {
+			if err := applyCommon(elementInterface, extendData); err != nil {
 				return nil, err
 			}
 		}
 		return i, nil
 	}
 
-	if err := applyCommon(i); err != nil {
+	if err := applyCommon(i, extendData); err != nil {
 		return nil, err
 	}
 
-	if err := apply(i); err != nil {
+	if err := apply(i, extendData); err != nil {
 		return nil, err
 	}
 	return i,nil
 }
 
-func (c *apiContext) JsonApiOK(i interface{}) error {
-	data, err := extendAndExtract(i)
+func (c *apiContext) JsonApiOK(i interface{}, extendData ...interface{}) error {
+	var ed interface{}
+	if len(extendData) > 0 {
+		ed = extendData[0]
+	}
+	data, err := extendAndExtract(i, ed)
 	if err != nil {
 		return err
 	}
