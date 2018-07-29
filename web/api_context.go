@@ -17,6 +17,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/eyecuelab/kit/flect"
 	"errors"
+	"github.com/eyecuelab/kit/web/meta"
 )
 
 var reNotJsonApi = regexp.MustCompile("not a jsonapi|EOF")
@@ -38,6 +39,7 @@ type (
 		BindIdParam(*int, ...string) error
 		JsonApi(interface{}, int) error
 		JsonApiOK(interface{}, ...interface{}) error
+		JsonApiOKPaged(interface{}, meta.Pagination, ...interface{}) error
 		ApiError(string, ...int) *echo.HTTPError
 		JsonAPIError(string, int, string) *jsonapi.ErrorObject
 		QueryParamTrue(string) (bool, bool)
@@ -71,11 +73,11 @@ type (
 	}
 
 	CommonLinkable interface {
-		CommonLinks() error
+		CommonLinks(*meta.Pagination) error
 	}
 
 	Linkable interface {
-		Links() error
+		Links(*meta.Pagination) error
 	}
 )
 
@@ -195,7 +197,7 @@ func (c *apiContext) JsonApi(i interface{}, status int) error {
 	return jsonapi.MarshalPayload(c.Response().Writer, i)
 }
 
-func applyCommon(i interface{}, extendData interface{}) error {
+func applyCommon(i interface{}, page *meta.Pagination,  extendData ...interface{}) error {
 	if casted, ok := i.(CommonExtendable); ok {
 		if err := casted.CommonExtend(extendData); err != nil {
 			return err
@@ -209,14 +211,14 @@ func applyCommon(i interface{}, extendData interface{}) error {
 	}
 
 	if casted, ok := i.(CommonLinkable); ok {
-		if err := casted.CommonLinks(); err != nil {
+		if err := casted.CommonLinks(page); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func apply(i interface{}, extendData interface{}) error {
+func apply(i interface{}, page *meta.Pagination, extendData interface{}) error {
 	if casted, ok := i.(Extendable); ok {
 		if err := casted.Extend(extendData); err != nil {
 			return err
@@ -230,30 +232,30 @@ func apply(i interface{}, extendData interface{}) error {
 	}
 
 	if casted, ok := i.(Linkable); ok {
-		if err := casted.Links(); err != nil {
+		if err := casted.Links(page); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func extendAndExtract(i interface{}, extendData interface{}) (data interface{}, err error) {
+func extendAndExtract(i interface{}, page *meta.Pagination, extendData interface{}) (data interface{}, err error) {
 	if flect.IsSlice(i) {
 		slice := reflect.ValueOf(i)
 		for idx := 0; idx < slice.Len(); idx++ {
 			elementInterface := slice.Index(idx).Interface()
-			if err := applyCommon(elementInterface, extendData); err != nil {
+			if err := applyCommon(elementInterface, page, extendData); err != nil {
 				return nil, err
 			}
 		}
 		return i, nil
 	}
 
-	if err := applyCommon(i, extendData); err != nil {
+	if err := applyCommon(i, page, extendData); err != nil {
 		return nil, err
 	}
 
-	if err := apply(i, extendData); err != nil {
+	if err := apply(i, page, extendData); err != nil {
 		return nil, err
 	}
 	return i,nil
@@ -264,7 +266,19 @@ func (c *apiContext) JsonApiOK(i interface{}, extendData ...interface{}) error {
 	if len(extendData) > 0 {
 		ed = extendData[0]
 	}
-	data, err := extendAndExtract(i, ed)
+	data, err := extendAndExtract(i, nil, ed)
+	if err != nil {
+		return err
+	}
+	return c.JsonApi(data, http.StatusOK)
+}
+
+func (c *apiContext) JsonApiOKPaged(i interface{}, page *meta.Pagination, extendData ...interface{}) error {
+	var ed interface{}
+	if len(extendData) > 0 {
+		ed = extendData[0]
+	}
+	data, err := extendAndExtract(i, page, ed)
 	if err != nil {
 		return err
 	}
