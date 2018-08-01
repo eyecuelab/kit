@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/google/jsonapi"
+	"github.com/eyecuelab/jsonapi"
 	"github.com/labstack/echo"
 	"github.com/stretchr/testify/assert"
 )

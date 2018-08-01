@@ -176,7 +176,7 @@ the maputil package itself covers `map[string]interface{}`
 
 ## web
 
-`web` is the bones of our web framework, built on top of google's [jsonapi framework](https://github.com/google/jsonapi) and labstack's [echo framework](https://github.com/labstack/echo).
+`web` is the bones of our web framework, built on top of google's [jsonapi framework](https://github.com/eyecuelab/jsonapi) and labstack's [echo framework](https://github.com/labstack/echo).
 
 ### web/middleware
 

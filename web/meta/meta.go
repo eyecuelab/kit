@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/eyecuelab/kit/flect"
-	"github.com/google/jsonapi"
+	"github.com/eyecuelab/jsonapi"
 	"github.com/jinzhu/inflection"
 	"github.com/spf13/viper"
 )

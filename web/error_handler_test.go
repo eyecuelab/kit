@@ -9,7 +9,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 
-	"github.com/google/jsonapi"
+	"github.com/eyecuelab/jsonapi"
 	"github.com/lib/pq"
 
 	"github.com/eyecuelab/kit/errorlib"

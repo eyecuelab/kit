@@ -11,7 +11,7 @@ import (
 	"github.com/eyecuelab/kit/brake"
 	"github.com/eyecuelab/kit/log"
 	"github.com/eyecuelab/kit/str"
-	"github.com/google/jsonapi"
+	"github.com/eyecuelab/jsonapi"
 	"github.com/labstack/echo"
 	"github.com/lib/pq"
 	"database/sql"

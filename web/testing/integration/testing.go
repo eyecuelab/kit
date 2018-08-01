@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/eyecuelab/kit/web/meta"
-	"github.com/google/jsonapi"
+	"github.com/eyecuelab/jsonapi"
 	"github.com/parnurzeal/gorequest"
 )
 
