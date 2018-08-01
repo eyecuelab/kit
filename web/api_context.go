@@ -39,7 +39,7 @@ type (
 		BindIdParam(*int, ...string) error
 		JsonApi(interface{}, int) error
 		JsonApiOK(interface{}, ...interface{}) error
-		JsonApiOKPaged(interface{}, meta.Pagination, ...interface{}) error
+		JsonApiOKPaged(interface{}, *meta.Pagination, ...interface{}) error
 		ApiError(string, ...int) *echo.HTTPError
 		JsonAPIError(string, int, string) *jsonapi.ErrorObject
 		QueryParamTrue(string) (bool, bool)
