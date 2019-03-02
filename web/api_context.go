@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	"github.com/eyecuelab/kit/maputil"
-	"github.com/google/jsonapi"
+	"github.com/eyecuelab/jsonapi"
 	"github.com/labstack/echo"
 	"github.com/eyecuelab/kit/flect"
 	"errors"
