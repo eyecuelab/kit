@@ -191,10 +191,18 @@ func (c *apiContext) BindAndValidate(i interface{}) error {
 }
 
 func (c *apiContext) JsonApi(i interface{}, status int) error {
+	var buf bytes.Buffer
+	if err := jsonapi.MarshalPayload(&buf, i); err != nil {
+		return err
+	}
+
+	// These methods have to be the last thing called, *after* any error checks.
+	// Once any of the Write methods are called, the response is "committed" and
+	// cannot be changed. This causes error responses with 200 statuses.
 	c.Response().Header().Set(echo.HeaderContentType, jsonapi.MediaType)
 	c.Response().WriteHeader(status)
-
-	return jsonapi.MarshalPayload(c.Response().Writer, i)
+	c.Response().Write(buf.Bytes())
+	return nil
 }
 
 func applyCommon(i interface{}, page *meta.Pagination,  extendData ...interface{}) error {
