@@ -8,6 +8,7 @@ import (
 	"github.com/eyecuelab/kit/web/meta"
 	"github.com/eyecuelab/jsonapi"
 	"github.com/parnurzeal/gorequest"
+	"github.com/eyecuelab/kit/web/security"
 )
 
 const (
@@ -41,7 +42,32 @@ type (
 		Errors   []*jsonapi.ErrorObject `json:"errors"`
 		Included []JSONAPIRespData
 	}
+
+	AuthRequester struct {
+		Requester
+		test *testing.T
+		token string
+	}
+
+	Requester struct {
+
+	}
 )
+
+func NewAuthRequester(t *testing.T, userId int) *AuthRequester{
+	token, err := security.JwtToken(userId)
+	if err != nil {
+		t.Errorf("error getting jwt: %s", err)
+	}
+	return &AuthRequester{token: token, test: t}
+}
+
+func (r *AuthRequester) GetList(path string) (gorequest.Response, *JSONAPIManyResp, []error) {
+	resp, body, errs := Request("GET", path, r.token).End()
+	data := unmarshalMany(r.test, body)
+
+	return resp, data, errs
+}
 
 // Request generic json api request with optional auth token
 func Request(method string, path string, token string) (req *gorequest.SuperAgent) {
