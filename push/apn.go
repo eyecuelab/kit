@@ -10,6 +10,7 @@ import (
 	"github.com/sideshow/apns2/certificate"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 )
 
 const (
@@ -34,6 +35,16 @@ func connectClient() {
 	topic = config.RequiredString("push_topic")
 	keyFile := viper.GetString("push_key_file")
 
+	if keyFile == "" {
+		log.Warnf("No push key location provided")
+		return
+	}
+
+	if _, err := os.Stat(keyFile); os.IsNotExist(err) {
+		log.Warnf("No push key found at: %s", keyFile)
+		return
+	}
+
 	cert, err := certificate.FromP12File(keyFile, "")
 
 	if err != nil {
@@ -41,6 +52,7 @@ func connectClient() {
 	}
 	client = apns2.NewClient(cert).Production()
 }
+
 func push(token string, payload string) error {
 	notification := &apns2.Notification{
 		DeviceToken: token,
