@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/eyecuelab/kit/flect"
-	"github.com/google/jsonapi"
+	"github.com/eyecuelab/jsonapi"
 	"github.com/jinzhu/inflection"
 	"github.com/spf13/viper"
 )
@@ -14,6 +14,7 @@ import (
 type (
 	method       string
 	inputType    string
+	idType       string
 	ActionHolder []*JsonAPIAction
 
 	Extendable interface {
@@ -21,11 +22,12 @@ type (
 	}
 
 	JsonAPIAction struct {
-		Method string         `json:"method"`
-		Name   string         `json:"name"`
-		URL    string         `json:"url"`
-		Multi  bool           `json:"multi"`
-		Fields []JsonAPIField `json:"fields"`
+		Method       string         `json:"method"`
+		Name         string         `json:"name"`
+		URL          string         `json:"url"`
+		Multi        bool           `json:"multi"`
+		Relationship bool           `json:"relationship"`
+		Fields       []JsonAPIField `json:"fields"`
 	}
 
 	JsonAPIField struct {
@@ -62,7 +64,23 @@ const (
 	InputBool   inputType = "bool"
 	InputNumber inputType = "number"
 	InputSelect inputType = "select"
+
+	IdString idType = "string"
+	IdInt    idType = "int"
 )
+
+func (ah *ActionHolder) AddRelAction(m method, name, urlHelper string, params ...interface{}) *JsonAPIAction {
+	a := JsonAPIAction{
+		Method: string(m),
+		Name:   name,
+		URL:    APIURL(fmt.Sprintf(urlHelper, params...)),
+		Fields: []JsonAPIField{
+			Name: "data"
+		},
+	}
+	*ah = append(*ah, &a)
+	return &a
+}
 
 // AddAction ...
 func (ah *ActionHolder) AddAction(m method, name, urlHelper string, params ...interface{}) *JsonAPIAction {
@@ -74,6 +92,24 @@ func (ah *ActionHolder) AddAction(m method, name, urlHelper string, params ...in
 	}
 	*ah = append(*ah, &a)
 	return &a
+}
+
+// RelFields ...
+func (a *JsonAPIAction) RelFields(typeName string) *JsonAPIAction {
+	fs := []JsonAPIField{
+		{
+			Name:      "type",
+			Value:     typeName,
+			Required:  true,
+		},
+		{
+			Name:      "id",
+			Required:  true,
+		},
+	}
+	a.Relationship = true
+	a.Fields = append(a.Fields, fs...)
+	return a
 }
 
 // Field ...
