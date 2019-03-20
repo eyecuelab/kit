@@ -69,19 +69,6 @@ const (
 	IdInt    idType = "int"
 )
 
-func (ah *ActionHolder) AddRelAction(m method, name, urlHelper string, params ...interface{}) *JsonAPIAction {
-	a := JsonAPIAction{
-		Method: string(m),
-		Name:   name,
-		URL:    APIURL(fmt.Sprintf(urlHelper, params...)),
-		Fields: []JsonAPIField{
-			Name: "data"
-		},
-	}
-	*ah = append(*ah, &a)
-	return &a
-}
-
 // AddAction ...
 func (ah *ActionHolder) AddAction(m method, name, urlHelper string, params ...interface{}) *JsonAPIAction {
 	a := JsonAPIAction{
