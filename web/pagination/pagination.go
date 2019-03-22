@@ -4,10 +4,58 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/eyecuelab/kit/web/meta"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
+	"net/url"
+
 )
+
+type (
+	Pagination struct {
+		Count   int `json:"item_count"`
+		Max     int `json:"max"`
+		Page    int `json:"page"`
+		PerPage int
+		Offset  int
+		Url   url.URL
+	}
+
+)
+
+func (p *Pagination) Links() map[string]string {
+	pageValues := map[string]int{ "self": p.Page }
+
+	if p.Max != 1 {
+		pageValues["first"] = 1
+		pageValues["last"] = p.Max
+	}
+
+	if p.Max != p.Page {
+		pageValues["next"] = p.Page + 1
+	}
+
+	if p.Page > 1 {
+		pageValues["prev"] = p.Page - 1
+	}
+
+	return p.linkify(pageValues)
+}
+
+func (p Pagination) linkify(pageValues map[string]int) map[string]string {
+	links := make(map[string]string)
+	for k, v := range pageValues {
+		links[k] = p.withPageNumber(v)
+	}
+	return links
+}
+
+func (p Pagination) withPageNumber(num int) string {
+	q := p.Url.Query()
+	q.Set("page[number]", strconv.Itoa(num))
+	p.Url.RawQuery = q.Encode()
+
+	return p.Url.RequestURI()
+}
 
 // DefaultPerPage ...
 var DefaultPerPage = 20
@@ -16,7 +64,7 @@ var DefaultPerPage = 20
 var MaxPerPage = 100
 
 // Data pagination data for jsonapi
-var Data meta.Pagination
+var Data Pagination
 
 // Apply apply pagination to a provided scope
 func Apply(c echo.Context, scope *gorm.DB, model interface{}, list interface{}, perPage int) error {

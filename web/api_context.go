@@ -17,7 +17,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/eyecuelab/kit/flect"
 	"errors"
-	"github.com/eyecuelab/kit/web/meta"
+	"github.com/eyecuelab/kit/web/pagination"
 )
 
 var reNotJsonApi = regexp.MustCompile("not a jsonapi|EOF")
@@ -39,7 +39,7 @@ type (
 		BindIdParam(*int, ...string) error
 		JsonApi(interface{}, int) error
 		JsonApiOK(interface{}, ...interface{}) error
-		JsonApiOKPaged(interface{}, *meta.Pagination, ...interface{}) error
+		JsonApiOKPaged(interface{}, *pagination.Pagination, ...interface{}) error
 		ApiError(string, ...int) *echo.HTTPError
 		JsonAPIError(string, int, string) *jsonapi.ErrorObject
 		QueryParamTrue(string) (bool, bool)
@@ -70,14 +70,6 @@ type (
 
 	Metable interface {
 		Meta() error
-	}
-
-	CommonLinkable interface {
-		CommonLinks(*meta.Pagination) error
-	}
-
-	Linkable interface {
-		Links(*meta.Pagination) error
 	}
 )
 
@@ -190,6 +182,21 @@ func (c *apiContext) BindAndValidate(i interface{}) error {
 	return nil
 }
 
+func (c *apiContext) JsonApiPaged(i interface{}, status int, page *pagination.Pagination) error {
+	var buf bytes.Buffer
+	if err := jsonapi.MarshalPayloadPaged(&buf, i, page); err != nil {
+		return err
+	}
+
+	// These methods have to be the last thing called, *after* any error checks.
+	// Once any of the Write methods are called, the response is "committed" and
+	// cannot be changed. This causes error responses with 200 statuses.
+	c.Response().Header().Set(echo.HeaderContentType, jsonapi.MediaType)
+	c.Response().WriteHeader(status)
+	c.Response().Write(buf.Bytes())
+	return nil
+}
+
 func (c *apiContext) JsonApi(i interface{}, status int) error {
 	var buf bytes.Buffer
 	if err := jsonapi.MarshalPayload(&buf, i); err != nil {
@@ -205,7 +212,7 @@ func (c *apiContext) JsonApi(i interface{}, status int) error {
 	return nil
 }
 
-func applyCommon(i interface{}, page *meta.Pagination,  extendData ...interface{}) error {
+func applyCommon(i interface{}, page *pagination.Pagination,  extendData ...interface{}) error {
 	if casted, ok := i.(CommonExtendable); ok {
 		if err := casted.CommonExtend(extendData); err != nil {
 			return err
@@ -217,16 +224,10 @@ func applyCommon(i interface{}, page *meta.Pagination,  extendData ...interface{
 			return err
 		}
 	}
-
-	if casted, ok := i.(CommonLinkable); ok {
-		if err := casted.CommonLinks(page); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
-func apply(i interface{}, page *meta.Pagination, extendData interface{}) error {
+func apply(i interface{}, page *pagination.Pagination, extendData interface{}) error {
 	if casted, ok := i.(Extendable); ok {
 		if err := casted.Extend(extendData); err != nil {
 			return err
@@ -238,16 +239,10 @@ func apply(i interface{}, page *meta.Pagination, extendData interface{}) error {
 			return err
 		}
 	}
-
-	if casted, ok := i.(Linkable); ok {
-		if err := casted.Links(page); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
-func extendAndExtract(i interface{}, page *meta.Pagination, extendData interface{}) (data interface{}, err error) {
+func extendAndExtract(i interface{}, page *pagination.Pagination, extendData interface{}) (data interface{}, err error) {
 	if flect.IsSlice(i) {
 		slice := reflect.ValueOf(i)
 		for idx := 0; idx < slice.Len(); idx++ {
@@ -281,7 +276,7 @@ func (c *apiContext) JsonApiOK(i interface{}, extendData ...interface{}) error {
 	return c.JsonApi(data, http.StatusOK)
 }
 
-func (c *apiContext) JsonApiOKPaged(i interface{}, page *meta.Pagination, extendData ...interface{}) error {
+func (c *apiContext) JsonApiOKPaged(i interface{}, page *pagination.Pagination, extendData ...interface{}) error {
 	var ed interface{}
 	if len(extendData) > 0 {
 		ed = extendData[0]
@@ -290,7 +285,8 @@ func (c *apiContext) JsonApiOKPaged(i interface{}, page *meta.Pagination, extend
 	if err != nil {
 		return err
 	}
-	return c.JsonApi(data, http.StatusOK)
+	page.Url = *c.Request().URL
+	return c.JsonApiPaged(data, http.StatusOK, page)
 }
 
 func (c *apiContext) BindIdParam(idValue *int, named ...string) (err error) {
