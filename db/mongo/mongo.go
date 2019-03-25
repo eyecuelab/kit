@@ -3,9 +3,9 @@ package mongo
 import (
 	"errors"
 
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/globalsign/mgo"
+	"github.com/spf13/viper"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -16,10 +16,10 @@ var (
 )
 
 func init() {
-	cobra.OnInitialize(connect)
+	cobra.OnInitialize(connectG)
 }
 
-func connect() {
+func connectG() {
 	MongoUrl = viper.GetString("mongo_url")
 	if len(MongoUrl) == 0 {
 		Error = errors.New("Missing mongo_url")
@@ -30,6 +30,23 @@ func connect() {
 			MDb = Msession.DB(info.Database)
 		}
 	}
+}
+
+func Connect() (*mgo.Database, error){
+	url := viper.GetString("mongo_url")
+	if len(url) == 0 {
+		return nil, errors.New("Missing mongo_url")
+	}
+
+	mSession, err := mgo.Dial(MongoUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	info, _ := mgo.ParseURL(url)
+	mSession.SetMode(mgo.Monotonic, true)
+
+	return mSession.DB(info.Database), nil
 }
 
 //InCollection returns whether document(s) matching the query the specified collection exist
