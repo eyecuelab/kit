@@ -212,7 +212,7 @@ func (c *apiContext) JsonApi(i interface{}, status int) error {
 	return nil
 }
 
-func applyCommon(i interface{}, page *pagination.Pagination,  extendData ...interface{}) error {
+func applyCommon(i interface{}, page *pagination.Pagination, extendData interface{}) error {
 	if casted, ok := i.(CommonExtendable); ok {
 		if err := casted.CommonExtend(extendData); err != nil {
 			return err
