@@ -155,10 +155,11 @@ func errorObj(status int, title, detail, code string) *jsonapi.ErrorObject {
 }
 
 func trackErr(err error, c echo.Context, status int) {
-	notifyErr(err, c, status)
-	if status == 0 || status >= 500 {
-		logErr(err)
+	if status > 0 && status < 500 {
+		return
 	}
+	notifyErr(err, c, status)
+	logErr(err)
 }
 
 func logErr(err error) {
