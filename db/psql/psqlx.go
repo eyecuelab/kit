@@ -13,7 +13,6 @@ import (
 	"github.com/spf13/viper"
 
 	//register postgres dialect
-	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres"
 	_ "github.com/lib/pq"
 )
 
