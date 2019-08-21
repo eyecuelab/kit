@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 
-	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres"
 	"github.com/jinzhu/gorm"
 	//register postgres dialect
 	_ "github.com/jinzhu/gorm/dialects/postgres"
