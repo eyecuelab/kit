@@ -12,12 +12,13 @@ import (
 	"strconv"
 	"strings"
 
+	"errors"
+
+	"github.com/eyecuelab/kit/flect"
 	"github.com/eyecuelab/kit/maputil"
+	"github.com/eyecuelab/kit/web/meta"
 	"github.com/google/jsonapi"
 	"github.com/labstack/echo"
-	"github.com/eyecuelab/kit/flect"
-	"errors"
-	"github.com/eyecuelab/kit/web/meta"
 )
 
 var reNotJsonApi = regexp.MustCompile("not a jsonapi|EOF")
@@ -205,7 +206,7 @@ func (c *apiContext) JsonApi(i interface{}, status int) error {
 	return nil
 }
 
-func applyCommon(i interface{}, page *meta.Pagination,  extendData ...interface{}) error {
+func applyCommon(i interface{}, page *meta.Pagination, extendData ...interface{}) error {
 	if casted, ok := i.(CommonExtendable); ok {
 		if err := casted.CommonExtend(extendData); err != nil {
 			return err
@@ -266,7 +267,7 @@ func extendAndExtract(i interface{}, page *meta.Pagination, extendData interface
 	if err := apply(i, page, extendData); err != nil {
 		return nil, err
 	}
-	return i,nil
+	return i, nil
 }
 
 func (c *apiContext) JsonApiOK(i interface{}, extendData ...interface{}) error {

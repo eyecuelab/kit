@@ -6,9 +6,11 @@ import (
 	"testing"
 
 	"github.com/eyecuelab/kit/web/meta"
-	"github.com/eyecuelab/jsonapi"
-	"github.com/parnurzeal/gorequest"
 	"github.com/eyecuelab/kit/web/security"
+
+	// "github.com/eyecuelab/jsonapi"
+	"github.com/google/jsonapi"
+	"github.com/parnurzeal/gorequest"
 )
 
 const (
@@ -45,16 +47,15 @@ type (
 
 	AuthRequester struct {
 		Requester
-		test *testing.T
+		test  *testing.T
 		token string
 	}
 
 	Requester struct {
-
 	}
 )
 
-func NewAuthRequester(t *testing.T, userId int) *AuthRequester{
+func NewAuthRequester(t *testing.T, userId int) *AuthRequester {
 	token, err := security.JwtToken(userId)
 	if err != nil {
 		t.Errorf("error getting jwt: %s", err)

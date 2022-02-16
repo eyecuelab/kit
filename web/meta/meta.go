@@ -6,7 +6,9 @@ import (
 	"strings"
 
 	"github.com/eyecuelab/kit/flect"
-	"github.com/eyecuelab/jsonapi"
+
+	// "github.com/eyecuelab/jsonapi"
+	"github.com/google/jsonapi"
 	"github.com/jinzhu/inflection"
 	"github.com/spf13/viper"
 )
@@ -85,13 +87,13 @@ func (ah *ActionHolder) AddAction(m method, name, urlHelper string, params ...in
 func (a *JsonAPIAction) RelFields(typeName string) *JsonAPIAction {
 	fs := []JsonAPIField{
 		{
-			Name:      "type",
-			Value:     typeName,
-			Required:  true,
+			Name:     "type",
+			Value:    typeName,
+			Required: true,
 		},
 		{
-			Name:      "id",
-			Required:  true,
+			Name:     "id",
+			Required: true,
 		},
 	}
 	a.Relationship = true
@@ -124,7 +126,7 @@ func (a *JsonAPIAction) FieldWithOpts(name string, inputType inputType, value in
 	return a
 }
 
-func FieldOptionsFromValues(values ...string) []FieldOption{
+func FieldOptionsFromValues(values ...string) []FieldOption {
 	opts := make([]FieldOption, len(values))
 	for i, v := range values {
 		opts[i] = FieldOption{Value: v}

@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"github.com/eyecuelab/kit/assets"
 	"github.com/eyecuelab/kit/cmd/api"
 	"github.com/eyecuelab/kit/cmd/migrate"
 	"github.com/eyecuelab/kit/config"
@@ -32,8 +31,8 @@ func Use(cmds ...string) {
 }
 
 //Init initalizes the cobra CLI for the specified command, if any
-func Init(appName string, rootCmd *cobra.Command, get assets.AssetGet, dir assets.AssetDir) error {
-	assets.Manager = &assets.AssetManager{Get: get, Dir: dir}
+func Init(appName string, rootCmd *cobra.Command) error {
+	// assets.Manager = &assets.AssetManager{Get: get, Dir: dir}
 
 	if rootCmd == nil {
 		log.Info("cmd.Init: rootCmd is nil")

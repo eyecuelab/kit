@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/eyecuelab/kit/assets"
 	"github.com/eyecuelab/kit/db/psql"
 	"github.com/eyecuelab/kit/log"
 	migrate "github.com/rubenv/sql-migrate"
@@ -79,12 +78,5 @@ func migrationsDirExists() bool {
 }
 
 func getMigrations() migrate.MigrationSource {
-	if files && migrationsDirExists() {
-		return &migrate.FileMigrationSource{Dir: migrationsDir}
-	}
-	return &migrate.AssetMigrationSource{
-		Asset:    assets.Manager.Get,
-		AssetDir: assets.Manager.Dir,
-		Dir:      migrationsDir,
-	}
+	return &migrate.FileMigrationSource{Dir: migrationsDir}
 }

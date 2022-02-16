@@ -32,7 +32,6 @@ type authSkipperConfig map[string]*regexp.Regexp
 
 func AuthedSkipper() func(echo.Context) bool {
 	config := viper.GetStringMapString("skipjwt")
-
 	if config == nil || len(config) == 0 {
 		return emw.DefaultSkipper
 	}

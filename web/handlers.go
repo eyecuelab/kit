@@ -25,7 +25,7 @@ func Healthz(c ApiContext) error {
 	case badParam("400"):
 		return echo.NewHTTPError(http.StatusBadRequest, "Missing value.")
 	default:
-		return c.String(http.StatusOK, "live")
+		return c.String(http.StatusOK, "ok")
 	}
 }
 
