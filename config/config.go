@@ -6,7 +6,7 @@ import (
 
 func Load(envPrefix string, configPath string) error {
 	viper.AddConfigPath(".")
-	viper.SetConfigName("api")
+	viper.SetConfigName(envPrefix)
 	viper.SetConfigType("env")
 	viper.AutomaticEnv()
 
