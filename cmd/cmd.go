@@ -18,7 +18,7 @@ var (
 	NoDb              bool
 )
 
-//Add a child command to the root
+// Add a child command to the root
 func Add(command *cobra.Command) {
 	childCommands = append(childCommands, command)
 }
@@ -45,9 +45,8 @@ func Init(appName string, rootCmd *cobra.Command) error {
 
 func addRoot(cmd *cobra.Command) {
 	Root = cmd
-
 	Root.PersistentFlags().BoolVar(&verbose, "verbose", false, "more verbose error reporting")
-	Root.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $PWD/config.yaml)")
+	Root.PersistentFlags().StringVar(&cfgFile, "config", "config", "app root to lookup config file")
 	Root.PersistentFlags().BoolVar(&NoDb, "nodb", false, "allow DB-less execution")
 
 	Root.AddCommand(childCommands...)

@@ -5,7 +5,7 @@ import (
 )
 
 func Load(envPrefix string, configPath string) error {
-	viper.AddConfigPath(".")
+	viper.AddConfigPath(configPath)
 	viper.SetConfigName(envPrefix)
 	viper.SetConfigType("env")
 	viper.AutomaticEnv()
@@ -16,7 +16,7 @@ func Load(envPrefix string, configPath string) error {
 	}
 
 	viper.SetConfigName("config")
-	viper.AddConfigPath("./data/bin")
+	// viper.AddConfigPath(configPath)
 	viper.SetConfigType("yaml")
 	err = viper.MergeInConfig()
 	if err != nil {
